@@ -13,8 +13,8 @@ It's written mostly in JavaScript, with a Node.js server and a JS client using V
 
 ```
 # Prerequisites: node 10.15.0 with npm 6.4.1
-git clone git://github.com/cstigler/serenity-admin.git
-cd serenity-admin
+git clone git://github.com/FlamingLotusGirls/Serenity.git
+cd Serenity/admin
 npm install
 ```
 
