@@ -1,0 +1,67 @@
+A quick and dirty description of the software design...
+
+Work in progress... Feel free to fold spindle and mutilate
+
+Serenity Effects
+Serenity supports four different types of effects:
+    * Flame effects
+    * Jar LED effects
+    * Sound effects
+    * Firefly LED effects
+
+Flame Effects
+Flame effects include triggering individual poofers and running poofer
+sequences - see the flame controller code in Noetica for an example of
+how this can be done. I would suggest using the same high-level 
+specification for a sequence that we used in Noetica - the code already
+exists and is working, which is always a plus.
+
+One difference from Noetica from Noetica is instead of having a 
+single large sculpture, we have three separate bugs. I'd suggest 
+that we (mostly) define sequences that run on a single bug, with
+the exception of an all-poof (always a favorite) and a global chase.
+
+Assuming that we have a mechanism to define the sequences, the API 
+to the UI would look something like:
+PUT /flames/sequences/<sequencename> bugid=<bugid>
+PUT /flames/stop bugid=<bugid>
+PUT /flames/poofers/<pooferid> on=<tf> duration=<some_relatively_short_duration> bugid=<bugid>
+POST /flames/sequences/<sequencename>
+GET /flames/sequences
+GET /flames/poofers 
+DELETE /flames/sequences/<sequencename> (although dont allow deletion of built in all-poof and chase)
+
+Jar LED Effects
+I'm imagining the same sort of thing as above, except without the ability to
+add and delete patterns from the fuel depot. Although we might want to allow
+people to add images... Anyway - there's one Jar piece for each bug, so 
+the API looks some thing like:
+PUT /jarleds/patterns/<patternid> bugid=<bugid> image=<imageid>
+GET /jarleds/patterns
+GET /leds/images (if we can use images. Images end up being a good way to grab a 
+color palette, even if we can't project the actual image on the the jar. See the
+Soma code for an example of this)
+POST /leds/images
+DELETE /leds/images/<imageid>
+
+Firefly Effects
+Here we can set the blink interval (which probably ends up following a gaussian)
+and a color. There are probably other interesting effects as well - think of more!
+PUT /fireflyleds/interval/<interval> swarmid=<swarmid>
+PUT /fireflyleds/color/<color (or color sequence)? swarmid=<swarmid>
+
+Sound Effects
+Looking at what Ted was showing a couple of weeks back, we seem to have the
+ability to layer sound effects over one another, and to turn off a particular
+effect. I'd also like to have some controls over the ambient buzzing sound as well.
+There are a (currently unknown) number of separate sound controllers in the field. 
+PUT /sound/effects/<soundeffectid> controllerid=<soundcontrollerid> onoff=<tf> (add/subtract sound effect to general noise)
+GET /sound/effects/
+PUT /sound/volume/<volumelevel... 0-100> controllerid=<soundcontrollerid>
+POST /sound/volume_settings/<settinggid>  (save current settings for volume under a tag)
+DELETE /sound/volume_settings/<settingid>
+GET /sound/volume_settings/
+GET /sound/volume_settings/<settingid>
+PUT /sound/volume_settings/<settingid> (apply specified volume settings)
+
+
