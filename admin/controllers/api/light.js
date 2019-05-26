@@ -26,6 +26,10 @@ exports.deleteJarLightImage = function(req, res) {
 
 // Firefly stuff
 
+exports.getFireflySwarms = function(req, res) {
+    return res.json({ status: 'error', message: 'Method not yet implemented' });
+}
+
 // set the blink interval (which probably ends up following a gaussian)
 exports.setFireflyBlinkInterval = function(req, res) {
     // req.body.swarmId = swarm type to modify 

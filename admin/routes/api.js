@@ -36,9 +36,11 @@ router.delete('/light/jar/images/:imageId', lightController.deleteJarLightImage)
 
 // Firefly Light Routes
 
-router.put('/light/fireflies/interval/:interval', lightController.setFireflyBlinkInterval);
+router.get('/light/fireflies/swarms', lightController.getFireflySwarms);
 
-router.put('/light/fireflies/color/:color', lightController.setFireflyLightColor);
+router.put('/light/fireflies/:swarmId/interval/:interval', lightController.setFireflyBlinkInterval);
+
+router.put('/light/fireflies/:swarmId/color/:color', lightController.setFireflyLightColor);
 
 // SOUND routes
 
