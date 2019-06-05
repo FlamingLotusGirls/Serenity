@@ -40,10 +40,14 @@ to do this time?
 - Low level lighting control. Actually talking to the fade candies...
 
 Lil' Bugs:
-- Wifi robustness. Make sure we don't lose the DhCP lease, that kind of thing.
+- Wifi robustness. Make sure we don't lose the DHCP lease, that kind of thing.
 - Command interface design - what are the UDP packets that tell the little fireflies to
 do somethimg?
 - Command interface implementation - on the main pi
 - Command interface implmentation - on the bugs themselves.
 - REST interface on main pi
+
+User Interface (Administration Application for All The Things):
+- Design - Charlie and Char
+- Webserver and UI - Charlie
 
