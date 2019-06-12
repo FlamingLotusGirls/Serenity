@@ -1,0 +1,53 @@
+A listing of functional pieces and who's claiming responsibility:
+
+General Infrastructure:
+- Initialization scripts (led pi(s), sound pi(s), master pi)
+- Networking setup (static ipaddresses, or discovery with zeroconf?)
+- Disk images
+
+Fire:
+- Flame driver (low level, speaks ! protocol on the RS485 to the flame control boxes)
+- Flame control (high level, takes REST requests, may hand off to flame driver, may
+(in some instances, such as when managing stored sequences) handle independently
+of flame driver)
+- Interface with fuel depot button box. What does the communication here
+look like? (The fuel depot button box - unlike the buttons in the field - communicates
+with the flame controller to send its signals)
+- Fuel depot button box - physical construction/design
+
+Sound:
+- Sonic pi/Supercollider headless mode. How do we set this up, how do we talk to it
+  (Sonic pi sort of assumes a UI - which we don't want. But the lower level 
+   Sonic server doesn't need a UI, nor does Supercollider, which is the low level 
+   sound driver. How to put these pieces together? What's the API for talking
+   to them?)
+- Sound interface to REST
+- Management of stored sound samples
+- Playing of sound samples, control of state. (Note that we want to take advantage of the two
+(R/L) channels by treating them completely separately, ie, all effect sounds are mon-aural and
+can be played on either of the channels.
+- Subwoofer sounds.
+- Subwoofer sound management. We don't need sonic pi here - could just play a loop. 
+- Gathering of sound assets
+
+Lighting:
+- Design general lighting infrastructure. (We have fade candies, and we've previously worked
+with OPC and mapped from 3d space to led space (see Pulse or Soma). Is this what we want
+to do this time?
+- Design lighting communication - How do we specify a particular pattern, or color?
+- Lighting interface to REST
+- Management of stored lighting assets (?images? palettes? None of the above? See Soma)
+- Low level lighting control. Actually talking to the fade candies...
+
+Lil' Bugs:
+- Wifi robustness. Make sure we don't lose the DHCP lease, that kind of thing.
+- Command interface design - what are the UDP packets that tell the little fireflies to
+do somethimg?
+- Command interface implementation - on the main pi
+- Command interface implmentation - on the bugs themselves.
+- REST interface on main pi
+
+User Interface (Administration Application for All The Things):
+- Design - Charlie and Char
+- Webserver and UI - Charlie
+

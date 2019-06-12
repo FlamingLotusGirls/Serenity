@@ -1,0 +1,65 @@
+<html>
+
+<head>
+  <title></title>
+  <link rel="stylesheet" href="/css/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="app">
+    <h1>🔥 FLAMING LOTUS GIRLS 🔥</h1>
+    <h1>Serenity Admin Dashboard</h1>
+    <div class="admin-section">
+      <h2>Fire</h2>
+      <button class="btn btn-danger" v-on:click="stopAllFireEffects()">Stop All Fire Effects</button>
+      <button class="btn btn-primary" v-on:click="showPoofingInterface()">Poof</button>
+      <button class="btn btn-primary">Run Fire Sequence</button>
+      <button class="btn btn-primary">Create New Fire Sequence</button>
+
+      <poofer-form v-if="interfacesShown.poofing">
+
+      </poofer-form>
+    </div>
+    <div class="admin-section">
+      <h2>Light</h2>
+      <button class="btn btn-primary">Change Patterns</button>
+      <button class="btn btn-primary">Change Colors</button>
+    </div>
+    <div class="admin-section">
+      <h2>Sound</h2>
+      <h3>Volume</h3>
+      <div>
+        <label>Location A: {{sound.volumes.a * 100}}%<label> <button class="btn btn-secondary">-</button> <button class="btn btn-secondary">+</button>
+      </div>
+      <div>
+        <label>Location B: {{sound.volumes.b * 100}}%</label> <button class="btn btn-secondary">-</button> <button class="btn btn-secondary">+</button>
+      </div>
+      <div>
+        <label>Location C: {{sound.volumes.c * 100}}%</label> <button class="btn btn-secondary">-</button> <button class="btn btn-secondary">+</button>
+      </div>
+      <button class="btn btn-primary">Play Effect</button>
+    </div>
+
+    <!-- COMPONENTS - TODO: SEPARATE TO FILES -->
+    <script type="text/x-template" id="poofer-form-template">
+      <form>
+        <h1>Pick a bug and poof!</h1>
+        <select class="custom-select" name="bugToPoof" id="bugToPoof">
+          <option value="0" selected>All bugs</option>
+          <option value="1">Bug 1 (Metric)</option>
+          <option value="2">Bug 2 (Moopy)</option>
+          <option value="3">Bug 3 (Marquee)</option>
+        </select>
+        <button class="btn btn-danger">POOF!</button>
+      </form>
+    </script>
+  </div>
+
+  <!-- <script type="text/javascript" src="/js/vendor/bootstrap.min.js"></script> -->
+  <script type="text/javascript" src="/js/vendor/vue-dev-2.6.10.js"></script>
+  <script type="text/javascript" src="/js/main.js"></script>
+</body>
+
+
+</html>
