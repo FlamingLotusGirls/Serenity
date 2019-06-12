@@ -1,0 +1,8 @@
+[{"name":"North South And Top", "events": [{"ids":["NN","SS","NT","ST","TN","TS","TT"], "startTime":0, "duration":100}]},
+ {"name":"Top", "events":[{"ids":["TT","TN","TE","TW","TS"], "startTime":0, "duration":2000}]},
+ {"name":"Bottom", "events":[{"ids":["BW","BN","BE","BS"], "startTime":0, "duration":2000}]},
+ {"name":"North",  "events":[{"ids":["NT","NN","NE","NW"], "startTime":0, "duration":2000}]},
+ {"name":"South",  "events":[{"ids":["ST","SS","SE","SW"], "startTime":0, "duration":2000}]},
+ {"name":"East",   "events":[{"ids":["ET","EE","EN","ES"], "startTime":0, "duration":2000}]},
+ {"name":"West",   "events":[{"ids":["WT","WW","WN","WS"], "startTime":0, "duration":2000}]}
+ ]

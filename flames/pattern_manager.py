@@ -10,22 +10,29 @@ import unittest
 
 import poofermapping
 
-''' Handles creation-deletion-modification-retrieval (and permanent save) of flame effect
-sequences, aka patterns. A pattern is defined to have the following format:
-  {"name":<patternName>, "modifyable":[True|False],
-    "events":[eventList]}
-where each event has the format:
-    {"duration":<duration, int milliseconds>, "startTime":<startTime, in ms from start of sequence>
-     "ids:[poofer_ids]}
-poofer_ids are strings that name the 25 unique poofers. These strings can be found in
-poofermapping.py
+''' Handles creation-deletion-modification-retrieval (and permanent save) of 
+    flame effect sequences, aka patterns. A pattern is defined to have the
+    following format:
+      {
+       "name":<patternName>,
+       "modifyable":[True|False],
+       "events":[eventList]
+      }
+    where each event has the format:
+      {
+       "duration":<duration, int milliseconds>, 
+       "startTime":<startTime, in ms from start of sequence>
+       "ids:[poofer_ids]
+      }
+    
+    poofer_ids are strings that name the unique poofers. These strings can be
+    found in poofermapping.py
 '''
 
 gPatterns = list()
 patternLock = Lock()
 patternFileName = None
 
-#logging.basicConfig()
 logger = logging.getLogger('flames')
 
 def init(flameEffectsFile="./sequences.json"):
