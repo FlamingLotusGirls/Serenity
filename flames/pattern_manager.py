@@ -8,7 +8,10 @@ from threading import Lock
 from shutil import copyfile
 import unittest
 
-import poofermapping
+if __name__ == "__main__":
+    import test_poofermapping as poofermapping
+else:
+    import poofermapping
 
 ''' Handles creation-deletion-modification-retrieval (and permanent save) of 
     flame effect sequences, aka patterns. A pattern is defined to have the
@@ -35,7 +38,7 @@ patternFileName = None
 
 logger = logging.getLogger('flames')
 
-def init(flameEffectsFile="./sequences.json"):
+def init(flameEffectsFile="./std_sequences.json"):
     global patternFileName
 
     logger.info("Pattern Manager Init, sequence file {}".format(flameEffectsFile))
@@ -56,12 +59,12 @@ def _loadPatternFile(flameEffectsFile):
             for pattern in savedPatterns:
                 if not (pattern['name'] in patternNames):
                     if not _validatePattern(pattern):
-                        logger.warn("Pattern {} does not validate, rejecting".format(pattern['name']))
+                        logger.warning("Pattern {} does not validate, rejecting".format(pattern['name']))
                         continue
                     patternNames.append(pattern['name'])
                     gPatterns.append(pattern)
                 else:
-                    logger.warn("Pattern name {} used twice".format(pattern['name']))
+                    logger.warning("Pattern name {} used twice".format(pattern['name']))
     except ValueError:
         logger.exception("Bad JSON in pattern file")
 
@@ -70,30 +73,30 @@ def shutdown():
 
 def _validatePattern(pattern):
     if not "name" in pattern:
-        logger.warn("Pattern has no name")
+        logger.warning("Pattern has no name")
         return False
 
     if not "events" in pattern:
-        logger.warn("Pattern {} has no events".format(pattern["name"]))
+        logger.warning("Pattern {} has no events".format(pattern["name"]))
         return False
 
     if not "modifiable" in pattern:
-        logger.warn("Pattern modifiable flag not set, defaulting to True")
+        logger.warning("Pattern modifiable flag not set, defaulting to True")
         pattern["modifiable"] = True
 
     for event in pattern["events"]:
         if not "ids" in event:
-            logger.warn("Pattern {} has no ids".format(pattern["name"]))
+            logger.warning("Pattern {} has no ids".format(pattern["name"]))
             return False
         for id in event["ids"]:
             if not id in poofermapping.mappings.keys():
-                logger.warn("Pattern {} contains invalid id {}".format(pattern["name"], id))
+                logger.warning("Pattern {} contains invalid id {}".format(pattern["name"], id))
                 return False
         if not "duration" in event:
-            logger.warn("Pattern {} has no duration".format(pattern["name"]))
+            logger.warning("Pattern {} has no duration".format(pattern["name"]))
             return False
         if not "startTime" in event:
-            logger.warn("Pattern {} has no startTime".format(pattern["name"]))
+            logger.warning("Pattern {} has no startTime".format(pattern["name"]))
             return False
     return True
 
@@ -135,7 +138,7 @@ def addOrModifyPattern(newPattern):
 
 def addPattern(newPattern):
     if not _validatePattern(newPattern):
-        log.warn("Pattern {} does not validate, will not add".format(pattern['name']))
+        logger.warning("Pattern {} does not validate, will not add".format(pattern['name']))
         return
 
     patternLock.acquire()
@@ -152,7 +155,7 @@ def addPattern(newPattern):
 
 def modifyPattern(newPattern):
     if not _validatePattern(newPattern):
-        log.warn("Pattern {} does not validate, will not modify".format(pattern['name']))
+        logger.warning("Pattern {} does not validate, will not modify".format(pattern['name']))
         return
 
     patternLock.acquire()
@@ -238,14 +241,14 @@ class PatternTests(unittest.TestCase):
 
 
         modifiedPattern = getPattern("Bottom")
-        self.assertEquals(modifiedPattern["name"], savedPattern["name"])
-        self.assertEquals(len(modifiedPattern["events"]), len(savedPattern["events"]))
-        self.assertEquals(modifiedPattern["events"][0]["duration"], 4000)
-        self.assertEquals(modifiedPattern["events"][0]["startTime"], savedPattern["events"][0]["startTime"])
+        self.assertEqual(modifiedPattern["name"], savedPattern["name"])
+        self.assertEqual(len(modifiedPattern["events"]), len(savedPattern["events"]))
+        self.assertEqual(modifiedPattern["events"][0]["duration"], 4000)
+        self.assertEqual(modifiedPattern["events"][0]["startTime"], savedPattern["events"][0]["startTime"])
 
     def test_addPattern(self):
         pattern = getPattern("Custom")
-        self.assertEquals(pattern, None)
+        self.assertEqual(pattern, None)
         pattern = {"modifiable": True, "name": "Custom",
                     "events": [{"duration": 2000, "ids": ["NE", "NW"], "startTime": 0},
                                {"duration": 2000, "ids": ["NE", "NW"], "startTime": 4000}]}

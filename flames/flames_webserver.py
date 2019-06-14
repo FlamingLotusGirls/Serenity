@@ -23,8 +23,6 @@ import triggers
 '''
 
 PORT = 5000
-HYDRAULICS_PORT = 9000
-hydraulics_addr = "noetica-hydraulics.local"
 
 logger = logging.getLogger("flames")
 
@@ -35,8 +33,7 @@ app = Flask("flg", static_url_path="", static_folder="/home/flaming/Serenity/Fla
 # XXX TODO - function to set the log level
 
 def serve_forever(httpPort=PORT):
-    logger.info("FLAMES WebServer: port {}, \
-       hydraulics port {}".format(httpPort,hydraulicsAddr, hydraulicsPort))
+    logger.info("FLAMES WebServer: port {}".format(httpPort))
     app.run(host="0.0.0.0", port=httpPort, threaded=True) ## XXX - FIXME - got a broken pipe on the socket that terminated the application (uncaught exception) supposedly this is fixed in flask 0.12
 
 @app.route("/flame", methods=['GET', 'POST'])
