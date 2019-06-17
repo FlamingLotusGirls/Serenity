@@ -6,21 +6,25 @@ General Infrastructure:
 - Disk images
 
 Fire:
-- Flame driver (low level, speaks ! protocol on the RS485 to the flame control boxes)
-- Flame control (high level, takes REST requests, may hand off to flame driver, may
+- (CSW) Flame driver (low level, speaks ! protocol on the RS485 to the flame control boxes)
+- (CSW) Flame control (high level, takes REST requests, may hand off to flame driver, may
 (in some instances, such as when managing stored sequences) handle independently
 of flame driver)
 - Interface with fuel depot button box. What does the communication here
 look like? (The fuel depot button box - unlike the buttons in the field - communicates
-with the flame controller to send its signals)
-- Fuel depot button box - physical construction/design
+with the flame controller to send its signals) (CSW - suggest we use three ESP8266's, one for
+each of the fireflies. The wiring is going to be sort of hell, but <eh>)
+- Fuel depot button box - physical construction/design (CSW - Suggest we use the large spare
+Pelican case in the 20' container. We could use the laser cutter to make a plastic cut 
+out to go in the center)
 
 Sound:
 - Sonic pi/Supercollider headless mode. How do we set this up, how do we talk to it
   (Sonic pi sort of assumes a UI - which we don't want. But the lower level 
    Sonic server doesn't need a UI, nor does Supercollider, which is the low level 
    sound driver. How to put these pieces together? What's the API for talking
-   to them?)
+   to them?) (CSW - As I'm failing to find an easy way to do Sonic Pi headless, I'm thinking
+more and more fondly of the low-level C interface I wrote to Alsa for Pulse...)
 - Sound interface to REST
 - Management of stored sound samples
 - Playing of sound samples, control of state. (Note that we want to take advantage of the two
