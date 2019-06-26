@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
+#include <stdio.h>
 #include "user_interface.h"
 #include "wifi_credentials.h"
 
@@ -22,16 +23,11 @@
  *  Released under the MIT license.
  */
 
-#define NUM_LEDS 10
 
-#define DATA_PIN 4   // GPIO4. D2 on the board
-#define BLINK_PIN 2  // GPI02. D4 on the board
-
-CRGB leds[NUM_LEDS];
-
+/*
 #define BUFFER_LENGTH 512
 char incomingPacket[BUFFER_LENGTH]; 
-
+*/
 // NB - variables ssid and password are intentionally kept in 
 // 'wifi_credentials.h' so that they don't need to be checked in
 
@@ -40,66 +36,66 @@ extern const char* ssid;
 extern const char *password;
 */
 
-WiFiUDP Udp;
-IPAddress multicastAddress(224,3,29,71);
+#define NUM_LEDS 10
+#define DATA_PIN 4   // GPIO4. D2 on the board
+#define BLINK_PIN 2  // GPI02. D4 on the board
+
+CRGB leds[NUM_LEDS];
+static int board_id = 1;
+
+
+
+/*********************************************
+ *  WIFI
+ *********************************************/
+static WiFiUDP Udp;
+static IPAddress multicastAddress(224,3,29,71);
 //IPAddress multicastAddress(224,0,0,1);
-unsigned int multicastPort = 5010;
+static unsigned int multicastPort = 5010;
 
+static bool wifi_setup = false;
 
-void setup() { 
-    pinMode(2, OUTPUT);
-    pinMode(4, OUTPUT);
-    // Uncomment/edit one of the following lines for your leds arrangement.
-    // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-    // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<GW6205, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<GW6205_400, DATA_PIN, RGB>(leds, NUM_LEDS);
-      
-    // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<LPD8806, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<P9813, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<APA102, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<DOTSTAR, RGB>(leds, NUM_LEDS);
-
-    // FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<SM16716, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<P9813, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<DOTSTAR, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-  
-    Serial.begin(9600);  // yeah. Slow but reliable...
-    Serial.println();
-
-    WiFi.begin(ssid, password);
-
-    Serial.print("Connecting");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-      delay(500);
-      Serial.print(".");
-    }
-    Serial.println();
-
-    Serial.print("Connected, IP address: ");
-    Serial.println(WiFi.localIP());
-    WiFi.printDiag(Serial);
-
-    WiFi.mode(WIFI_STA);
-    wifi_set_sleep_type(NONE_SLEEP_T);
-
-    Udp.beginMulticast(WiFi.localIP(), multicastAddress, multicastPort);
+static void wifi_connect() {
+  WiFi.begin(ssid, password);
+  wifi_setup = false;
 }
 
+static bool wifi_is_connected() {
+  return wifi_setup;
+}
+
+static void wifi_poke() {
+  Serial.print("Wifi poke\n");
+  int status = WiFi.status();
+  if (status == WL_CONNECTED) {
+    Serial.print("Wifi is connected!");
+    if (!wifi_setup) {
+      Serial.print("Connected, IP address: ");
+      Serial.println(WiFi.localIP());
+      WiFi.printDiag(Serial);
+
+      WiFi.mode(WIFI_STA);
+      wifi_set_sleep_type(NONE_SLEEP_T);
+
+      Udp.beginMulticast(WiFi.localIP(), multicastAddress, multicastPort);
+      wifi_setup = true;
+    }
+  } else {
+    char printBuf[256];
+    sprintf(printBuf, "Wifi status is %d\n", status);
+    Serial.print(printBuf);
+  }
+}
+
+static bool wifi_disconnect() {
+  WiFi.disconnect();
+  wifi_setup = false;
+}
+
+
+/*************************************************************************
+ *  SEQUENCES 
+ **************************************/
 static char *default_sequence_str = "0001110011111";
 #define MAX_COLOR_STR_LEN 16
 #define MAX_SEQUENCE_STR_LEN 32
@@ -113,7 +109,6 @@ static int  current_clock = 5; // 5* 100ms
 static uint8_t current_red = 0xe0;
 static uint8_t current_blue = 0xe0;
 static uint8_t current_green = 0xff;
-static int board_id = 1;
 
 static bool doLEDs = true;
 
@@ -135,18 +130,21 @@ static bool validate_color(const char *color) {
   if (*endptr != '\0' 
        || r < 0 
        || r > 255 ) {
+    Serial.print("red not correct\n");
     return false;
   }
   g = strtol(green, &endptr, 0);
   if (*endptr != '\0' 
        || g < 0 
        || g > 255 ) {
-    return false;
+   Serial.print("green not correct\n");
+   return false;
   }
   b = strtol(blue, &endptr, 0);
   if (*endptr != '\0' 
        || b < 0 
        || b > 255 ) {
+    Serial.print("blue not correct\n");
     return false;
   }
 
@@ -156,11 +154,13 @@ static bool validate_color(const char *color) {
 static bool validate_sequence(const char *sequence) {
   // only 0s and 1s allowed...
   if (strlen(sequence) > MAX_SEQUENCE_STR_LEN - 1) {
+    Serial.print("Sequence too big\n");
     return false;
   }
 
   for (int i=0; i<strlen(sequence)-1; i++) {
-    if (sequence[i] != '0' && sequence[i] != 1) {
+    if (sequence[i] != '0' && sequence[i] != '1') {
+      Serial.print("Sequence not ones and zeros\n");
       return false;
     }
   }
@@ -172,10 +172,12 @@ static bool validate_clock(const char *clock_str) {
   long clock_time = 0;
   char *endptr;
   if (strlen(clock_str) > MAX_CLOCK_STR_LEN - 1) {
+    Serial.print("Clock str too big\n");
     return false;
   }
   clock_time = strtol(clock_str, &endptr, 0);
   if (*endptr != '\0') {
+    Serial.print("Clock not numeric\n");
     return false;
   }
   return true;
@@ -187,6 +189,7 @@ static void init_current_colors(const char *color) {
   char *red, *green, *blue;
   long r, g, b;
   char *endptr;
+  char msgBuf[256];
 
   strcpy(current_color_str, color);
   strcpy(temp_buf, color);
@@ -197,20 +200,32 @@ static void init_current_colors(const char *color) {
   current_red = (uint8_t)strtol(red, &endptr, 0);
   current_green = (uint8_t)strtol(green, &endptr, 0);
   current_blue = (uint8_t)strtol(blue, &endptr, 0);
+
+  sprintf(msgBuf, "Set red: 0x%x, g: 0x%x, b: 0x%x\n", current_red, current_green, current_blue);
+  Serial.print(msgBuf);
 }
 
 static void init_current_clock(const char *clock_time) {
   // NB - validation is assumed to have happened previously
+  char msgBuf[256];
   char *endptr;
-  
+
   strcpy(current_clock_str, clock_time);
-  current_clock = strtol(current_clock_str, &endptr, 0)/100;
+  current_clock = strtol(current_clock_str, &endptr, 0);
+  
+  sprintf(msgBuf, "Setting clock to %d\n", current_clock);
+  Serial.print(msgBuf);
 }
 
 static void init_current_sequence(const char *sequence) {
-    strcpy(current_sequence_str, sequence);
-    current_sequence_idx = 0;
-    current_sequence_len = strlen(current_sequence_str);
+  char msgBuf[256];
+  
+  strcpy(current_sequence_str, sequence);
+  current_sequence_idx = 0;
+  current_sequence_len = strlen(current_sequence_str);
+
+  sprintf(msgBuf, "Setting sequence to %s\n", current_sequence_str);
+  Serial.print(msgBuf);
 }
 
 static void set_blink_pattern(const char* color, const char *clock_time, const char *sequence) {
@@ -220,15 +235,16 @@ static void set_blink_pattern(const char* color, const char *clock_time, const c
     // No change - do nothing
     return;
   }
+  
   if (!validate_color(color) || !validate_clock(clock_time) || !validate_sequence(sequence)) {
     Serial.print("Input data invalid, ignoring\n");
     return;
   }
-  strcpy(current_sequence_str, sequence);
 
   init_current_colors(color);
-  init_current_clock(clock_time);
   init_current_sequence(sequence);
+  init_current_clock(clock_time);
+
 
   doLEDs = true;
 }
@@ -238,10 +254,13 @@ static void blink_halt() {
 }
 
 static uint8_t simple_checksum(uint8_t *bytes, int len) {
+  char msgBuf[256];
   uint8_t sum = 0;
   uint8_t *ptr = bytes;
   for (int i=0; i<len; i++, ptr++) {
     sum += *ptr;
+    //sprintf(msgBuf, "Sum is %d\n", sum);
+    //Serial.print(msgBuf);    
   }
   return sum;
 }
@@ -300,6 +319,14 @@ static bool validatePacket(char *packet, uint8_t packet_len) {
   }
 
   if (hdr->checksum != simple_checksum((uint8_t*)(packet + header_len), packet_len - header_len)) {
+    char msgBuf[256];
+    /*memcpy(msgBuf, (uint8_t*)(packet + header_len), packet_len - header_len);
+    msgBuf[packet_len - header_len] = '\0';
+    Serial.print(msgBuf);
+    sprintf(msgBuf, "Checksum invalid. Len is %d\n", packet_len - header_len);
+    Serial.print(msgBuf);
+    sprintf(msgBuf, "First character of checksum data is %c\n", (packet + header_len)[0]);
+    Serial.print(msgBuf); */
     Serial.print("Checksum invalid\n");
     return false;
   }
@@ -343,15 +370,20 @@ int lasttime_ms = 0;
 int onOff = 0;
 
 static void set_LEDs() {
+  char printBuf[256];
   if (!doLEDs) {
     return;
   }
+//  sprintf(printBuf, "current_sequence_str is %s, idx is %d\n", current_sequence_str, current_sequence_idx);
+//  Serial.print(printBuf);
   if (current_sequence_str[current_sequence_idx] == '1') {
+    Serial.print("On\n");
     uint32_t color = ((current_red << 16) && (current_green << 8) && (current_blue));
     for (int i=0; i<NUM_LEDS; i++) {
       leds[i] = color;
     }
   } else {
+    Serial.print("Off\n");
     for (int i=0; i<NUM_LEDS; i++) {
       leds[i] = CRGB::Black;
     }
@@ -363,7 +395,7 @@ static void set_LEDs() {
   }
 }
 
-static void getBoardId() {
+static void get_board_id() {
   char statusBuf[512];
   uint32_t analogIn = analogRead(A0);
 
@@ -379,15 +411,105 @@ static void getBoardId() {
    Serial.print(statusBuf);
 }
 
-#define BLINK_TIME 500
-void loop() { 
+
+void setup() { 
+    pinMode(2, OUTPUT);
+    pinMode(4, OUTPUT);
+    // Uncomment/edit one of the following lines for your leds arrangement.
+    // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+    // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<GW6205, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<GW6205_400, DATA_PIN, RGB>(leds, NUM_LEDS);
+      
+    // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<LPD8806, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<P9813, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<APA102, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<DOTSTAR, RGB>(leds, NUM_LEDS);
+
+    // FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<SM16716, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<P9813, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<DOTSTAR, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
   
-  // check wifi
-  if (counter % 10 == 0) {
+    Serial.begin(9600);  // yeah. Slow but reliable...
+    Serial.print("...Init...\n");
+
+    init_current_sequence(default_sequence_str);
+      
+    wifi_connect();
+
+    delay(500);
+
+    for (int i=0; i<100; i++) {
+      wifi_poke();
+      if (wifi_is_connected()) {
+        break;
+      }
+      delay(500);
+    }
+
+    get_board_id();
+
+    char serialBuf[256];
+
+    sprintf(serialBuf, "...Board id is %d\n", board_id);
+
+    
+    
+/*
+    WiFi.begin(ssid, password);
+
+    Serial.print("Connecting\n");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println();
+
+    Serial.print("Connected, IP address: ");
+    Serial.println(WiFi.localIP());
+    WiFi.printDiag(Serial);
+
+    WiFi.mode(WIFI_STA);
+    wifi_set_sleep_type(NONE_SLEEP_T);
+
+    Udp.beginMulticast(WiFi.localIP(), multicastAddress, multicastPort);
+*/
+}
+
+#define BLINK_TIME 500
+#define WIFI_PING_INTERVAL 10
+#define WIFI_CHECK_INTERVAL 5
+#define MAX_PACKET_LEN 255
+
+void loop() {
+  
+  // Attempt to connect to wifi if it's not up
+  if (!wifi_is_connected() && (counter % WIFI_CHECK_INTERVAL) == 0) {
+    wifi_poke();
+  }
+
+  // XXX - may want to have a poke counter and restart wifi...
+
+  // Check for wifi up
+  if (wifi_is_connected() && (counter % WIFI_PING_INTERVAL == 0)) {
     //ping_wifi(); 
   }
 
-  // blink the leds if we're on a clock edge
+  // blink the onboard leds if we're on a clock edge
   if ((counter % current_clock) == 0) {
     set_LEDs();
     digitalWrite(BLINK_PIN, onOff?HIGH:LOW);
@@ -396,23 +518,33 @@ void loop() {
 
   // get board id. Not that it's going to change...
    if (counter % 10 == 0) {
-    getBoardId();
+    delay(1);
+    get_board_id();
     char statusBuf[512];
     Serial.print("tick!\n");
     sprintf(statusBuf, "Reading %d on analog\n", analogRead(A0));
   }
 
-  // read UDP command
-  int packetSize = Udp.parsePacket();
-  if (packetSize > 0) {
-    char packet[512];
-    char replyBuf[512];
-    int len = Udp.read(packet, 512);
-    packet[len-1] = '\0';
-    processPacket(packet, len);
+  // read UDP and process UDP commands
+  if (wifi_is_connected()) {
+    int packetSize;
+    while ((packetSize=Udp.parsePacket()) > 0) {
+      
+      char packet[MAX_PACKET_LEN + 1];
+      char replyBuf[256];
+
+      if (packetSize > MAX_PACKET_LEN) {
+        // whatever the fuck this is, we don't want it.
+        continue;      
+      }
+      int len = Udp.read(packet, MAX_PACKET_LEN);
     
-    sprintf(replyBuf, "Received packet %s\n", packet);
-    Serial.print(replyBuf);
+      packet[len] = '\0';
+      processPacket(packet, len);
+    
+      //sprintf(replyBuf, "Received packet %s\n", packet);
+      //Serial.print(replyBuf);
+    }
   }
 /*
   // blink leds
