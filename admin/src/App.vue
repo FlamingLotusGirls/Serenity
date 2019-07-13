@@ -1,21 +1,29 @@
 <template>
   <div id="app">
-    <Header/>
-    <MainContentContainer/>
+    <Header v-bind:selectedTab="selectedTab"/>
+    <keep-alive>
+      <component class="page-content" v-bind:is="pageComponent"></component>
+    </keep-alive>
     <Footer/>
   </div>
 </template>
 
 <script>
 import Header from './components/Header.vue'
-import MainContentContainer from './components/MainContentContainer.vue'
+import BigBugsPage from './components/BigBugsPage.vue'
+import SoundPage from './components/SoundPage.vue'
+import LightPage from './components/LightPage.vue'
+import AdminPage from './components/AdminPage.vue'
 import Footer from './components/Footer.vue'
 
 export default {
   name: 'app',
   components: {
     Header,
-    MainContentContainer,
+    BigBugsPage,
+    SoundPage,
+    LightPage,
+    AdminPage,
     Footer
   },
   data: () => ({
@@ -26,11 +34,39 @@ export default {
               c: 0.2
           }
       },
+      selectedTab: 'BigBugs',
       interfacesShown: {
           poofing: false
       }
   }),
+  computed: {
+    pageComponent: function() {
+      return this.selectedTab + 'Page';
+    }
+  },
+  mounted: function() {
+    window.addEventListener('hashchange', () => {
+      this.hashChanged();
+    });
+  
+    // immmediately pretend the hash changed when we load the page, to initialize
+    // the right tab
+    this.hashChanged();
+  },
   methods: {
+    hashChanged: function() {
+      // alert(`hash changed to ${location.hash}`)
+      const validTabs = ['BigBugs', 'Sound', 'Light', 'Admin'];
+      let targetTab = location.hash.slice(1);
+      if (validTabs.includes(targetTab)) {
+        this.selectedTab = targetTab;
+      } else {
+        console.log('validTabs ', validTabs, 'does not include', targetTab);
+        // if we got to an invalid URL, just head back to the big bugs
+        location.hash = "#BigBugs";
+      }
+    },
+
     /* Fire */
     stopAllFireEffects: function() {
         // TODO: make REST request to server to stop all fire effects
@@ -68,4 +104,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.page-content {
+  padding: 20px 50px;
+}
+</style>

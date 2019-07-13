@@ -1,9 +1,9 @@
 <template>
-  <div class="simple-poofer-section">
+  <div class="big-bugs-page-section">
     <p>Tap a button on a bug to make a poof. Tap the bug's name to poof all poofers on that bug.</p>
-    <PoofableBug />
-    <PoofableBug />
-    <PoofableBug />
+    <PoofableBug bugName="Metric"/>
+    <PoofableBug class="middle-bug" bugName="Brazen"/>
+    <PoofableBug bugName="John"/>
   </div>
 </template>
 
@@ -19,5 +19,8 @@ export default {
 </script>
 
 <style>
+.middle-bug {
+  top: 80px;
+}
 </style>
 

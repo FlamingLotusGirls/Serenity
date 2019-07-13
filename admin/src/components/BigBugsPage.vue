@@ -19,5 +19,10 @@ export default {
 </script>
 
 <style>
+.big-bugs-page-section {
+  display: inline-block;
+  vertical-align: top;
+  margin: 20px;
+}
 </style>
 
