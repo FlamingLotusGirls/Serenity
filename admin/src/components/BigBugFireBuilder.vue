@@ -24,10 +24,4 @@ export default {
 };
 </script>
 
-<style>
-    .custom-fire-big-bug-section label {
-        text-transform: uppercase;
-        color: #999;
-        font-size: 12px;
-    }
-</style>
+<style></style>
