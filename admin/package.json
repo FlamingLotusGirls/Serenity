@@ -14,11 +14,12 @@
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
+    "core-js": "^2.6.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "morgan": "~1.9.1",
-    "core-js": "^2.6.5",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "vue-color": "^2.7.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.9.0",

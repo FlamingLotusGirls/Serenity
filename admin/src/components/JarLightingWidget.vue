@@ -3,7 +3,7 @@
         <!-- inner div is just a hack so our borders can go inside of the Bootstrap grid gutters -->
         <div class="jar-lighting-widget-inner">
             <label>Set {{bugName}}'s Color Palette</label>
-            <ColorSlider />
+            <ColorPicker class="color-slider" color="#f00" v-model="colors" />
             <label>Select a Jar Pattern for {{bugName}}</label>
             <select class="custom-select">
                 <option value="0" selected>soothingFlow</option>
@@ -15,12 +15,17 @@
 </template>
 
 <script>
-import { Slider } from 'vue-color';
+import ColorPicker from './ColorPicker';
 
 export default {
     props: ['bugName'],
+    data () {
+        return {
+            colors: {}
+        };
+    },
     components: {
-        ColorSlider: Slider
+        ColorPicker
     }
 };
 </script>
