@@ -5,12 +5,12 @@ from flask import abort
 import json
 import logging
 import requests
+import time
 import urllib
 
 import flames_controller
 import poofermapping
 import pattern_manager
-import triggers
 
 ''' 
     Webserver for the flame effect controller. In this variant, we're mostly
@@ -220,87 +220,95 @@ def patternName_valid(patternName):
 def param_valid(value, validValues):
     return value != None and (value.lower() in validValues)
 
+def shutdown():
+    flames_drv.shutdown()
+    flames_controller.shutdown()
+    event_manager.shutdown()
+    pattern_manager.shutdown()
 
+production = True
 
 if __name__ == "__main__":
     from threading import Thread
     import event_manager
-    import Queue
+    import queue
     import flames_drv
-    print "flame api!!"
+    print("flame api!!")
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
     pattern_manager.init("./pattern_test_2.json")
     event_manager.init()
 
-    commandQueue = Queue.Queue()
-    flames_drv.init(commandQueue)
+    commandQueue = queue.Queue()
+    flames_drv.init(commandQueue, ".") # XXX FIXME. Homedir may not be "." Take from args?:
     flames_controller.init(commandQueue)
 
-    flaskThread = Thread(target=serve_forever, args=[5000, "localhost", 9000])
-    flaskThread.start()
-    serve_forever
+    if production:
+        try:
+            serve_forever()
+        except Exception:
+            shutdown()
+    else:
+        flaskThread = Thread(target=serve_forever) #, args=[5000, "localhost", 9000])
+        flaskThread.start()
 
-    print "About to make request!"
+        time.sleep(5)
+        print("About to make request!")
 
-    baseURL = 'http://localhost:' + str(PORT) + "/"
+        baseURL = 'http://localhost:' + str(PORT) + "/"
 
-    print "Setting playstate to Pause"
-    r = requests.post(baseURL + "flame", data={"playState":"pause"})
-    print r.status_code
+        print("Setting playstate to Pause")
+        r = requests.post(baseURL + "flame", data={"playState":"pause"})
+        print(r.status_code)
 
-    r = requests.get(baseURL + "flame")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame")
+        print(r.status_code)
+        print(r.json())
 
-    print "Setting playstate to Play"
-    r = requests.post(baseURL + "flame", data={"playState":"play"})
-    print r.status_code
+        print("Setting playstate to Play")
+        r = requests.post(baseURL + "flame", data={"playState":"play"})
+        print(r.status_code)
 
-    r = requests.get(baseURL + "flame")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame")
+        print(r.status_code)
+        print(r.json())
 
-    print "Get poofers"
-    r = requests.get(baseURL + "flame/poofers/1_T1")
-    print r.status_code
-    print r.json()
+        print("Get poofers")
+        r = requests.get(baseURL + "flame/poofers/1_T1")
+        print(r.status_code)
+        print(r.json())
 
-    print "Set poofer enabled/disabled"
-    r = requests.post(baseURL + "flame/poofers/1_T1", data={"enabled":"false"})
+        print("Set poofer enabled/disabled")
+        r = requests.post(baseURL + "flame/poofers/1_T1", data={"enabled":"false"})
 
-    r = requests.get(baseURL + "flame/poofers/1_T1")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame/poofers/1_T1")
+        print(r.status_code)
+        print(r.json())
 
-    r = requests.post(baseURL + "flame/poofers/1_T1", data={"enabled":"true"})
+        r = requests.post(baseURL + "flame/poofers/1_T1", data={"enabled":"true"})
 
-    r = requests.get(baseURL + "flame/poofers/1_T1")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame/poofers/1_T1")
+        print(r.status_code)
+        print(r.json())
 
-    print "Set pattern enabled/disabled"
-    r = requests.post(baseURL + "flame/patterns/2_A2", data={"enabled":"false"})
+        print("Set pattern enabled/disabled")
+        r = requests.post(baseURL + "flame/patterns/Firefly_3_chase", data={"enabled":"false"})
 
-    r = requests.get(baseURL + "flame/patterns/2_A2")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame/patterns/Firefly_3_chase")
+        print(r.status_code)
+        print(r.json())
 
-    r = requests.post(baseURL + "flame/patterns/2_A2", data={"enabled":"true"})
+        r = requests.post(baseURL + "flame/patterns/Firefly_3_chase", data={"enabled":"true"})
 
-    r = requests.get(baseURL + "flame/patterns/2_A2")
-    print r.status_code
-    print r.json()
+        r = requests.get(baseURL + "flame/patterns/Firefly_3_chase")
+        print(r.status_code)
+        print(r.json())
 
-    print "Set pattern active"
-    r = requests.post(baseURL + "flame/patterns/2_A2", data={"active":"true"})
+        print("Set pattern active")
+        r = requests.post(baseURL + "flame/patterns/Firefly_3_chase", data={"active":"true"})
 
-    print "Set pattern inactive"
-    r = requests.post(baseURL + "flame/patterns/2_A2", data={"active":"false"})
+        print("Set pattern inactive")
+        r = requests.post(baseURL + "flame/patterns/Firefly_3_chase", data={"active":"false"})
 
-
-    flames_drv.shutdown()
-    flames_controller.shutdown()
-    event_manager.shutdown()
-    pattern_manager.shutdown()
+        shutdown()

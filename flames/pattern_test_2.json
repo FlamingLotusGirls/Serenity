@@ -1,16 +1,16 @@
-[{"name":"Firefly 1 poof butt", "events": [{"ids":["1_T1","1_T2","1_T3","1_T4","1_T5","1_T6"], "startTime":0, "duration":100}]},
- {"name":"Firefly 2 antenna then butt", "events":[
-      {"ids":["2_A1","2_A2"], "startTime":0, "duration":300}
-      {"ids":["2_T1","2_T2", "2_T3", "2_T4", "2_T5", "2_T6"], "startTime":500, "duration":700}
+[{"name":"Firefly_1_poof_butt", "events": [{"ids":["1_T1","1_T2","1_T3","1_T4","1_T5","1_T6"], "startTime":0, "duration":0.1}]},
+ {"name":"Firefly_2_antenna_then_butt", "events":[
+      {"ids":["2_A1","2_A2"], "startTime":0, "duration":0.3},
+      {"ids":["2_T1","2_T2", "2_T3", "2_T4", "2_T5", "2_T6"], "startTime":0.5, "duration":0.7}
  ]},
- {"name":"Firefly 3 chase", "events":[
-      {"ids":["3_A1"], "startTime":0, "duration":300}
-      {"ids":["3_A2"], "startTime":250, "duration":300}
-      {"ids":["3_T1"], "startTime":500, "duration":300}
-      {"ids":["3_T2"], "startTime":750, "duration":300}
-      {"ids":["3_T3"], "startTime":1000, "duration":300}
-      {"ids":["3_T4"], "startTime":1250, "duration":300}
-      {"ids":["3_T5"], "startTime":1500, "duration":300}
-      {"ids":["3_T6"], "startTime":1750, "duration":300}
- ]},
+ {"name":"Firefly_3_chase", "events":[
+      {"ids":["3_A1"], "startTime":0, "duration":0.3},
+      {"ids":["3_A2"], "startTime":250, "duration":0.3},
+      {"ids":["3_T1"], "startTime":500, "duration":0.3},
+      {"ids":["3_T2"], "startTime":750, "duration":0.3},
+      {"ids":["3_T3"], "startTime":1000, "duration":0.3},
+      {"ids":["3_T4"], "startTime":1250, "duration":0.3},
+      {"ids":["3_T5"], "startTime":1500, "duration":0.3},
+      {"ids":["3_T6"], "startTime":1750, "duration":0.3}
+ ]}
  ]

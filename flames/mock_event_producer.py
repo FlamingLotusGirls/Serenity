@@ -60,7 +60,7 @@ class RandomPooferFiringThread(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-        self.availablePoofers = poofermapping.mappings.keys()
+        self.availablePoofers = list(poofermapping.mappings.keys())
         self.poofersActive = list()
         
     def run(self):
@@ -105,7 +105,7 @@ class RandomPooferFiringThread(Thread):
                     self.poofersActive = list()
                 else:
                     self.poofersActive = self.poofersActive[lastExpiredPooferIdx+1:]
-                print "New poofers active are", self.poofersActive
+                print(f"New poofers active are {self.poofersActive}")
                     
 
             # calculate sleep time
@@ -116,7 +116,7 @@ class RandomPooferFiringThread(Thread):
                 
             sleepTime = min(offTime, nextFiringTime - curTime)
             sleepTime = max(0.1, sleepTime)
-            print "sleeptime is", sleepTime
+            print(f"sleeptime is {sleepTime}")
             
     
     def stop(self):
@@ -130,15 +130,15 @@ if __name__ == "__main__":
         event_manager.init()
         init()
         time.sleep(10)
-        print "Stop now!"
+        print("Stop now!")
         stopFiringRandomPoofers()
         event_manager.shutdown()
     except Exception as e:
-        print "Exception occurs!", e
+        print(f"Exception occurs! {e}")
         shutdown()
         event_manager.shutdown()
     except KeyboardInterrupt:
-        print "Keyboard Interrupt!"
+        print("Keyboard Interrupt!")
         shutdown()
         event_manager.shutdown()
     

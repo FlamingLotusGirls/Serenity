@@ -1,7 +1,7 @@
 import json
 import logging
 from threading import Thread
-import Queue
+import queue
 
 logger = logging.getLogger("flames")
 
@@ -33,7 +33,7 @@ def init():
     global eventQueue
     logger.info("Event Manager Init")
     if eventThread == None:
-        eventQueue = Queue.Queue()
+        eventQueue = queue.Queue()
         eventThread = EventManagerThread(eventQueue)
         eventThread.start()
     
@@ -79,7 +79,7 @@ class EventManagerThread(Thread):
                         eventHandler["msgType"] == msgType or 
                         msgType in eventHandler["msgType"]):
                         eventHandler["handler"](msg)
-            except Queue.Empty:
+            except queue.Empty:
                 # just timeout, completely expected
                 pass
             except Exception:

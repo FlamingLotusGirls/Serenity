@@ -37,7 +37,7 @@ import traceback            # exceptions and tracebacks
 import time                    # system time
 import re                     # regex
 from threading import Thread
-import Queue
+import queue
 import json
 import logging
 import event_manager
@@ -103,8 +103,8 @@ class PooferFiringThread(Thread): # comment out for unit testing
         self.disabledFile = homeDir + "disabled_poofers.json"
         # with open(pooferMappingPath) as data_file:
         #     self.pooferMapping = json.load(data_file)
-        self.disableAllPoofersCommand = self.generateDisableAllString()
-        self.readDisabledPoofers()
+        self.generateDisableAllString()
+        #self.readDisabledPoofers()
 
 
     def shutdown(self):
@@ -139,7 +139,7 @@ class PooferFiringThread(Thread): # comment out for unit testing
     def generateDisableAllString(self):
         self.disableAllPoofersCommand = ""
         controllerDict = defaultdict(list)
-        for attribute, value in pooferMapping.iteritems():
+        for attribute, value in pooferMapping.items():
             controllerDict[value[:2]].append(value[2])  # value[:2] is the id of the flame driver board. value[2] is the id of the poofer on that board
 
         for i in controllerDict.keys(): # ie, for all flame driver boards
@@ -200,7 +200,7 @@ class PooferFiringThread(Thread): # comment out for unit testing
                     elif type == "flameEffectStop":
                         self.stopFlameEffect(msgObj)
 
-            except Queue.Empty:
+            except queue.Empty:
                 # this is just a timeout - completely expected. Run the loop
                 pass
             except Exception:
@@ -217,7 +217,7 @@ class PooferFiringThread(Thread): # comment out for unit testing
             for e in events:
                 totalDuration += e["duration"]
             if totalDuration > 60:
-                raise Exception ("Error: duration", len(firingSequence))
+                raise Exception ("Error: duration", totalDuration)
 
             return True
 
@@ -283,9 +283,9 @@ class PooferFiringThread(Thread): # comment out for unit testing
         try:
             if not self.ser:
                 self.ser.initSerial()
-            if disableAllPoofersCommand == "":
+            if self.disableAllPoofersCommand == "":
                 self.generateDisableAllString()
-            self.ser.write(disableAllPoofersCommand.encode())
+            self.ser.write(self.disableAllPoofersCommand.encode())
 
             self.isFiringDisabled = True
             self.pooferEvents = list() # reset all pooferEvents
@@ -377,21 +377,3 @@ class PooferFiringThread(Thread): # comment out for unit testing
         return {"on":onBangCommands, "off":offBangCommands}
 
 
-'''
-## proof of concept: fire a single poofer ##
-
-def singlePooferProofOfConcept():
-
-#debugging
-boardID="01"
-boardChannel="1"
-print boardID
-print boardChannel
-
-#command components: write, boardID, boardChannel, on
-bangString="!"+ boardID + boardChannel + "1"
-# command terminator
-bangString=poofString + "."
-
-print bangString
-'''

@@ -11,12 +11,11 @@ Note that at the moment, many event types are not getting created. A more solid 
 would use the event queue to set state rather than setting state off of the command. But
 that seems like a nicety that I can ignore for now.'''
 
-import Queue
+import queue
 import json
 import logging
 from threading import Thread
 from threading import Lock
-from websocket_server import WebsocketServer
 import mock_event_producer as mockDriver
 import event_manager
 import pattern_manager
@@ -131,7 +130,7 @@ def eventHandler(msg):
 if __name__ == "__main__":
     import mock_event_producer
     import time
-    import Queue
+    import queue
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d:  %(message)s', level=logging.DEBUG)
 
@@ -139,15 +138,15 @@ if __name__ == "__main__":
 
         event_manager.init()
         mock_event_producer.init()
-        init(Queue.Queue())
+        init(queue.Queue())
 
         while(True):
             time.sleep(10)
 
     except Exception as e:
-        print "Exception occurs!", e
+        print(f"Exception occurs! {e}")
     except KeyboardInterrupt:
-        print "Keyboard Interrupt!"
+        print("Keyboard Interrupt!")
 
     event_manager.shutdown()
     mock_event_producer.shutdown()
