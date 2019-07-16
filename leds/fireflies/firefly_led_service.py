@@ -1,3 +1,4 @@
+from builtins import str
 from flask import Flask
 from flask import request
 from flask import Response
@@ -5,10 +6,10 @@ from flask import abort
 import json
 import logging
 import requests
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from threading import Thread
 
-import firefly_led_controller
+import led_controller
 
 ''' 
     REST service for controlling firefly leds
@@ -21,7 +22,6 @@ logger = logging.getLogger("firefly_leds")
 app = Flask("flg", static_url_path="", static_folder="/home/flaming/Serenity/leds/fireflies/static")
 #app = Flask("flg", static_url_path="")
 
-
 def serve_forever(httpPort=PORT):
     logger.info("Fireflies LED WebServer: port {}".format(httpPort))
     app.run(host="0.0.0.0", port=httpPort, threaded=True) ## XXX - FIXME - got a broken pipe on the socket that terminated the application (uncaught exception) supposedly this is fixed in flask 0.12
@@ -32,7 +32,6 @@ g_led_state = [
   {'swarm':2, 'red':255, 'green':255, 'blue':255, 'speed':1, 'sequence':'0000011111'},
   {'swarm':3, 'red':255, 'green':255, 'blue':255, 'speed':1, 'sequence':'0000011111'},
 ]
-
 
 @app.route("/firefly_leds", methods=['GET', 'POST'])
 def firefly_status():
@@ -50,7 +49,7 @@ def firefly_status():
             swarm_id = int(request.values['swarm'])
             if swarm_id < 0 or swarm_id > 3:
                 raise Exception
-            current_leds = firefly_led_controller.get_led_patterns()
+            current_leds = led_controller.get_led_patterns()
         except:
             return Response("Invalid swarm value", 400)
 
@@ -80,12 +79,12 @@ def firefly_status():
         else:
             sequence = current_leds['sequence']
             
-        firefly_led_controller.send_pattern(swarm_id, red, green, blue, speed, sequence)
+        led_controller.send_pattern(swarm_id, red, green, blue, speed, sequence)
 
         return Response("", 200)
 
     else:
-        return makeJsonResponse(json.dumps(g_firefly_led_controller.get_led_patterns())
+        return makeJsonResponse(json.dumps(led_controller.get_led_patterns()))
 
 def makeJsonResponse(jsonString, VrespStatus=200):
     resp = Response(jsonString, status=respStatus, mimetype='application/json')
@@ -97,14 +96,9 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
-    firefly_led_controller.init()
-
-    flaskThread = Thread(target=serve_forever, args=[5000, "localhost", 9000])
+    flaskThread = Thread(target=serve_forever, args=[6000])
     flaskThread.start()
-    serve_forever()
 
-    print "About to make request!"
+    print("About to make request!")
 
     baseURL = 'http://localhost:' + str(PORT) + "/"
-
-    firefly_led_controller.shutdown()
