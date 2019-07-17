@@ -5,7 +5,7 @@
             <h5>Swarm {{swarmNumberString}}</h5>
             <div class="master-switch">
                 <label>Master Lighting Switch</label>
-                <ToggleButton labels="true" />
+                <ToggleButton labels />
             </div>
             <label for="swarmBrightness">Set Swarm Brightness:</label>
             <input type="range" name="swarmBrightness" class="swarm-brightness-control" id="swarmBrightness" />

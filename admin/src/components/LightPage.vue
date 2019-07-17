@@ -7,7 +7,7 @@
                     <a class="view-color-sources-link" href="#">view color palette sources</a>
                 </div>
                 <div class="col-4 align-self-right synchronize-column">
-                    <button class="btn btn-primary">Synchronize Jars</button>
+                    <button class="btn btn-primary">Save Jars</button>
                 </div>
             </div>
             <div class="jars-content row">
@@ -22,7 +22,7 @@
                     <h2><img class="small-bugs-icon" src="/images/firefly.png"></img> Small Bugs</h2>
                 </div>
                 <div class="col-4 align-self-right synchronize-column">
-                    <button class="btn btn-primary">Synchronize Jars</button>
+                    <button class="btn btn-primary">Save Jars</button>
                 </div>
             </div>
             <div class="small-bugs-content row">
@@ -35,7 +35,7 @@
         <div class="extra-lights-section row">
             <div class="col-6">
                 <label><span class="icon">👀</span> Big Bug Eyes</label>
-                <ToggleButton labels="true" />
+                <ToggleButton labels />
             </div>
             <div class="col-6">
                 <label for="benchBrightness"><span class="icon">💺</span> Set Bench Brightness:</label>
@@ -52,6 +52,9 @@ import SwarmLightingWidget from './SwarmLightingWidget.vue';
 import { ToggleButton } from 'vue-js-toggle-button';
 
 export default {
+    beforeMount() {
+      // REST request to get current LED status goes here
+    },
     components: {
         JarLightingWidget,
         SwarmLightingWidget,
