@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { fireControllerURL } from '../appConfig';
+
 export default {
     name: 'FireProgramSection',
     data() {
@@ -20,7 +22,7 @@ export default {
       };
     },
     beforeMount() {
-      fetch('http://localhost:5000/flame/patterns')
+      fetch(`${fireControllerURL}/flame/patterns`)
         .then(res => {
           // handle non-success responses
           if (!res.ok) {
@@ -38,7 +40,7 @@ export default {
     },
     methods: {
         onSubmit: function() {
-          fetch(`http://localhost:5000/flame/patterns/${this.selectedFireProgram}`, {
+          fetch(`${fireControllerURL}/flame/patterns/${this.selectedFireProgram}`, {
             method: 'POST',
             body: new FormData(this.$el)
           })
