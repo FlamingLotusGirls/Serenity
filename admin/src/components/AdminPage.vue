@@ -1,38 +1,36 @@
 <template>
   <div class="admin-page">
-    <h2>This is the admin page</h2>
-    <form class="custom-fire-by-poofer">
-        <h2>Fire</h2>
-        <h4>set custom fire controls by big bug</h4>
-        <BigBugFireBuilder bugName="Metric" />
-        <BigBugFireBuilder bugName="Brazen" />
-        <BigBugFireBuilder bugName="John" />
-        <div class="save-section">
-            <input type="text" placeholder="Enter a unique name">
-            <button type="submit" class="btn btn-primary">Save Fire</button>
+    <div class="row">
+        <div class="col-12 tabs">
+            <a href="#Admin/Fire" v-bind:class="{ selected: selectedAdminTab === 'Fire' }">Fire Admin</a>
+            |
+            <a href="#Admin/Sound" v-bind:class="{ selected: selectedAdminTab === 'Sound' }">Sound Admin</a>
+            |
+            <a href="#Admin/Light" v-bind:class="{ selected: selectedAdminTab === 'Light' }">Light Admin</a>
         </div>
-    </form>
+    </div>
+    <keep-alive>
+      <component class="admin-subpage-content" v-bind:is="adminPageComponent"></component>
+    </keep-alive>
   </div>
 </template>
 
 <script>
-import BigBugFireBuilder from './BigBugFireBuilder.vue';
+import FireAdminPage from './FireAdminPage.vue';
 
 export default {
+    props: ['selectedAdminTab'],
     name: 'AdminPage',
+    computed: {
+        adminPageComponent: function() {
+            return this.selectedAdminTab + 'AdminPage';
+        }
+    },
     components: {
-        BigBugFireBuilder
+        FireAdminPage
     }
 };
 </script>
 
 <style>
-    .custom-fire-by-poofer {
-        background: #bbb;
-        border: 1px solid #999;
-        margin: 10px;
-    }
-    .save-section {
-        margin-top: 20px;
-    }
 </style>

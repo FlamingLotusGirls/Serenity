@@ -17,3 +17,20 @@ label {
   font-size: 12px;
   margin-bottom: 6px;
 }
+
+.tabs {
+  margin-right: 40px;
+  margin-top: 4px;
+  font-size: 24px;
+}
+.tabs a {
+  margin: 10px 4px;
+  color: #A19FA1;
+}
+.tabs a:hover {
+  color: #DE019E;
+}
+.tabs a.selected {
+  font-weight: bold;
+  color: #DE019E
+}

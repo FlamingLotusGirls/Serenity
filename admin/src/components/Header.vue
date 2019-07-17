@@ -32,22 +32,9 @@ export default {
     float: left;
     margin-left: 40px;
   }
+
   header .tabs {
     float: right;
-    margin-right: 40px;
-    margin-top: 4px;
-    font-size: 24px;
-  }
-  header .tabs a {
-    margin: 10px 4px;
-    color: #A19FA1;
-  }
-  header .tabs a:hover {
-    color: #DE019E;
-  }
-  header .tabs a.selected {
-    font-weight: bold;
-    color: #DE019E
   }
 </style>
 

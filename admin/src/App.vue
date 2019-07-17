@@ -2,7 +2,7 @@
   <div id="app">
     <Header v-bind:selectedTab="selectedTab"/>
     <keep-alive>
-      <component class="page-content" v-bind:is="pageComponent"></component>
+      <component class="page-content" v-bind:is="pageComponent" v-bind:selectedAdminTab="selectedAdminTab"></component>
     </keep-alive>
     <Footer/>
   </div>
@@ -35,6 +35,7 @@ export default {
           }
       },
       selectedTab: 'BigBugs',
+      selectedAdminTab: 'Fire',
       interfacesShown: {
           poofing: false
       }
@@ -56,14 +57,26 @@ export default {
   methods: {
     hashChanged: function() {
       // alert(`hash changed to ${location.hash}`)
-      const validTabs = ['BigBugs', 'Sound', 'Light', 'Admin'];
-      let targetTab = location.hash.slice(1);
-      if (validTabs.includes(targetTab)) {
-        this.selectedTab = targetTab;
-      } else {
-        console.log('validTabs ', validTabs, 'does not include', targetTab);
+      const validPaths = ['BigBugs', 'Sound', 'Light', 'Admin', 'Admin/Fire', 'Admin/Sound', 'Admin/Light'];
+      let targetPath = location.hash.slice(1);
+      if (!validPaths.includes(targetPath)) {
+        console.log(`Invalid URL hash. ${targetPath} is not a valid path.`);
         // if we got to an invalid URL, just head back to the big bugs
         location.hash = "#BigBugs";
+        return;
+      }
+
+      if (targetPath == 'Admin') {
+        // just going to #Admin should take us to the Admin tab, on whatever subtab we're currently on
+        location.hash = `#Admin/${this.selectedAdminTab}`;
+      } else if (targetPath.startsWith('Admin')) {
+        // but going to #Admin/Fire should take us to the Admin tab AND change the subtab
+        this.selectedTab = 'Admin';
+        let targetAdminTab = targetPath.replace('Admin/', '');
+        this.selectedAdminTab = targetAdminTab;
+      } else {
+        // just set selected tab as normal
+        this.selectedTab = targetPath;
       }
     },
 
