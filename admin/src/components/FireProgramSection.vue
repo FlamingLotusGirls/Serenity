@@ -2,11 +2,8 @@
   <form v-on:submit.prevent="onSubmit" class="big-bugs-page-section fire-program-section">
     <h2>or</h2>
     <p>Select a fire program</p>
-    <select class="custom-select" name="fireProgramName" id="fireProgramName" v-model="fireProgramName">
-      <option value="0" selected>Ambiguous Name 23</option>
-      <option value="1">Charlie's Cool Fire Program</option>
-      <option value="2">Chase</option>
-      <option value="3">Burn Baby Burn</option>
+    <select class="custom-select" name="fireProgramName" id="fireProgramName" v-model="selectedFireProgram">
+      <option v-for="programName in fireProgramNames" v-bind:value="programName">{{programName}}</option>
     </select>
     <button class="btn btn-primary">Start Fire Show</button>
   </form>
@@ -15,9 +12,34 @@
 <script>
 export default {
     name: 'FireProgramSection',
+    data() {
+      return {
+        fireProgramNames: [],
+        selectedFireProgram: null
+      };
+    },
+    beforeMount() {
+      fetch('http://localhost:5000/flame/patterns')
+        .then(res => {
+          // handle non-success responses
+          if (!res.ok) {
+            alert(`Unable to fetch list of fire programs. Request failed with status ${res.status} ${res.statusText}`);
+          }
+
+          return res;
+        })
+        .then(res => res.json())
+        .then(result => {
+          this.fireProgramNames = result.map(fireProgram => fireProgram.name);
+        }, error => {
+            // triggers only on network errors, not unsuccessful responses
+            alert(`Failed to fetch fire program list with error ${error}`);
+            return;
+        });
+    },
     methods: {
         onSubmit: function() {
-            alert(`Starting fire program with ID ${this.fireProgramName}`);
+            alert(`Starting fire program with name ${this.selectedFireProgram}`);
         }
     }
 };
