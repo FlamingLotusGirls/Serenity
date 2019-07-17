@@ -15,7 +15,7 @@ import led_controller
     REST service for controlling firefly leds
 '''
 
-PORT = 6000
+PORT = 7000
 
 logger = logging.getLogger("firefly_leds")
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
-    flaskThread = Thread(target=serve_forever, args=[6000])
+    flaskThread = Thread(target=serve_forever, args=[7000])
     flaskThread.start()
 
     print("About to make request!")
