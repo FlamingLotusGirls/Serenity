@@ -1,6 +1,5 @@
 <template>
     <form class="custom-fire-by-poofer">
-        <h2>Fire</h2>
         <h4>set custom fire controls by big bug</h4>
         <BigBugFireBuilder bugName="Metric" />
         <BigBugFireBuilder bugName="Brazen" />

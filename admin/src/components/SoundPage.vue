@@ -19,17 +19,17 @@
             </div>
             <div class="balance-controls col-4">
                 <label>Set Balance Controls:</label>
-                <BalanceControl controllerId="leftpergolanear" controllerName="Left Pergola Near" />
-                <BalanceControl controllerId="leftpergolamid" controllerName="Left Pergola Mid" />
-                <BalanceControl controllerId="leftpergolafar" controllerName="Left Pergola Far" />
-                <BalanceControl controllerId="rightpergolanear" controllerName="Right Pergola Near" />
-                <BalanceControl controllerId="rightpergolamid" controllerName="Right Pergola Mid" />
-                <BalanceControl controllerId="rightpergolafar" controllerName="Right Pergola Far" />
-                <BalanceControl controllerId="metric" controllerName="Metric" />
-                <BalanceControl controllerId="brazen" controllerName="Brazen" />
-                <BalanceControl controllerId="john" controllerName="John" />
-                <BalanceControl controllerId="jar3" controllerName="Jar 3" />
-                <BalanceControl controllerId="fueldepot" controllerName="Fuel Depot" />
+                <BalanceControl controllerId="leftpergolanear">Left Pergola Near</BalanceControl>
+                <BalanceControl controllerId="leftpergolamid">Left Pergola Mid</BalanceControl>
+                <BalanceControl controllerId="leftpergolafar">Left Pergola Far</BalanceControl>
+                <BalanceControl controllerId="rightpergolanear">Right Pergola Near</BalanceControl>
+                <BalanceControl controllerId="rightpergolamid">Right Pergola Mid</BalanceControl>
+                <BalanceControl controllerId="rightpergolafar">Right Pergola Far</BalanceControl>
+                <BalanceControl controllerId="metric">Metric</BalanceControl>
+                <BalanceControl controllerId="brazen">Brazen</BalanceControl>
+                <BalanceControl controllerId="john">John</BalanceControl>
+                <BalanceControl controllerId="jar3">Jar 3</BalanceControl>
+                <BalanceControl controllerId="fueldepot">Fuel Depot</BalanceControl>
             </div>
             <button class="toggle-mute-button col-2 btn" v-on:click="toggleMute">
                 <span class="unmute-icon">{{ muted ? '🔊' : '🔇' }}</span>

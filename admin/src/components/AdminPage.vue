@@ -17,6 +17,7 @@
 
 <script>
 import FireAdminPage from './FireAdminPage.vue';
+import SoundAdminPage from './SoundAdminPage.vue';
 
 export default {
     props: ['selectedAdminTab'],
@@ -27,10 +28,15 @@ export default {
         }
     },
     components: {
-        FireAdminPage
+        FireAdminPage,
+        SoundAdminPage
     }
 };
 </script>
 
 <style>
+.admin-page .tabs {
+    font-size: 28px;
+    margin-bottom: 15px;
+}
 </style>
