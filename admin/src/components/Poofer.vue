@@ -4,13 +4,14 @@
 
 <script>
 export default {
-  props: ['pooferId', 'bugName'],
+  props: ['pooferId', 'bugNumber'],
   mounted: function() {
     this.$el.classList.add(`poofer-id-${this.pooferId}`);
   },
   methods: {
     poof: function() {
-      alert(`Would send poof for poofer ${this.pooferId} in big bug ${this.bugName}`);
+      // TODO: add fetch() request to poof poofer here
+      alert(`Would send poof for poofer ${this.bugNumber}_${this.pooferId}`);
     }
   }
 };

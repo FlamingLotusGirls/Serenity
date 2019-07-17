@@ -2,14 +2,7 @@
     <div class="poofable-bug">
         <img src="/images/firefly.png" />
         <h3><a href="#" v-on:click="poof">{{bugName}}</a></h3>
-        <Poofer pooferId="antenna1" v-bind:bugName="bugName"/>
-        <Poofer pooferId="antenna2" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt1" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt2" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt3" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt4" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt5" v-bind:bugName="bugName"/>
-        <Poofer pooferId="butt6" v-bind:bugName="bugName"/>
+        <Poofer v-for="pooferId in pooferIds" v-bind:pooferId="pooferId" v-bind:bugNumber="bugNumber" />
     </div>
 </template>
 
@@ -17,13 +10,28 @@
 import Poofer from './Poofer.vue'
 
 export default {
-    props: ['bugName'],
+    props: ['bugName', 'bugNumber'],
     name: 'PoofableBug',
     components: {
         Poofer
     },
+    computed: {
+        pooferIds() {
+            return [
+                'T1',
+                'T2',
+                'T3',
+                'T4',
+                'T5',
+                'T6',
+                'A1',
+                'A2'
+            ]
+        }
+    },
     methods: {
         poof: function() {
+            // TODO: add fetch() request to poof all poofers here
             alert(`Poofing all poofers on ${this.bugName}`);
         }
     }
@@ -48,35 +56,35 @@ export default {
     .poofable-bug .poof-button {
         position: absolute;
     }
-    .poofable-bug .poof-button.poofer-id-antenna1 {
+    .poofable-bug .poof-button.poofer-id-A1 {
         top: -31px;
         left: -27px;
     }
-    .poofable-bug .poof-button.poofer-id-antenna2 {
+    .poofable-bug .poof-button.poofer-id-A2 {
         top: -31px;
         left: 104px;
     }
-    .poofable-bug .poof-button.poofer-id-butt1 {
+    .poofable-bug .poof-button.poofer-id-T1 {
         top: 140px;
         left: 3px;
     }
-    .poofable-bug .poof-button.poofer-id-butt2 {
+    .poofable-bug .poof-button.poofer-id-T2 {
         top: 140px;
         left: 80px;
     }
-    .poofable-bug .poof-button.poofer-id-butt3 {
+    .poofable-bug .poof-button.poofer-id-T3 {
         top: 185px;
         left: -8px;
     }
-    .poofable-bug .poof-button.poofer-id-butt4 {
+    .poofable-bug .poof-button.poofer-id-T4 {
         top: 185px;
         left: 90px;
     }
-    .poofable-bug .poof-button.poofer-id-butt5 {
+    .poofable-bug .poof-button.poofer-id-T5 {
         top: 240px;
         left: 20px;
     }
-    .poofable-bug .poof-button.poofer-id-butt6 {
+    .poofable-bug .poof-button.poofer-id-T6 {
         top: 240px;
         left: 63px;
     }
