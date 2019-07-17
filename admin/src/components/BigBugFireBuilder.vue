@@ -7,19 +7,19 @@
         </div>
         <div class="custom-poof-pattern">
             <label>Set A Pattern</label>
-            <PoofPatternButton v-for="n in 20"></PoofPatternButton>
+            <PatternToggleButton v-for="n in 20"></PatternToggleButton>
         </div>
   </div>
 </template>
 
 <script>
-import PoofPatternButton from './PoofPatternButton';
+import PatternToggleButton from './PatternToggleButton';
 
 export default {
     name: 'BigBugFireBuilder',
     props: ['bugName'],
     components: {
-        PoofPatternButton
+        PatternToggleButton
     }
 };
 </script>

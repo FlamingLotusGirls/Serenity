@@ -1,5 +1,5 @@
 <template>
-  <button class="poof-pattern-button" v-on:click="toggleState"></button>
+  <button class="pattern-toggle-button" v-on:click="toggleState"></button>
 </template>
 
 <script>
@@ -19,7 +19,7 @@ export default {
 </script>
 
 <style>
-.poof-pattern-button {
+.pattern-toggle-button {
     -webkit-appearance: none;
     border: 1px solid #000;
     width: 20px;
@@ -27,7 +27,7 @@ export default {
     border-radius: 10px;
     background: #000;
 }
-.poof-pattern-button.lit {
+.pattern-toggle-button.lit {
     background: #efb64c;
 }
 </style>

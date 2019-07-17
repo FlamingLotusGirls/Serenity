@@ -18,6 +18,7 @@
 <script>
 import FireAdminPage from './FireAdminPage.vue';
 import SoundAdminPage from './SoundAdminPage.vue';
+import LightAdminPage from './LightAdminPage.vue';
 
 export default {
     props: ['selectedAdminTab'],
@@ -29,7 +30,8 @@ export default {
     },
     components: {
         FireAdminPage,
-        SoundAdminPage
+        SoundAdminPage,
+        LightAdminPage
     }
 };
 </script>
