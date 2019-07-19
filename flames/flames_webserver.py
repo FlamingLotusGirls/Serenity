@@ -237,7 +237,8 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
-    pattern_manager.init("./pattern_test_2.json")
+    #pattern_manager.init("./pattern_test_2.json")
+    pattern_manager.init("./std_sequences.json")
     event_manager.init()
 
     commandQueue = queue.Queue()
