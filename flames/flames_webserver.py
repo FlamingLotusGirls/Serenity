@@ -1,6 +1,5 @@
 from flask import Flask
 from flask import request
-from flask import Response
 from flask import abort
 import json
 import logging
@@ -11,6 +10,8 @@ import urllib
 import flames_controller
 import poofermapping
 import pattern_manager
+from flask_utils import CORSResponse
+from flask_utils import JSONResponse
 
 ''' 
     Webserver for the flame effect controller. In this variant, we're mostly
@@ -52,19 +53,15 @@ def flame_status():
             elif playState == "play":
                 flames_controller.globalRelease()
             else:
-                return Response("Invalid 'playState' value", 400)
+                return CORSResponse("Invalid 'playState' value", 400)
         else:
-            return Response("Must have 'playState' value", 400)
+            return CORSResponse("Must have 'playState' value", 400)
 
-        return Response("", 200)
+        return CORSResponse("", 200)
 
     else:
-        return makeJsonResponse(json.dumps(get_status()))
+        return JSONResponse(json.dumps(get_status()))
 
-def makeJsonResponse(jsonString, respStatus=200):
-    resp = Response(jsonString, status=respStatus, mimetype='application/json')
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    return resp
 
 
 @app.route("/flame/poofers/<poofer_id>", methods=['GET', 'POST'])
@@ -77,7 +74,7 @@ def specific_flame_status(poofer_id):
         abort(400)
     if request.method == 'POST':
         if not "enabled" in request.values:
-            return Response("'enabled' must be present", 400)
+            return CORSResponse("'enabled' must be present", 400)
 
         enabled = request.values["enabled"].lower()
         if enabled == 'true':
@@ -85,11 +82,11 @@ def specific_flame_status(poofer_id):
         elif enabled == 'false':
             flames_controller.disablePoofer(poofer_id)
         else:
-            return Response("Invalid 'enabled' value", 400)
+            return CORSResponse("Invalid 'enabled' value", 400)
 
         return "" # XXX check for errors as a matter of course
     else:
-        return makeJsonResponse(json.dumps(get_poofer_status(poofer_id)))
+        return JSONResponse(json.dumps(get_poofer_status(poofer_id)))
         
 @app.route("/flame/patterns", methods=['GET','POST'])
 def flame_patterns():
@@ -98,13 +95,13 @@ def flame_patterns():
         POST /flame/patterns: Creates a new flame pattern from json patterndata
     '''
     if request.method == 'GET':
-        return makeJsonResponse(json.dumps(get_flame_patterns()))
+        return JSONResponse(json.dumps(get_flame_patterns()))
     else:
         if not "patternData" in request.values:
-            return Response("'patternData' must be present", 400)
+            return CORSResponse("'patternData' must be present", 400)
         else:
             set_flame_pattern(request.values["patternData"])
-            return Response("", 200)
+            return CORSResponse("", 200)
 
 
 @app.route("/flame/patterns/<patternName>", methods=['GET', 'POST', 'DELETE'])
@@ -121,7 +118,7 @@ def flame_pattern(patternName):
     if request.method == 'POST':
         # pattern create - pattern data included, but pattern name not in system
         if  (not includesPattern) and (not patternName_valid(patternName)):
-            return Response("Must have valid 'patternName'", 400)
+            return CORSResponse("Must have valid 'patternName'", 400)
 
         if includesPattern:
             patternData = json.loads(request.values["pattern"])
@@ -170,9 +167,9 @@ def flame_pattern(patternName):
 
     else:
         if (not patternName_valid(patternName)):
-            return Response("Must have valid 'patternName'", 400)
+            return CORSResponse("Must have valid 'patternName'", 400)
         else:
-            return makeJsonResponse(json.dumps(get_pattern_status(patternName)))
+            return JSONResponse(json.dumps(get_pattern_status(patternName)))
 
 
 def get_status():
