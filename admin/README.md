@@ -22,7 +22,7 @@ yarn install
 
 `yarn serve`
 
-Access at http://localhost:8080
+Access at http://localhost:3000
 
 ## Building for Production
 
@@ -33,6 +33,8 @@ yarn build
 # Runs the node server, which is currently just a static file server serving out of /dist
 yarn start
 ```
+
+Access at http://localhost:3000
 
 ## Developing
 
