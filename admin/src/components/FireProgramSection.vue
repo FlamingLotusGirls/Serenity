@@ -32,7 +32,11 @@ export default {
         })
         .then(res => res.json())
         .then(result => {
-          this.fireProgramNames = result.map(fireProgram => fireProgram.name);
+          this.fireProgramNames = result.map(fireProgram => fireProgram.name).filter(name => {
+            // the single poofers are set up as fire sequences with names starting with __
+            // so we should filter all of those out so as not to confuse the user
+            return !name.startsWith('__');
+          });
         }, error => {
             // triggers only on network errors, not unsuccessful responses
             alert(`Failed to fetch fire program list with error ${error}`);
