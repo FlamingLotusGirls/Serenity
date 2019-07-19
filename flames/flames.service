@@ -3,7 +3,7 @@ Description=FLG Serenity Flame Controller Webserver
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/flg/Serenity/flames/flames_webserver.py
+ExecStart=/usr/bin/python3 /home/flaming/Serenity/flames/flames_webserver.py
 WorkingDirectory=/home/flg/serenity/flames
 Restart=always
 User=flaming
