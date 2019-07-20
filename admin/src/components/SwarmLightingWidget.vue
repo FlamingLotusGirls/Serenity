@@ -31,7 +31,7 @@ import ColorPicker from './ColorPicker';
 import PatternToggleSet from './PatternToggleSet';
 
 export default {
-    props: ['swarmNumberString'],
+    props: ['swarmNumber', 'swarmNumberString'],
     data() {
         return {
             selectedColor: {},
@@ -50,23 +50,25 @@ export default {
             this.saveSwarmSettings();
         },
         saveSwarmSettings() {
-            console.log('saving swarm settings');
+            console.log('saving swarm settings', this.selectedColor, this.swarmNumber);
+            let formData = new FormData();
+            formData.append('swarm', this.swarmNumber);
+            formData.append('sequence', this.blinkPattern.map(bool => bool ? 1 : 0).join(''));
+
             return fetch(`${smallFireflyLEDControllerURL}/firefly_leds`, {
                 method: 'POST',
-                body: JSON.stringify({
-                    swarm: 1,
-                    sequence: this.blinkPattern.map(bool => bool ? 1 : 0).join('')
-                })
+                body: formData
             })
             .then(res => {
                 // handle non-success responses
                 if (!res.ok) {
-                alert(`Unable to save swarm LED settings. Request failed with status ${res.status} ${res.statusText}`);
+                    alert(`Unable to save swarm LED settings. Request failed with status ${res.status} ${res.statusText}`);
+                    return;
                 }
                 return res;
             })
             .then(res => {
-                alert(`Saved swarm LED settings`);
+                console.log(`Saved swarm LED settings`);
             }, error => {
                 alert(`Failed to save swarm LED settings with error ${error}`);
             });

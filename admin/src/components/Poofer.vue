@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import { fireControllerURL } from '../appConfig';
+
 export default {
   props: ['pooferId', 'bugNumber'],
   mounted: function() {
@@ -10,9 +12,12 @@ export default {
   },
   methods: {
     poof: function() {
+      let formData = new FormData();
+      formData.append('active', true);
+
       return fetch(`${fireControllerURL}/flame/patterns/__${this.bugNumber}_${this.pooferId}`, {
             method: 'POST',
-            body: JSON.stringify({ active: true })
+            body: formData
           })
           .then(res => {
             // handle non-success responses
