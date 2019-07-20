@@ -5,7 +5,7 @@
             <h5>Swarm {{swarmNumberString}}</h5>
             <div>
                 <label>Pick a Color:</label>
-                <ColorPicker class="color-slider" color="#f00" v-model="selectedColor" v-on:input="saveSwarmSettings" />
+                <ColorPicker class="color-slider" color="#ff0000" v-model="selectedColor" v-on:input="saveSwarmSettings" />
             </div>
             <div>
                 <label for="swarmBrightness">Set Brightness:</label>
@@ -44,7 +44,7 @@ export default {
     props: ['swarmNumber', 'swarmNumberString'],
     data() {
         return {
-            selectedColor: '#f00',
+            selectedColor: '#ff0000',
             swarmBrightness: 100,
             blinkPattern: new Array(10).fill(false)
         };
