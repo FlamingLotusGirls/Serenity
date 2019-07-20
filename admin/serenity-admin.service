@@ -1,0 +1,12 @@
+[Unit]
+Description=FLG Serenity Admin Webserver
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/yarn start
+WorkingDirectory=/home/flaming/Serenity/admin
+Restart=always
+User=flaming
+
+[Install]
+WantedBy=multi-user.target
