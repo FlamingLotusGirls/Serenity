@@ -1,14 +1,14 @@
 {
   "name": "serenity-admin",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "engines": {
     "node": "10.15.0",
-    "npm": "6.4.1"
+    "yarn": "0.18.1"
   },
   "scripts": {
     "start": "node ./bin/www",
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 3000",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },

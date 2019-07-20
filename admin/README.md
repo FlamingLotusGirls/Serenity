@@ -12,15 +12,29 @@ It's written mostly in JavaScript, with a Node.js server and a JS client using V
 ## Setting Up
 
 ```
-# Prerequisites: node 10.15.0 with npm 6.4.1
+# Prerequisites: node 10.15.0 and yarn 0.18.1
 git clone git://github.com/cstigler/serenity-admin.git
 cd serenity-admin
-npm install
+yarn install
 ```
 
-## Running
+## Running for Development
 
-`npm start`
+`yarn serve`
+
+Access at http://localhost:3000
+
+## Building for Production
+
+```
+# Compiles static files for production and puts them in /dist
+yarn build
+
+# Runs the node server, which is currently just a static file server serving out of /dist
+yarn start
+```
+
+Access at http://localhost:3000
 
 ## Developing
 
