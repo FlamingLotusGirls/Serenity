@@ -30,11 +30,21 @@ import { smallFireflyLEDControllerURL } from '../appConfig';
 import ColorPicker from './ColorPicker';
 import PatternToggleSet from './PatternToggleSet';
 
+// TODO: put this into a util file so it can be shared
+let hexToRgb = function(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+};
+
 export default {
     props: ['swarmNumber', 'swarmNumberString'],
     data() {
         return {
-            selectedColor: {},
+            selectedColor: '#f00',
             swarmBrightness: 100,
             blinkPattern: new Array(10).fill(false)
         };
@@ -51,9 +61,14 @@ export default {
         },
         saveSwarmSettings() {
             console.log('saving swarm settings', this.selectedColor, this.swarmNumber);
+            let rgbColor = hexToRgb(this.selectedColor);
+
             let formData = new FormData();
             formData.append('swarm', this.swarmNumber);
             formData.append('sequence', this.blinkPattern.map(bool => bool ? 1 : 0).join(''));
+            formData.append('red', rgbColor.r);
+            formData.append('green', rgbColor.g);
+            formData.append('blue', rgbColor.b);
 
             return fetch(`${smallFireflyLEDControllerURL}/firefly_leds`, {
                 method: 'POST',

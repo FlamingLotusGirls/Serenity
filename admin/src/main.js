@@ -8,7 +8,6 @@ import App from './App.vue'
 /* Main Client-Side Entry Point */
 Vue.config.productionTip = false
 
-
 window.addEventListener('load', function() {
   new Vue({
     render: h => h(App)
