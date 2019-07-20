@@ -12,32 +12,54 @@ LED_CMD_PORT   = 5010
 
 class FireflyLedController():
     class FireflyPattern():
-        def __init__(self, board_id, red, green, blue, speed, pattern_str):
+        def __init__(
+            self,
+            board_id,
+            red, 
+            green,
+            blue,
+            speed,
+            pattern_str,
+            pattern_name=None
+        ):
             self.board_id = board_id
             self.red = red
             self.blue = blue
             self.green = green
             self.speed = speed
             self.pattern_str = pattern_str
-            self.packet = create_firefly_packet(
-                self.board_id,
-                [red, green, blue],
-                self.speed,
-                self.pattern_str
-            )
+            self.pattern_name = pattern_name
+            if self.board_id is not None:
+                self.packet = create_firefly_packet(
+                    self.board_id,
+                    [red, green, blue],
+                    self.speed,
+                    self.pattern_str
+                )
+            else:
+                self.packet = []
 
         def get_minimal(self):
             return {
                 'board_id':self.board_id,
                 'color': [self.red, self.green, self.blue],
                 'speed': self.speed,
-                'pattern': self.pattern_str
+                'pattern': self.pattern_str,
+                'pattern_name': self.pattern_name
             }       
     def __init__(self):
-        self.sender_socket = self.createBroadcastSender()
+        self.createBroadcastSender()
         self.patterns = {
-            board_id : FireflyLedController.FireflyPattern(board_id, 0.5, 0.7, 0.5, 2, "01100110000") \
-            for board_id in range(NUM_SWARMS)}
+            board_id : FireflyLedController.FireflyPattern(
+                board_id,
+                0.5,
+                0.7,
+                0.5,
+                2, 
+                "01100110000",
+                "Default") \
+            for board_id in range(NUM_SWARMS)
+        }
 
         self.patternLock = Lock()
         self.is_running = True
@@ -45,7 +67,16 @@ class FireflyLedController():
         self.broadcastThread.start()
 
 
-    def set_led_pattern(self, board_id, red, green, blue, speed, pattern_str):
+    def set_led_pattern(
+        self,
+        board_id,
+        red,
+        green,
+        blue,
+        speed,
+        pattern_str,
+        pattern_name = None
+    ):
         self.patternLock.acquire()
         self.patterns[board_id] = FireflyLedController.FireflyPattern(
             board_id,
@@ -53,7 +84,8 @@ class FireflyLedController():
             green,
             blue,
             speed,
-            pattern_str
+            pattern_str,
+            pattern_name,
         )
         self.patternLock.release()
 
@@ -67,22 +99,27 @@ class FireflyLedController():
 
     def broadcastFireflyPatterns(self):
         while self.is_running:
+            print("BROADCAST")
+            print(f"{self.patterns}")
+            print(f"{len(self.patterns)}")
             self.patternLock.acquire()
             try:
-                for pattern in self.patterns:
-                    self.sender_socket.sendto(packet, (MULTICAST_GROUP, LED_CMD_PORT))
+                for pattern in self.patterns.values():
+                    print(f"Sending {pattern.packet}")
+                    self.sender_socket.sendto(pattern.packet, (MULTICAST_GROUP, LED_CMD_PORT))
                     time.sleep(0.01)
-            except Exception:
+            except Exception as e:
+                print(f"Exception {e}")
                 pass # I'm concerned about transient networking issues...
                      # and I really don't know what to do if they happen
             self.patternLock.release()
             time.sleep(1.0)
                 
     def createBroadcastSender(self, ttl=4):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#       self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+        self.sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sender_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#       self.sender_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sender_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
 
 
 
@@ -108,6 +145,7 @@ def create_firefly_packet(board_id, color, speed, pattern):
     header_data = bytearray([board_id%256, cmd_str_len, 0, checksum])
     packet = header_id + header_data + cmd_bytes
 
+    print(f"Create firefly packet returns {packet}")
     return packet
 
 if __name__ == '__main__':
