@@ -33,7 +33,7 @@ export default {
                 this.activationLevel++;
             }
 
-            this.$emit('activationLevelChanged');
+            this.$emit('activation-level-changed');
         }
     }
 };

@@ -97,6 +97,9 @@ export default {
 </script>
 
 <style>
+.color-picker {
+	margin-bottom: 12px;
+}
 .vc-chrome, .vc-swatches {
 	position: absolute;
 	top: 35px;
