@@ -22,16 +22,17 @@
                     <h2><img class="small-bugs-icon" src="/images/firefly.png"></img> Small Bugs</h2>
                 </div>
                 <div class="col-4 align-self-right synchronize-column">
-                    <button class="btn btn-primary">Save Jars</button>
+                    <button class="btn btn-primary">Save Swarms</button>
                 </div>
             </div>
             <div class="small-bugs-content row">
-                <SwarmLightingWidget swarmNumberString="One" class="col-3" />
-                <SwarmLightingWidget swarmNumberString="Two" class="col-3" />
-                <SwarmLightingWidget swarmNumberString="Three" class="col-3" />
-                <SwarmLightingWidget swarmNumberString="Four" class="col-3" />
+                <SwarmLightingWidget v-bind:swarmNumber="0" swarmNumberString="One" class="col-3" />
+                <SwarmLightingWidget v-bind:swarmNumber="1" swarmNumberString="Two" class="col-3" />
+                <SwarmLightingWidget v-bind:swarmNumber="2" swarmNumberString="Three" class="col-3" />
+                <SwarmLightingWidget v-bind:swarmNumber="3" swarmNumberString="Four" class="col-3" />
             </div>
         </div>
+        <!-- these APIs got cut so do not exist!
         <div class="extra-lights-section row">
             <div class="col-6">
                 <label><span class="icon">👀</span> Big Bug Eyes</label>
@@ -42,6 +43,7 @@
                 <input type="range" name="benchBrightness" id="benchBrightness" />
             </div>
         </div>
+        -->
         <button class="btn btn-primary apply-changes-button">💡Apply Changes</button>
     </div>
 </template>
