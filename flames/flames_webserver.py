@@ -57,7 +57,7 @@ def flame_status():
         else:
             return CORSResponse("Must have 'playState' value", 400)
 
-        return CORSResponse("", 200)
+        return CORSResponse("Success!", 200)
 
     else:
         return JSONResponse(json.dumps(get_status()))
@@ -84,7 +84,7 @@ def specific_flame_status(poofer_id):
         else:
             return CORSResponse("Invalid 'enabled' value", 400)
 
-        return "" # XXX check for errors as a matter of course
+        return CORSResponse("Success", 200)
     else:
         return JSONResponse(json.dumps(get_poofer_status(poofer_id)))
         
@@ -101,7 +101,7 @@ def flame_patterns():
             return CORSResponse("'patternData' must be present", 400)
         else:
             set_flame_pattern(request.values["patternData"])
-            return CORSResponse("", 200)
+            return CORSResponse("Success", 200)
 
 
 @app.route("/flame/patterns/<patternName>", methods=['GET', 'POST', 'DELETE'])
@@ -158,12 +158,12 @@ def flame_pattern(patternName):
             elif (active == "false"):
                 flames_controller.stopFlameEffect(patternName)
 
+        return CORSResponse("Success", 200)
 
-        return ""
     elif request.method == "DELETE":
         pattern_manager.deletePattern(patternName)
         pattern_manager.savePatterns()
-        return ""
+        return CORSREsponse("Success", 200)
 
     else:
         if (not patternName_valid(patternName)):
