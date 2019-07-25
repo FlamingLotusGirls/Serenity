@@ -62,8 +62,8 @@ int g_verbose = 0;
 //static char *g_filename1 = "sounds/crickets-dawn.wav";  // this is not duped, it's from the inputs
 //static char *g_filename2 = "sounds/bullfrog-2.wav";  // this is not duped, it's from the inputs
 
-static char *g_filename1 = "sounds/flg_sample_3.wav";  
-static char *g_filename2 = "sounds/owl_01.wav";  
+static char *g_filename1 = "../sounds/flg_sample_3.wav";  
+static char *g_filename2 = "../sounds/owl_01.wav";  
 
 static char *g_directory = NULL; // loaded from the config file
 
