@@ -4,8 +4,8 @@ Description=Flaming Lotus Girls 2019 Serenity SoundScape Server
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/SerenityAudio
-ExecStart=/home/pi/SerenityAudio/saplay
+WorkingDirectory=/home/pi/serenity/sound/SerenityAudio
+ExecStart=/home/pi/serenity/sound/SerenityAudio/saplay
 Restart=always
 RestartSec=2
 
