@@ -74,8 +74,8 @@ static sa_soundscape_t *g_scape2 = NULL;
 
 static sa_sink_t g_sa_sinks[MAX_SA_SINKS] = {0}; // null terminated array of pointers
 
-static pa_context *g_context = NULL;
-static bool g_context_connected = false;
+pa_context *g_context = NULL;
+bool g_context_connected = false;
 
 static pa_mainloop_api *g_mainloop_api = NULL;
 
@@ -94,7 +94,7 @@ static pa_time_event *g_timer = NULL;
 
 
 /* A shortcut for terminating the application */
-static void quit(int ret) {
+void quit(int ret) {
     assert(g_mainloop_api);
     g_mainloop_api->quit(g_mainloop_api, ret);
 }
@@ -104,95 +104,6 @@ static void context_drain_complete(pa_context *c, void *userdata) {
     pa_context_disconnect(c);
 }
 
-/* Stream draining complete */
-static void stream_drain_complete(pa_stream *s, int success, void *userdata) {
-    sa_soundplay_t *splay = (sa_soundplay_t *) userdata;
-    pa_operation *o;
-
-    if (!success) {
-        fprintf(stderr, "Failed to drain stream: %s\n", pa_strerror(pa_context_errno(g_context)));
-        quit(1);
-    }
-
-    if (splay->verbose)
-        fprintf(stderr, "Playback stream %s drained.\n",splay->stream_name );
-
-    pa_stream_disconnect(splay->stream);
-    pa_stream_unref(splay->stream);
-    splay->stream = NULL;
-
-}
-
-/* This is called whenever new data may be written to the stream */
-static void stream_write_callback(pa_stream *s, size_t length, void *userdata) {
-    
-	sa_soundplay_t *splay = (sa_soundplay_t *)userdata;
-
-    sf_count_t bytes;
-    void *data;
-
-	//if (splay->verbose) fprintf(stderr,"stream write callback\n");
-
-    assert(s && length);
-
-    if (!splay->sndfile) {
-		if (splay->verbose) fprintf(stderr, "write callback with no sndfile %s\n",splay->stream_name);
-        return;
-	}
-
-    data = pa_xmalloc(length);
-
-    if (splay->readf_function) {
-        size_t k = pa_frame_size(&splay->sample_spec);
-
-        if ((bytes = (splay->readf_function) (splay->sndfile, data, (sf_count_t) (length/k))) > 0)
-            bytes *= (sf_count_t) k;
-
-    } else {
-        bytes = sf_read_raw(splay->sndfile, data, (sf_count_t) length);
-	}
-
-    if (bytes > 0)
-        pa_stream_write(s, data, (size_t) bytes, pa_xfree, 0, PA_SEEK_RELATIVE);
-    else
-        pa_xfree(data);
-
-    if (bytes < (sf_count_t) length) {
-        sf_close(splay->sndfile);
-        splay->sndfile = NULL;
-        pa_operation_unref(pa_stream_drain(s, stream_drain_complete, userdata));
-    }
-}
-
-/* This routine is called whenever the stream state changes */
-static void stream_state_callback(pa_stream *s, void *userdata) {
-	sa_soundplay_t *splay = (sa_soundplay_t *)userdata;
-
-	if (splay->verbose) {
-		fprintf(stderr, "stream state callback: %d\n",pa_stream_get_state(s) );
-	}
-
-	// just making sure
-    assert(s);
-
-    switch (pa_stream_get_state(s)) {
-        case PA_STREAM_CREATING:
-        	break;
-        case PA_STREAM_TERMINATED:
-        	if (splay->verbose) fprintf(stderr, "stream %s terminated\n",splay->stream_name);
-            break;
-
-        case PA_STREAM_READY:
-            if (splay->verbose)
-                fprintf(stderr, "Stream successfully created\n");
-            break;
-
-        case PA_STREAM_FAILED:
-        default:
-            fprintf(stderr, "Stream errror: %s\n", pa_strerror(pa_context_errno(pa_stream_get_context(s))));
-            quit(1);
-    }
-}
 
 /* This is called whenever the context status changes */
 /* todo: creating the stream as soon as the context comes available is kinda fun, but 

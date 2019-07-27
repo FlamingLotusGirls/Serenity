@@ -82,6 +82,14 @@ typedef void (*callback_fn_t) (void);
 
 /* Forward References */
 
+// Saplay
+
+extern pa_context *g_context;
+extern bool g_context_connected;
+
+
+extern void quit(int ret);
+
 extern void sa_soundplay_start(sa_soundplay_t *);
 extern void sa_soundplay_free(sa_soundplay_t *);
 
@@ -89,8 +97,14 @@ extern sa_soundscape_t *sa_soundscape_new(char *filename);
 
 extern void sa_sinks_populate( pa_context *c, callback_fn_t next_fn );
 
+// httpd
 extern bool sa_http_start(void); // false if fail
 extern void sa_http_terminate(void);
+
+// Stream
+extern void stream_drain_complete(pa_stream *s, int success, void *userdata);
+extern void stream_write_callback(pa_stream *s, size_t length, void *userdata);
+extern void stream_state_callback(pa_stream *s, void *userdata);
 
 extern int g_verbose;
 
