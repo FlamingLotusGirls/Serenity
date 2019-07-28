@@ -32,14 +32,16 @@ SOFTWARE.
 #include <pulse/pulseaudio.h>
 
 #define MAX_SA_SINKS 6 // having 6 sound inputs seems very reasonable
+#define STREAM_INDEX_NULL UINT32_MAX
 
 typedef struct sa_soundplay {
 
 	pa_stream *stream; // gets reset to NULL when file is over
-
+  uint32_t stream_index; // this id is used to change volume with the sink set volume by id call
 	char *stream_name;
+
 	char *filename;
-    char *dev; // device
+  char *dev; // device
 
 	int verbose;
 
@@ -48,7 +50,6 @@ typedef struct sa_soundplay {
   SNDFILE* sndfile;
   pa_sample_spec sample_spec; // is this valid c?  
   pa_channel_map channel_map;
-  bool channel_map_set;
 
 	sf_count_t (*readf_function)(SNDFILE *_sndfile, void *ptr, sf_count_t frames);
 } sa_soundplay_t;
@@ -69,6 +70,8 @@ typedef struct sa_soundscape {
 
     sa_soundplay_t *splays[MAX_SA_SINKS];
 
+    pa_volume_t volume; // persists a bit!
+
 } sa_soundscape_t;
 
 typedef struct sa_sound_ambient {
@@ -87,13 +90,13 @@ typedef void (*callback_fn_t) (void);
 extern pa_context *g_context;
 extern bool g_context_connected;
 
-
 extern void quit(int ret);
 
 extern void sa_soundplay_start(sa_soundplay_t *);
 extern void sa_soundplay_free(sa_soundplay_t *);
+extern void sa_soundplay_volume_set(sa_soundplay_t *, pa_volume_t);
 
-extern sa_soundscape_t *sa_soundscape_new(char *filename);
+extern sa_soundscape_t *sa_soundscape_new(char *filename, pa_volume_t volume);
 
 extern void sa_sinks_populate( pa_context *c, callback_fn_t next_fn );
 
@@ -102,6 +105,7 @@ extern bool sa_http_start(void); // false if fail
 extern void sa_http_terminate(void);
 
 // Stream
+extern void stream_volume_set(sa_soundplay_t *splay, pa_volume_t volume);
 extern void stream_drain_complete(pa_stream *s, int success, void *userdata);
 extern void stream_write_callback(pa_stream *s, size_t length, void *userdata);
 extern void stream_state_callback(pa_stream *s, void *userdata);

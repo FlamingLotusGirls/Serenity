@@ -81,9 +81,6 @@ static pa_mainloop_api *g_mainloop_api = NULL;
 
 static char *g_client_name = NULL, *g_device = NULL;
 
-static pa_channel_map g_channel_map;
-static bool g_channel_map_set = false;
-
 static pa_volume_t g_volume = PA_VOLUME_NORM;
 
 static pa_time_event *g_timer = NULL;
@@ -159,7 +156,7 @@ static void exit_signal_callback(pa_mainloop_api*m, pa_signal_event *e, int sig,
 // Filename of null means use stdin... or is always passed in?
 // filename is a static and not to be freed
 
-static sa_soundplay_t * sa_soundplay_new( char *filename, char *dev ) {
+static sa_soundplay_t * sa_soundplay_new( char *filename, char *dev, pa_volume_t volume ) {
 
 	sa_soundplay_t *splay = malloc(sizeof(sa_soundplay_t));
 	memset(splay, 0, sizeof(sa_soundplay_t) );  // typically don't do this, do every field, but doing it this time
@@ -167,11 +164,8 @@ static sa_soundplay_t * sa_soundplay_new( char *filename, char *dev ) {
     SF_INFO sfinfo;
 
   	// initialize many things from the globals at this point
-    splay->channel_map_set = g_channel_map_set;
-	if (splay->channel_map_set) {
-		splay->channel_map = g_channel_map;
-	}
-	splay->volume = g_volume;
+    pa_channel_map_init_stereo(&splay->channel_map); // bug waiting to happen. Might not be a stereo file.
+	splay->volume = volume;
 	splay->verbose = g_verbose;
 
 	// open file
@@ -265,7 +259,7 @@ void sa_soundplay_start( sa_soundplay_t *splay) {
         assert(splay->sndfile);
     }
 
-    splay->stream = pa_stream_new(g_context, splay->stream_name, &splay->sample_spec, splay->channel_map_set ? &splay->channel_map : NULL);
+    splay->stream = pa_stream_new(g_context, splay->stream_name, &splay->sample_spec, &splay->channel_map );
     assert(splay->stream);
 
 	pa_cvolume cv;
@@ -275,6 +269,10 @@ void sa_soundplay_start( sa_soundplay_t *splay) {
     pa_stream_connect_playback(splay->stream, splay->dev, NULL/*buffer_attr*/ , 0/*flags*/ , 
 				pa_cvolume_set(&cv, splay->sample_spec.channels, splay->volume), 
 			NULL/*sync stream*/);
+
+    // Test code: what is the stream index? Can I use that to inedpendantly control
+    // volume?
+    //fprintf(stderr,"stream %s: index %d\n",splay->stream_name, pa_stream_get_index(splay->stream));
 
 }
 
@@ -315,14 +313,14 @@ void sa_soundscape_start(void) {
 
     // Create a player for each file
     sa_soundscape_t *scape;
-    scape = sa_soundscape_new( g_filename1 );
+    scape = sa_soundscape_new( g_filename1, PA_VOLUME_NORM );
     if (scape == NULL) {
         fprintf(stderr, "scape file1 failed FATAL\n");
     } else {
         g_scape1 = scape; // for freeing only
     }
 
-    scape = sa_soundscape_new( g_filename2 );
+    scape = sa_soundscape_new( g_filename2, PA_VOLUME_NORM );
     if (scape == NULL) {
         fprintf(stderr, "scape file2 failed\n");
     }
@@ -332,18 +330,19 @@ void sa_soundscape_start(void) {
 
 }
 
-sa_soundscape_t *sa_soundscape_new(char *filename) {
+sa_soundscape_t *sa_soundscape_new(char *filename, pa_volume_t volume) {
 
     sa_soundscape_t *scape = malloc(sizeof(sa_soundscape_t));
     memset( scape, 0, sizeof(sa_soundscape_t) );
 
     if (g_verbose) fprintf(stderr, "new soundscape: %s\n",filename);
 
+    scape->volume = volume;
 
     for(int i=0 ; i<MAX_SA_SINKS ; i++) {
         if (g_sa_sinks[i].active) {
             if (g_verbose) fprintf(stderr, "new soundscape: new soundplay: sink %s\n",g_sa_sinks[i].dev);
-            scape->splays[i] = sa_soundplay_new(filename, g_sa_sinks[i].dev);
+            scape->splays[i] = sa_soundplay_new(filename, g_sa_sinks[i].dev, scape->volume);
             if (!scape->splays[i]) return(NULL);
             sa_soundplay_start(scape->splays[i]);
             scape->n_splays++;
@@ -351,6 +350,16 @@ sa_soundscape_t *sa_soundscape_new(char *filename) {
     }
 
     return(scape);
+
+}
+
+void sa_soundscape_volume_set(sa_soundscape_t *scape, pa_volume_t volume) {
+
+    scape->volume = volume;
+
+    for (int i=0;i<scape->n_splays;i++) {
+        stream_volume_set(scape->splays[i], volume);
+    }
 
 }
 
@@ -403,30 +412,33 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
 
 		// Create a player for each file
 		sa_soundscape_t *scape;
-		scape = sa_soundscape_new( g_filename1 );
+		scape = sa_soundscape_new( g_filename1, PA_VOLUME_NORM );
 		if (scape == NULL) {
             fprintf(stderr, "scape file1 failed\n");
-            goto ABORT;
+            goto NEXT;
 		}
 		g_scape1 = scape; // for freeing only
 
-		scape = sa_soundscape_new( g_filename2 );
+		scape = sa_soundscape_new( g_filename2, PA_VOLUME_NORM );
 		if (scape == NULL) {
 			fprintf(stderr, "scape file2 failed\n");
-	       goto ABORT;
+	       goto NEXT;
 		}
 		g_scape2 = scape; // for freeing only
 
 
 		g_started = true;
-	}
-	else {
-        sa_soundscape_timer(g_scape1);
-        sa_soundscape_timer(g_scape2);
+        goto NEXT;
 	}
 
+    // This happens every time after the first
+    sa_soundscape_timer(g_scape1);
+    sa_soundscape_timer(g_scape2);
+
+
 	// put the things you want to happen in here
-ABORT:	;
+
+NEXT:	;
 
 	struct timeval now;
 	gettimeofday(&now, NULL);
@@ -543,7 +555,6 @@ static void help(const char *argv0) {
 enum {
     ARG_VERSION = 256,
     ARG_STREAM_NAME,
-    ARG_VOLUME,
     ARG_CHANNELMAP
 };
 
@@ -563,8 +574,6 @@ int main(int argc, char *argv[]) {
         {"version",     0, NULL, ARG_VERSION},
         {"help",        0, NULL, 'h'},
         {"verbose",     0, NULL, 'v'},
-        {"volume",      1, NULL, ARG_VOLUME},
-        {"channel-map", 1, NULL, ARG_CHANNELMAP},
         {NULL,          0, NULL, 0}
     };
 
@@ -598,21 +607,6 @@ int main(int argc, char *argv[]) {
 
             case 'v':
                 g_verbose = 1;
-                break;
-
-            case ARG_VOLUME: {
-                int v = atoi(optarg);
-                g_volume = v < 0 ? 0U : (pa_volume_t) v;
-                break;
-            }
-
-            case ARG_CHANNELMAP:
-                if (!pa_channel_map_parse(&g_channel_map, optarg)) {
-                    fprintf(stderr, "Invalid channel map\n");
-                    goto quit;
-                }
-
-                g_channel_map_set = true;
                 break;
 
             default:
