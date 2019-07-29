@@ -356,7 +356,6 @@ sa_soundscape_t *sa_soundscape_new(char *filename, pa_volume_t volume) {
 void sa_soundscape_volume_set(sa_soundscape_t *scape, pa_volume_t volume) {
 
     scape->volume = volume;
-
     for (int i=0;i<scape->n_splays;i++) {
         stream_volume_set(scape->splays[i], volume);
     }
@@ -394,6 +393,10 @@ static void sa_soundscape_free( sa_soundscape_t *scape) {
 
 static struct timeval g_start_time;
 static bool g_started = false;
+
+static bool g_volume_timer_set = false;
+static struct timeval g_volume_timer_next;
+static int g_volume_next;
 
 /* pa_time_event_cb_t */
 static void
@@ -434,6 +437,29 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
     // This happens every time after the first
     sa_soundscape_timer(g_scape1);
     sa_soundscape_timer(g_scape2);
+
+// TEST CODE FOR VOLUMES
+
+    if (!g_volume_timer_set) {
+    	g_volume_timer_set = true;
+    	pa_gettimeofday(&g_volume_timer_next);
+    	pa_timeval_add(&g_volume_timer_next, PA_USEC_PER_SEC);
+    	g_volume_next = PA_VOLUME_NORM;
+    }
+
+    struct timeval tv_now;
+    pa_gettimeofday(&tv_now);
+    if (pa_timeval_cmp(&g_volume_timer_next, &tv_now) <= 0) {
+
+	    sa_soundscape_volume_set(g_scape1, g_volume_next);
+	    //sa_soundscape_volume_set(g_scape2, g_volume_next);
+
+	    g_volume_next -= PA_VOLUME_NORM / 10;
+	    if (g_volume_next < 0) g_volume_next = PA_VOLUME_NORM;
+
+    	g_volume_timer_next = tv_now; 
+    	pa_timeval_add( &g_volume_timer_next , PA_USEC_PER_SEC );
+    }
 
 
 	// put the things you want to happen in here

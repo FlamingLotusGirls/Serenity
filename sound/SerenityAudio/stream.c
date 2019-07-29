@@ -117,6 +117,14 @@ void stream_write_callback(pa_stream *s, size_t length, void *userdata) {
     }
 }
 
+void volume_success_callback(pa_context *c, int success, void *userdata) {
+    sa_soundplay_t *splay = (sa_soundplay_t *) userdata;
+
+    if (success == 0) {
+        fprintf(stderr, "setting volume failed: %s\n",splay->stream_name);
+    }
+}
+
 // Do I ever want to set the volume of the left and right side independantly?
 // No, I think, which means I actually use volumes and convert to cvolume
 
@@ -124,12 +132,15 @@ void stream_volume_set(sa_soundplay_t *splay, pa_volume_t volume) {
     // stash the new value
     splay->volume = volume;
 
+    if (g_verbose) fprintf(stderr, "stream volume set: index %d: volume %d\n",splay->stream_index,volume);
+
     if (splay->stream_index != STREAM_INDEX_NULL) {
         pa_cvolume cvol;
         pa_cvolume_set(&cvol,2,volume);
 
-        pa_context_set_sink_volume_by_index(g_context, splay->stream_index, &cvol, 
-            NULL /*pa_context_success_cb*/, NULL /*userdata*/);
+        pa_context_set_sink_input_volume(g_context, splay->stream_index, &cvol, 
+            volume_success_callback /*pa_context_success_cb*/, splay /*userdata*/);
+
     }
 }
 
