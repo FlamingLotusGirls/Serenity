@@ -435,8 +435,8 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
 	}
 
     // This happens every time after the first
-    sa_soundscape_timer(g_scape1);
-    sa_soundscape_timer(g_scape2);
+    if (g_scape1) sa_soundscape_timer(g_scape1);
+    if (g_scape2) sa_soundscape_timer(g_scape2);
 
 // TEST CODE FOR VOLUMES
 
@@ -451,8 +451,8 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
     pa_gettimeofday(&tv_now);
     if (pa_timeval_cmp(&g_volume_timer_next, &tv_now) <= 0) {
 
-	    sa_soundscape_volume_set(g_scape1, g_volume_next);
-	    //sa_soundscape_volume_set(g_scape2, g_volume_next);
+	    if (g_scape1) sa_soundscape_volume_set(g_scape1, g_volume_next);
+	    // if (g_scape2) sa_soundscape_volume_set(g_scape2, g_volume_next);
 
 	    g_volume_next -= PA_VOLUME_NORM / 10;
 	    if (g_volume_next < 0) g_volume_next = PA_VOLUME_NORM;
@@ -470,6 +470,7 @@ NEXT:	;
 	gettimeofday(&now, NULL);
 	pa_timeval_add(&now, TIME_EVENT_USEC);
 	a->time_restart(e,&now);
+
 } 
 
 //
