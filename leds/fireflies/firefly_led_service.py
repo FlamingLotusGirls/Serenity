@@ -3,8 +3,13 @@ from flask import Flask
 from flask import request
 from flask import Response
 from flask import abort
+from flask import send_file
+from flask import make_response
+import netifaces as ni
 import json
+import io
 import logging
+import os
 import requests
 import urllib.request, urllib.parse, urllib.error
 from threading import Thread
@@ -16,7 +21,8 @@ from pattern_manager import PatternManager
     REST service for controlling firefly leds
 '''
 
-PORT = 7000
+#PORT = 7000
+PORT = 8080
 
 logger = logging.getLogger("firefly_leds")
 
@@ -234,6 +240,40 @@ def firefly_patterns():
         print("RETURN SUCCESS")
         return CORSResponse("Success", 200)
 
+@app.route("/firefly_leds/firmware/<md5>", methods=['GET', 'POST'])
+def do_firmware(md5):
+    print("Received request for firmware")
+    if request.method == 'GET':
+        if md5 != controller.get_firmware_hash():
+            print("Invalid MD5 has received")
+            return CORSResponse("Invalid MD5 hash", 400)
+
+        # fetch current firmware
+        print("Fetching firmware")
+        with open('current_fw.bin', 'rb') as fw:
+            print("Attempting to read file")
+#            response = make_response(
+            response = send_file(
+                    io.BytesIO(fw.read()),
+                    attachment_filename="firmware.bin",
+                    mimetype="application/octet-stream"
+            )
+            #    200    
+#            )
+            print("About to send")
+            print(response)
+            response.headers['Content-Length'] =  os.path.getsize('current_fw.bin')
+            response.headers['x-MD5'] = md5
+            #response.headers['Content-Type', 'application/octet-stream']
+            #response.headers[
+            print("Sending firmware")
+            return response
+
+    if request.method == 'POST':
+        print("Reloading firmware")
+        # trigger reload of firmware in driver
+        controller.update_firmware()
+
 #@app.route("/firefly_leds/swarm/<swarm_id>", methods=['GET', 'POST'])
 #def firefly_board_pattern(swarm_id):
 #    if swarm_id < 0 or swarm_id > 3: # define 3
@@ -258,9 +298,19 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
-    controller = FireflyLedController() 
+    controller = FireflyLedController()
+    interfaces = ni.interfaces()
+    for interface in interfaces:
+        addr = ni.ifaddresses(interface)
+        if ni.AF_INET in addr:
+            local_addr = addr[ni.AF_INET][0]['addr']
+            if local_addr.startswith("127"):
+                continue
+            print(f"Local address is {addr[ni.AF_INET][0]['addr']}")
+            controller.set_service_addr(addr[ni.AF_INET][0]['addr'], PORT) 
+            break
     pm = PatternManager()
-    flaskThread = Thread(target=serve_forever, args=[7000])
+    flaskThread = Thread(target=serve_forever, args=[PORT])
     flaskThread.start()
 
     print("About to make request!")

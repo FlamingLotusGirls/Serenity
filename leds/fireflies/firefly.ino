@@ -1,8 +1,13 @@
-#include <AsyncMqttClient.h>
+//#include <AsyncMqttClient.h>
 #include <FastLED.h>
 #include <ESP8266WiFi.h>
-#include <Ticker.h>
+#include <ESP8266WiFiMulti.h>
+//#include <Ticker.h>
 #include <WiFiUdp.h>
+#include <WiFiClient.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+#include <ESP8266TrueRandom.h>
 #include <stdio.h>
 #include "user_interface.h"
 #include "wifi_credentials.h"
@@ -27,9 +32,7 @@
 
 
 // TODO - 
-// - Add support for OTA upgrade
-// - Add wifi network fallback so it still works for me... 
-// - Add versioning
+// Add randomization to OTA update
 
 /*
 #define BUFFER_LENGTH 512
@@ -39,11 +42,13 @@ char incomingPacket[BUFFER_LENGTH];
 // 'wifi_credentials.h' so that they don't need to be checked in
 
 /*
-extern const char* ssid[2];
-extern const char *password[2];
+extern const char* ssid[NUM_WIFI_APS];
+extern const char *password[NUM_WIFI_APS];
 */
 
 #define VERSION 0.9
+
+#define CLOCK_TIME 100 // base time unit, ms
 
 #define NUM_LEDS 10
 #define DATA_PIN 4   // GPIO4. D2 on the board
@@ -55,33 +60,40 @@ static int board_id = 1;
 /*********************************************
  *  OTA Update
  *********************************************/
-static AsyncMqttClient mqtt_client;
-static Ticker mqttReconnectTimer;
+//static AsyncMqttClient mqtt_client;
+//static Ticker mqttReconnectTimer;
 char fw_checksum[32 + 1];
 bool do_reboot = false;
-bool ota_in_progress = false;
-#define MQTT_HOST IPAddress(192, 68, 4, 11) // XXX needs to be in a config file
-#define MQTT_PORT 5889
-#define OTA_TOPIC "/ota/firmware/+"
+//bool ota_in_progress = false;
+//#define MQTT_HOST IPAddress(192, 68, 4, 11) // XXX needs to be in a config file
+//#define MQTT_PORT 5889
+//#define OTA_TOPIC "/ota/firmware/"
 
 void OtaClientInit() {
+/*    Serial.print("OTA Client Init\n");
     mqtt_client.onConnect(onMqttConnect);
     mqtt_client.onDisconnect(onMqttDisconnect);
     mqtt_client.onMessage(onMqttMessage);
     mqtt_client.setServer(MQTT_HOST, MQTT_PORT);
+*/
     
     strlcpy(fw_checksum, ESP.getSketchMD5().c_str(), sizeof(fw_checksum));
     fw_checksum[sizeof(fw_checksum) - 1] = '\0';
-    Update.runAsync(true);
+//    Update.runAsync(true);
+    Serial.print("OTA Client Init Finishes\n");
 }
- 
+
+/*
 static void connectToMqtt() {
   Serial.println("Connecting to MQTT...");
   mqtt_client.connect();
 }
 
+
+
 static void onMqttConnect(bool session_present) {
-  Serial.println("On Mqtt Connect");
+  Serial.println("On Mqtt Connect\n");
+  // Subscribe to all ota/firmware topics. The firmware hash is last position
   char ota_topic_plus[sizeof(OTA_TOPIC) + 1];
   strcpy(ota_topic_plus, OTA_TOPIC);
   strcat(ota_topic_plus, "+");
@@ -89,14 +101,15 @@ static void onMqttConnect(bool session_present) {
 }
 
 static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-  Serial.println("On Mqtt Disconnect");
+  Serial.println("On Mqtt Disconnect\n");
   if (WiFi.isConnected()) {
     mqttReconnectTimer.once(2, connectToMqtt);
   }
 } 
 
 static void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-  if (strcmp(topic, OTA_TOPIC) == 0) {
+  Serial.println("On Mqtt Message\n");
+  if (strncmp(topic, OTA_TOPIC, strlen(OTA_TOPIC)) == 0) {
     if (index == 0) {
       // First chunk. Grab the MD5 from the topic, and start the update.
       ota_in_progress = false;
@@ -130,93 +143,55 @@ static void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProp
     }
   }
 }
-
- /* callback - process ota update message
-  *  
-  */
-
-  /* and restart if the network changes or goes down
-   *  
-   */
+*/
 
 
 
 /*********************************************
  *  WIFI
  *********************************************/
+static ESP8266WiFiMulti WifiMulti;
 static WiFiUDP Udp;
 static IPAddress multicastAddress(224,3,29,71);
 #define MULTICAST_PORT 5010
-static auto wifi_ap_idx = 0;
+//static auto wifi_ap_idx = 0;
+static void FlashLEDs(int ntimes);
 
-//static bool wifi_setup = false;
-static bool wifi_init_time = 0;
 static WiFiEventHandler got_ip_event_handler, disconnect_event_handler;
-Ticker wifiReconnectTimer;
+//Ticker wifiReconnectTimer;
 
 void WifiInit() {
-  WiFi.setAutoReconnect(true);
+  WiFi.mode(WIFI_STA);
+  for (int i=0; i<NUM_WIFI_APS; i++) {
+    WifiMulti.addAP(ssid[i], password[i]);
+  }
+  //WiFi.setAutoReconnect(true);
   got_ip_event_handler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
   {
     Serial.print("Wifi connected");
     WiFi.printDiag(Serial);
     Udp.beginMulticast(WiFi.localIP(), multicastAddress, MULTICAST_PORT);
-    connectToMqtt();
+    //connectToMqtt();
+    Serial.print("End connect to mqtt\n");
     FlashLEDs(5);
+    Serial.print("End wifi connect\n");
   });
   disconnect_event_handler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& event)
   {
-    Serial.println("Station disconnected");
+    Serial.println("Station disconnected\n");
     Udp.stop();
-    mqttReconnectTimer.detach(); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
-    wifiReconnectTimer.once(2, WifiConnect);
+    //mqttReconnectTimer.detach(); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
+    //wifiReconnectTimer.once(2, WifiConnect);
   }); 
-  WifiConnect();
+  //WifiConnect();
 }
 
+/*
 void WifiConnect() {
   WiFi.begin(ssid[wifi_ap_idx], password[wifi_ap_idx]);
   wifi_init_time = millis();
 }
-
-/*
-static bool wifi_is_connected() {
-  return wifi_setup;
-}
 */
-
-/*
-static void wifi_poke() {
-  Serial.print("Wifi poke\n");
-  int status = WiFi.status();
-  if (status == WL_CONNECTED) {
-    Serial.print("Wifi is connected!");
-    if (!wifi_setup) {
-      Serial.print("Connected, IP address: ");
-      Serial.println(WiFi.localIP());
-      WiFi.printDiag(Serial);
-
-      WiFi.mode(WIFI_STA);
-      wifi_set_sleep_type(NONE_SLEEP_T);
-
-      Udp.beginMulticast(WiFi.localIP(), multicastAddress, MULTICAST_PORT);
-      wifi_setup = true;
-    }
-  } else {
-    char printBuf[256];
-    sprintf(printBuf, "Wifi status is %d\n", status);
-    Serial.print(printBuf);
-  }
-}
-*/
-
-/*
-static bool wifi_disconnect() {
-  WiFi.disconnect();
-  wifi_setup = false;
-}
-*/
-
 
 /*************************************************************************
  *  SEQUENCES 
@@ -240,7 +215,7 @@ static bool doLEDs = true;
 static bool validate_color(const char *color) {
   char temp_buf[MAX_COLOR_STR_LEN];
   char *red, *green, *blue;
-  long r, g, b;
+  float r, g, b;
   char *endptr;
   
   if (strlen(color) > MAX_COLOR_STR_LEN - 1) {
@@ -251,24 +226,27 @@ static bool validate_color(const char *color) {
   green = strtok(NULL, ",");
   blue = strtok(NULL, ",");
 
-  r = strtol(red, &endptr, 0);
+  r = strtof(red, &endptr);
   if (*endptr != '\0' 
        || r < 0 
-       || r > 255 ) {
+       || r > 1.0 ) {
+    char printbuf[256];
+    sprintf(printbuf, "color string is %s\n", color);
+    Serial.print(printbuf);
     Serial.print("red not correct\n");
     return false;
   }
-  g = strtol(green, &endptr, 0);
+  g = strtof(green, &endptr);
   if (*endptr != '\0' 
        || g < 0 
-       || g > 255 ) {
+       || g > 1.0 ) {
    Serial.print("green not correct\n");
    return false;
   }
-  b = strtol(blue, &endptr, 0);
+  b = strtof(blue, &endptr);
   if (*endptr != '\0' 
        || b < 0 
-       || b > 255 ) {
+       || b > 1.0 ) {
     Serial.print("blue not correct\n");
     return false;
   }
@@ -321,10 +299,14 @@ static void init_current_colors(const char *color) {
   red = strtok(temp_buf, ",");
   green = strtok(NULL, ",");
   blue = strtok(NULL, ",");
-
-  current_red = (uint8_t)strtol(red, &endptr, 0);
-  current_green = (uint8_t)strtol(green, &endptr, 0);
-  current_blue = (uint8_t)strtol(blue, &endptr, 0);
+/*
+  current_red = (uint8_t)(strtof(red, &endptr, 0) * 255);
+  current_green = (uint8_t)(strtof(green, &endptr, 0) * 255);
+  current_blue = (uint8_t)(strtof(blue, &endptr, 0) * 255);
+*/
+  current_red = (uint8_t)(strtof(red, &endptr) * 255);
+  current_green = (uint8_t)(strtof(green, &endptr) * 255);
+  current_blue = (uint8_t)(strtof(blue, &endptr) * 255);
 
   sprintf(msgBuf, "Set red: 0x%x, g: 0x%x, b: 0x%x\n", current_red, current_green, current_blue);
   Serial.print(msgBuf);
@@ -353,6 +335,18 @@ static void init_current_sequence(const char *sequence) {
   Serial.print(msgBuf);
 }
 
+static void randomize_start() {
+  /* Randomize the start of the current sequence by setting the index
+   *  in the sequence we're currently at, and adding some delay so we're
+   *  not always at the CLOCK_TIME edge
+   */
+  current_sequence_idx = ESP8266TrueRandom.random(1, current_sequence_len);
+  int sleep_delay = ESP8266TrueRandom.random(1, current_clock) * CLOCK_TIME \
+                + ESP8266TrueRandom.random(1, CLOCK_TIME);
+  delay(sleep_delay);
+  
+}
+
 static void set_blink_pattern(const char* color, const char *clock_time, const char *sequence) {
   if (!strcmp(color, current_color_str) \
      && !strcmp(clock_time, current_clock_str) \
@@ -370,6 +364,7 @@ static void set_blink_pattern(const char* color, const char *clock_time, const c
   init_current_sequence(sequence);
   init_current_clock(clock_time);
 
+  randomize_start();
 
   doLEDs = true;
 }
@@ -433,7 +428,13 @@ static bool validatePacket(char *packet, uint8_t packet_len) {
     Serial.print("Bad packet header\n");
     return false;
   }
-  if (hdr->recipient_id != 0 && hdr->recipient_id != board_id) {
+
+  Serial.printf("Board id %d\n", hdr->recipient_id);
+//  if (hdr->recipient_id != 0 && hdr->recipient_id != board_id) {
+  if (hdr->recipient_id == 0) {
+    Serial.print("Board id zero\n");
+  }
+  if (hdr->recipient_id != board_id && hdr->recipient_id != 0) {
     Serial.print("Recipient not us\n");
     return false;
   }
@@ -473,6 +474,7 @@ static void processPacket(char *packet, uint8_t packet_len) {
 
   // Initialize parse and skip past header
   char *payload_start = packet + sizeof(FLG_Firefly_Packet_Header);
+  Serial.printf("payload is %s\n", payload_start);
 
   // Parse validated packet.
   cmd = strtok(payload_start, ":");
@@ -483,10 +485,58 @@ static void processPacket(char *packet, uint8_t packet_len) {
     if (color == NULL || clock_time == NULL || sequence == NULL) {
       Serial.print("Error parsing blink packet\n");
     }
+    Serial.print("Received valid packet\n");
     set_blink_pattern(color, clock_time, sequence);
   } else if (!strcmp(cmd, "HALT")) { 
     blink_halt();
-  }
+  } else if (!strcmp(cmd, "FW")) {
+    //char url_buf[1024]; 
+    // firmware update
+    char *url  = strtok(NULL, ":");
+    //char *url = payload_start+3;
+    Serial.printf("Firmware update, url is %s\n", url);
+    char *url_post_port = strtok(NULL, ":");
+    char *stuff = strtok(NULL, ":");
+    char *md5 = strtok(NULL, ":");
+    url[strlen(url)] = ':';  // restore server
+    url[strlen(url)] = ':';  // restore port
+/*    char *md5 = get_last_section(url);
+    if (md5 == NULL) {
+      return;
+    }
+*/
+    Serial.printf("Received firmware update packet, md5: %s, current: %s\n", md5, fw_checksum);
+    //strcpy(url_buf, url);
+    //strcat(url_buf, ":");
+    //strcat(url_buf, url_post_port);
+    Serial.printf("url is %s\n", url);
+    //Serial.printf("Final url %s\n", url_buf);
+    if (strcmp(md5, fw_checksum) != 0) {
+      Serial.print("Attempting OTA update\n");
+      // XXX - set a timer to do this. Not right now!
+      WiFiClient wf_client;
+   /*   if (wf_client.connect("google.com", 80)) {
+        Serial.print("Connect success\n");
+      } else {
+        Serial.print("Connect failure\n");
+      }
+      */
+      
+      /*HTTPClient http;
+      bool ret1 = http.begin("http://192.168.4.125:8080/firefly_leds");
+      Serial.printf("http ret 1 is %d\n", ret1);
+      int ret2 = http.GET();
+      Serial.printf("http ret 2 is %d\n", ret2); */
+      //url = "http://192.168.4.125:7000/firefly_leds";
+      t_httpUpdate_return ret = ESPhttpUpdate.update(wf_client, url);
+      //t_httpUpdate_return ret = ESPhttpUpdate.update("http://192.168.4.125", 7000, "firefly_leds");
+      Serial.printf("update returns %d\n", ret);
+      //WiFi.disconnect();
+      // nb - we may have to turn WifiUdp back on after this XXX CHECK!
+    } else {
+      Serial.print("Update refused - already have firmware\n");
+    }
+  } 
 }
 
 
@@ -531,7 +581,7 @@ static void get_board_id() {
     board_id = 3;
   }
    
-   sprintf(statusBuf, "Reading %d on analog, board id %d\n", analogRead(A0), board_id);
+   sprintf(statusBuf, "Reading %d on analog, board id %d\n", analogIn, board_id);
    Serial.print(statusBuf);
 }
 
@@ -569,56 +619,29 @@ void setup() {
   
     Serial.begin(9600);  // yeah. Slow but reliable...
     Serial.print("...Init...\n");
+    Serial.print("   v4  \n");
 
     init_current_sequence(default_sequence_str);
       
     WifiInit();
+    
 
     OtaClientInit();
 
     delay(500);
-/*
-    for (int i=0; i<100; i++) {
-      wifi_poke();
-      if (wifi_is_connected()) {
-        break;
-      }
-      delay(500);
-    }
-*/
 
     get_board_id();
 
     char serialBuf[256];
 
     sprintf(serialBuf, "...Board id is %d\n", board_id);
-
-    
-    
-/*
-    WiFi.begin(ssid, password);
-
-    Serial.print("Connecting\n");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-      delay(500);
-      Serial.print(".");
-    }
-    Serial.println();
-
-    Serial.print("Connected, IP address: ");
-    Serial.println(WiFi.localIP());
-    WiFi.printDiag(Serial);
-
-    WiFi.mode(WIFI_STA);
-    wifi_set_sleep_type(NONE_SLEEP_T);
-
-    Udp.beginMulticast(WiFi.localIP(), multicastAddress, MULTICAST_PORT);
-*/
 }
 
 static void FlashLEDs(int times) {
   // Quickly flash the onboard LED - use as a status indicator. Will block
+  // For some reason, this was crashing the ESP8266. WTF.
+  Serial.print("Begin flash LEDs\n");
+  /*
   digitalWrite(BLINK_PIN, LOW); 
   delay(20);
   for (int i=0; i<times; i++) {
@@ -628,11 +651,25 @@ static void FlashLEDs(int times) {
     delay(20);
   }
   digitalWrite(BLINK_PIN, onOff ? HIGH : LOW);
+  */
+  Serial.print("End flash LEDs\n");
+}
+
+static char *get_last_section(const char *url){
+  char *slash_ptr = NULL;
+  char *cur_ptr = (char *)url;
+  while(*cur_ptr != '\0'){
+    if (*cur_ptr == '/'){
+      Serial.print("Found slash!\n");
+      slash_ptr = cur_ptr;
+    }
+    cur_ptr++;
+  }
+  Serial.printf("get last section returns %p\n", slash_ptr);
+  return (slash_ptr == NULL ? NULL : slash_ptr+1);
 }
 
 #define BLINK_TIME 500
-//#define WIFI_PING_INTERVAL 10
-//#define WIFI_CHECK_INTERVAL 5
 #define MAX_PACKET_LEN 255
 
 void loop() {
@@ -641,19 +678,9 @@ void loop() {
     Serial.flush();
     ESP.restart();
   }
-  
- /* // Attempt to connect to wifi if it's not up
-  if (!wifi_is_connected() && (counter % WIFI_CHECK_INTERVAL) == 0) {
-    wifi_poke();
-  }
 
-  // XXX - may want to have a poke counter and restart wifi...
-
-  // Check for wifi up
-  if (wifi_is_connected() && (counter % WIFI_PING_INTERVAL == 0)) {
-    //ping_wifi(); 
-  }
-  */
+  // Check AP status, reconnect/connect if necessary
+  WifiMulti.run();
 
   // blink the onboard leds if we're on a clock edge
   if ((counter % current_clock) == 0) {
@@ -675,6 +702,7 @@ void loop() {
   // read and process UDP commands
   if (WiFi.status() == WL_CONNECTED) {
     int packetSize;
+//    WiFi.mode(WIFI_STA);
     while ((packetSize=Udp.parsePacket()) > 0) {
       
       char packet[MAX_PACKET_LEN + 1];
@@ -682,6 +710,7 @@ void loop() {
 
       if (packetSize > MAX_PACKET_LEN) {
         // whatever the fuck this is, we don't want it.
+        Udp.read(packet, MAX_PACKET_LEN);
         continue;      
       }
       int len = Udp.read(packet, MAX_PACKET_LEN);
@@ -743,5 +772,5 @@ void loop() {
   if (counter > 10000) {
     counter = 0;
   }
-  delay(100);
+  delay(CLOCK_TIME);
 }
