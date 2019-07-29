@@ -75,18 +75,11 @@ https://github.com/FlamingLotusGirls/Serenity/pull/1#issuecomment-496274887
 > *cant* change, and then ideally some set of buttons like Ted's that the
 > participants can use to add additional sounds on top of the ambient. That says
 > that our admin app definitely needs to be able to modify, save, and restore the
-> ambient, and probably needs to be able to have some control over the effect
-> overlays. Which of course also says that the APIs I tossed out there are
-> hopelessly inadequate. 
+> ambient, and probably needs to be able to have some control over the effects.
 
-PUT /sound/effects/<soundeffectid> controllerid=<soundcontrollerid> onoff=<tf> (add/subtract sound effect to general noise)
-GET /sound/effects/
-GET /sound/controllers/
-PUT /sound/<soundControllerId>/volume/ volumelevel=<0-100>
-POST /sound/presets/<presetId>  (save current settings for volume under a tag)
-DELETE /sound/presets/<presetId> (don't allow deletion of built-in "silence" tag)
-GET /sound/presets/
-GET /sound/presets/<presetId>
-PUT /sound/presets/<presetId> (apply specified volume settings)
+These are covered in the sound directory, please see the REST.md in the sound
+directory for definitions of the REST calls in question.
+
+
 
 
