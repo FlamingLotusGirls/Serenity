@@ -141,7 +141,8 @@ class FireflyLedController():
             time.sleep(1.0)
             
             # and every 10 seconds, also broadcast the current firmware hash
-            if idx % 10 == 0:
+            if False:
+            #if idx % 10 == 0:
                 if self.have_firmware:
                     print("FW UPDATE PACKET")
                     self.sender_socket.sendto(self.firmware_packet, (MULTICAST_GROUP, LED_CMD_PORT))
