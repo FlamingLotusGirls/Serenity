@@ -32,7 +32,7 @@ export default {
     methods: {
         poof: function() {
             // TODO: add fetch() request to poof all poofers here
-            alert(`Poofing all poofers on ${this.bugName}`);
+            alert(`This doesn't work yet, but someday this will poof all poofers on ${this.bugName}`);
         }
     }
 };
