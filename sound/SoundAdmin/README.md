@@ -1,28 +1,22 @@
 # SoundAdmin
 
-This runs on the master node.
+Listens on the main port, keeps track of state of things, directs individual speakers
 
-It supports all the REST calls in the above specification.
+Charlie says that if I write this in Node, he can maintain it
 
-It stores the list of raspberry pis.
+so, node!
 
-It acts as a router for the coming ( single ) admin call, and fans out to the raspberry pis ( SerenityAudio ).
+Version from regular raspberrian seems out of date with NPM which is a pity.
 
-It persists all the Effects and whatnot.
+'''
+sudo apt install nodejs
+sudo apt install npm
+sudo npm install npm@latest -g
+'''
 
-Written in python.
+In the directory, the npm is not most recent? `sudo npm install npm@latest -g`
 
-Choosing Aiohttp, because we need to fan out. I'd rather have all the requests go out in parallel,
-in case one is flakey, all the other ones have a chance to immediately take effect, and
-the other one can catch up. Hopefully it's not too crazy to program.
-
-# Requires python3
-
-```
-sudo apt install python3-pip
-python3 -m pip install aiohttp
-python3 -m pip install cchardet
-python3 -m pip install aiodns
-
-python3 SoundAdmin.py
-```
+Get the ARM v8 version from nodejs.org
+sudo tar xvf node-... -C /opt
+sudo mv /opt/node.... /opt/node
+Add node to everyone's path: /opt/node/bin to /etc/profile
