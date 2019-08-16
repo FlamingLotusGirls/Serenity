@@ -61,7 +61,7 @@ class FireflyLedController():
                 2, 
                 "01100110000",
                 "Default") \
-            for board_id in range(1, NUM_SWARMS+1)
+            for board_id in range(0, NUM_SWARMS)
         }
 
         self.patternLock = Lock()

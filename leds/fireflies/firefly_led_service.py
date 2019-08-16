@@ -96,7 +96,7 @@ def firefly_status():
             return CORSResponse("Must have 'swarm' value", 400)
         try:
             swarm_id = int(request.values['swarm'])
-            if swarm_id < 0 or swarm_id > 3:
+            if swarm_id < 0 or swarm_id > 2:
                 raise Exception
             current_leds = controller.get_led_patterns()
             for leds in current_leds:
