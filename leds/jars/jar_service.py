@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from jar_led_driver import JarLedDriver
 import jar_webserver
 

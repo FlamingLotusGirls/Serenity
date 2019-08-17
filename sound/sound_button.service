@@ -1,0 +1,12 @@
+[Unit]
+Description=FLG Serenity Audio Button Listener
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/flaming/Serenity/sound/SoundButtons/sound_button_service.py
+WorkingDirectory=/home/flaming/Serenity/sound
+Restart=Always
+User=flaming
+
+[Install]
+WantedBy=multi-user.target
