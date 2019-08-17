@@ -21,8 +21,7 @@ from pattern_manager import PatternManager
     REST service for controlling firefly leds
 '''
 
-#PORT = 7000
-PORT = 8080
+PORT = 7000
 
 logger = logging.getLogger("firefly_leds")
 

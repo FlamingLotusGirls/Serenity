@@ -6,10 +6,6 @@
                 <label>Pick a Color:</label>
                 <ColorPicker class="color-slider" color="#f00" v-model="selectedColor" />
             </div>
-            <div class="col-2">
-                <label for="swarmBrightness">Set Brightness:</label>
-                <input type="range" name="swarmBrightness" class="swarm-brightness-control" id="swarmBrightness" />
-            </div>
             <div class="col-4">
                 <label for="blinkPattern">Set a Blink Pattern (tap to turn on or off)</label>
                 <PatternToggleButton v-for="n in 12"></PatternToggleButton>

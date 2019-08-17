@@ -8,10 +8,6 @@
                 <ColorPicker class="color-slider" color="#ff0000" v-model="selectedColor" v-on:input="saveSwarmSettings" />
             </div>
             <div>
-                <label for="swarmBrightness">Set Brightness:</label>
-                <input type="range" name="swarmBrightness" class="swarm-brightness-control" id="swarmBrightness" v-model="swarmBrightness" v-on:change="saveSwarmSettings" />
-            </div>
-            <div>
                 <label for="blinkPattern">Set a Blink Pattern (tap to turn on or off)</label>
                 <PatternToggleSet v-bind:patternLength="10" v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
             </div>
@@ -26,7 +22,7 @@
 </template>
 
 <script>
-import { smallFireflyLEDControllerURL } from '../appConfig';
+import { setFireflyLEDs } from '../requests';
 import ColorPicker from './ColorPicker';
 import PatternToggleSet from './PatternToggleSet';
 
@@ -45,7 +41,6 @@ export default {
     data() {
         return {
             selectedColor: '#ff0000',
-            swarmBrightness: 100,
             blinkPattern: new Array(10).fill(false)
         };
     },
@@ -56,37 +51,18 @@ export default {
     methods: {
         patternChanged(newPattern) {
             this.blinkPattern = newPattern;
-            console.log('pattern changed', newPattern);
             this.saveSwarmSettings();
         },
         saveSwarmSettings() {
-            console.log('saving swarm settings', this.selectedColor, this.swarmNumber);
             let rgbColor = hexToRgb(this.selectedColor);
+            let sequence = this.blinkPattern.map(bool => bool ? 1 : 0).join('');
 
-            let formData = new FormData();
-            formData.append('swarm', this.swarmNumber);
-            formData.append('sequence', this.blinkPattern.map(bool => bool ? 1 : 0).join(''));
-            formData.append('red', rgbColor.r);
-            formData.append('green', rgbColor.g);
-            formData.append('blue', rgbColor.b);
-
-            return fetch(`${smallFireflyLEDControllerURL}/firefly_leds`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => {
-                // handle non-success responses
-                if (!res.ok) {
-                    alert(`Unable to save swarm LED settings. Request failed with status ${res.status} ${res.statusText}`);
-                    return;
-                }
-                return res;
-            })
-            .then(res => {
-                console.log(`Saved swarm LED settings`);
-            }, error => {
-                alert(`Failed to save swarm LED settings with error ${error}`);
-            });
+            return setFireflyLEDs(this.swarmNumber, sequence, rgbColor)
+                .then(() => {
+                    console.log(`Saved swarm LED settings`);
+                }, error => {
+                    alert(error);
+                });
         }
     }
 };
@@ -104,8 +80,5 @@ export default {
 .swarm-lighting-widget label {
     display: block;
     margin-top: 6px;
-}
-.swarm-brightness-control {
-    width: 100%;
 }
 </style>
