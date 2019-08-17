@@ -216,11 +216,19 @@ GET /audio/soundscapes - returns a JSON array of soundscapes. For simplicity, we
 }
 ```
 
+GET /audio/soundscapes/<name>
+
+Retrieves that object. Currently does NOT change the current object, although it could.
+
+
 DELETE /audio/soundscapes/<name>
 
 Removes this Soundscape from the server system.
 
 POST /audio/soundscapes/<name> - Create a new soundscape with that Name, using the format below.
+
+NOTE: If you pass in a soundscape object, the system will save it with that name and not change the current.
+If you don't pass a soundscape, then the current soundscape settings will be used. This is the preferred means.
 
 NOTE: for safety reasons, we are not supporting overwriting a soundscape. The server will inforce
 that if a soundscape already exists, an attempt to write the values a second time will return an error.

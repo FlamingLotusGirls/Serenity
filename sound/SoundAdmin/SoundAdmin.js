@@ -127,15 +127,70 @@ app.put('/audio/background', (req, res) => {
 
 // Returns the current list of sounscapes as an array
 app.get('/audio/soundscapes', (req, res) => {
-	res.send('Got a GET audio backgrounds request')
+	var files = fs.readdirSync(config.soundscapeDir);
+	// This isn't preciese because I only want the trailing .json
+	var ret = {}
+	ret.names = files.map(str => str.replace('.json',''))
+	res.send(ret);
 })
 
 // create a new soundscale with id 'id' using the current senttings
-app.post('/audio/soundscapes', (req, res) => {
-	res.send('Got a PUT audio backgrounds request')
+//if no object is passed in, or with the passed in object
+app.post('/audio/soundscapes/*', (req, res) => {
+
+	var id = req.path.replace('/audio/soundscapes/','')
+	// if exists fail
+	var fn = config.soundscapeDir+id+'.json';
+	if (fs.existsSync(fn)) {
+		res.status(400);
+		res.send(id + ' already exists')
+		return;
+	}
+
+	// if empty body use default
+	if (Object.keys(req.body).length==0) {
+		fs.writeFileSync(fn, JSON.stringify(g_scape));
+		res.send(g_scape)
+	}
+	else {
+		// TODO: should validate this
+		fs.writeFileSync(fn, JSON.stringify(req.body));
+		res.send(req.body)
+	}
+
 })
 
-// Returns the current list of sounscapes as an array
+// Get any named one... and make it current or not?
+app.get('/audio/soundscapes/*', (req, res) => {
+	var id = req.path.replace('/audio/soundscapes/','')
+	var fn = config.soundscapeDir+id+'.json';
+	if (fs.existsSync(fn) == false) {
+		res.status(400);
+		res.send(id + ' does not exist')
+		return;
+	}
+
+	var rawdata = fs.readFileSync(fn, JSON.stringify(g_scape));
+	var ret = JSON.parse(rawdata)
+	// if you want to also make it current, 
+	// just set it to g_scape and flush
+	res.send(ret);
+})
+
+// Delete the soundscape /audio/soundscapes/NAME
+app.delete('/audio/soundscapes/*', (req, res) => {
+	var id = req.path.replace('/audio/soundscapes/','')
+	var fn = config.soundscapeDir+id+'.json';
+	if (fs.existsSync(fn) == false) {
+		res.status(400);
+		res.send(id + ' does not exist')
+		return;
+	}
+	fs.unlinkSync(fn)
+	res.send('OK')
+})
+
+// Returns the current sounscape as a JSON object
 app.get('/audio/soundscape', (req, res) => {
 	// Maybe we want all the names in here. I don't think so though.
 	//var ret = Object.assign({},g_scape)
@@ -146,7 +201,7 @@ app.get('/audio/soundscape', (req, res) => {
 	res.send(g_scape);
 })
 
-// create a new soundscale with id 'id' using the current senttings
+// Update the current soundscape
 app.post('/audio/soundscape', (req, res) => {
 	if (req.hasOwnProperty('background')) {
 		if ( background_put ( req.background ) == false )
