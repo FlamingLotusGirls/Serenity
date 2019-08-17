@@ -12,8 +12,9 @@ const port = 3000;
 const config = require('./data/config.json')
 
 var g_scape = null;
+var g_sinks = null;
 
-
+// SCAPE FILES
 
 // Read from the default file
 function scape_init() {
@@ -33,19 +34,40 @@ function scape_init() {
 
 // write the newly changed scape to the last file 
 function scape_flush(s) {
-	fs.writeFileSync(config.currentScape, JSON.stringify(g_scape));
+	fs.writeFileSync(config.currentScape, JSON.stringify(s));
 	console.log(' flushed current scape ');
 }
 
-// have a JSON block with new effect volume level
-//function scape_effects_apply(s, e) {
-//}
-
-// Receive a new scape, find the diffs, leave the old
-
-
 // Init function, load the scape
 g_scape = scape_init();
+
+// SINK FILE
+
+// Read from the default file
+function sink_init() {
+	// first try to load the last thing that was set
+	//console.log('scape init');
+	var rawdata = null;
+	if (fs.existsSync(config.currentSink)) {
+		rawdata = fs.readFileSync(config.currentSink);
+	}
+	else {
+		rawdata = fs.readFileSync(config.defaultSink);
+	}
+	var s = JSON.parse(rawdata);
+	//console.log(s);
+	return(s);
+}
+
+// write the newly changed scape to the last file 
+function sink_flush(s) {
+	fs.writeFileSync(config.currentSink, JSON.stringify(g_sink));
+	console.log(' flushed current sink ');
+}
+
+// Init function, load the scape
+g_sink = sink_init();
+
 
 
 //
@@ -85,6 +107,8 @@ app.put('/audio/background', (req, res) => {
 
 	g_scape.background.name = req.body.name;
 	g_scape.background.volume = req.body.volume;
+
+	scape_flush(g_scape);
 
 	// TODO: notify all players of new background
 
@@ -159,6 +183,8 @@ app.put('/audio/effects', (req,res) => {
 		}
 	}
 
+	scape_flush(g_scape);
+
 	// Todo: update sound players
 
 	res.send("OK")
@@ -173,17 +199,58 @@ app.get('/audio/zones', (req, res) => {
 			ret[key] = value;
 		}
 	}
+
 	res.send(ret);
 })
 
 // set zones only through the put scape stuff
 
 app.get('/audio/sinks', (req, res) => {
-	res.json(config.sinks)
+	var ret = {}
+	ret.names = config.sinks.names;
+	for (const [key, value] of Object.entries(g_sink)) {
+		if (value.volume > 0) {
+			ret[key] = value;
+		}
+	}
+	res.send(ret);
 })
 
 app.put('/audio/sinks', (req, res) => {
-	res.send('Got a PUT audio sinks request')
+	console.log('got a PUT sinks request');
+	console.log(req.body);
+
+	// Validate input
+	for (const [key, value] of Object.entries(req.body)) {
+		console.log(' validating %s object %s ',key,JSON.stringify(value));
+		// is the name valid
+		if (config.sinks.names.includes(key) == false) {
+			res.status(400);
+			res.send(key + ' is not a supported name')
+			return;
+		}
+		if (value.hasOwnProperty('volume') == false) {
+			res.status(400);
+			res.send(key + ' must have volume')
+			return;
+		}
+		if ((value.volume > 100) || (value.volume < 0)) {
+			res.status(400);
+			res.send(key + ' volume out of range');
+			return;
+		}
+	}
+
+	// valid, replace
+	for (const [key, value] of Object.entries(req.body)) {
+		g_sink[key] = value;
+	}
+
+	sink_flush(g_scape);
+
+	// Todo: update sound players
+
+	res.send("OK")
 })
 
 app.get('/', (req, res) => res.send('Hello World from SoundAdmin!'))

@@ -11,25 +11,28 @@
   "dataDir": "data",
   "soundscapeDir": "data/scapes/",
   "currentScape": "data/scapes/recentScape.json",
-  "currentSinks": "data/",
+  "defaultSink": "data/defaultSink.json",
+  "currentSink": "data/recentSink.json",
   "soundDir":  "../flg_sound/",
 
-  "sinks": [
-  	"PergolaRight1",
-  	"PergolaRight2",
-  	"PergolaRight3",
-  	"PergolaRight4",
-  	"PergolaRight5",
-  	"PergolaLeft1",
-  	"PergolaLeft2",
-  	"PergolaLeft3",
-  	"PergolaLeft4",
-  	"PergolaLeft4",
-  	"JarBrazen",
-  	"JarM3tric",
-  	"JarJohn",
-  	"Depot"
-  ],
+  "sinks": {
+    "names": [
+    	"PergolaRight1",
+    	"PergolaRight2",
+    	"PergolaRight3",
+    	"PergolaRight4",
+    	"PergolaRight5",
+    	"PergolaLeft1",
+    	"PergolaLeft2",
+    	"PergolaLeft3",
+    	"PergolaLeft4",
+    	"PergolaLeft5",
+    	"JarBrazen",
+    	"JarM3tric",
+    	"JarJohn",
+    	"Depot"
+    ]
+  },
   "zones": {
     "names": ["PergolaRight", "PergolaLeft", "Jars", "Depot"]
   },
