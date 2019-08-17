@@ -11,6 +11,18 @@
 		"birds": {
 			"intensity": 2,
 			"volume": 45
+		},
+		"cicadas": {
+			"intensity": 0,
+			"volume": 0
+		},
+		"frogs": {
+			"intensity": 0,
+			"volume": 0
+		},
+		"frogsAlt": {
+			"intensity": 0,
+			"volume": 0
 		}
 	},
 	"zones": {

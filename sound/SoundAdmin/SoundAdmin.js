@@ -35,7 +35,7 @@ function scape_init() {
 // write the newly changed scape to the last file 
 function scape_flush(s) {
 	fs.writeFileSync(config.currentScape, JSON.stringify(s));
-	console.log(' flushed current scape ');
+	//console.log(' flushed current scape ');
 }
 
 // Init function, load the scape
@@ -62,7 +62,7 @@ function sink_init() {
 // write the newly changed scape to the last file 
 function sink_flush(s) {
 	fs.writeFileSync(config.currentSink, JSON.stringify(g_sink));
-	console.log(' flushed current sink ');
+	//console.log(' flushed current sink ');
 }
 
 // Init function, load the scape
@@ -88,20 +88,31 @@ app.get('/audio/background', (req,res) => {
 // res is there to throw errors
 function background_put(bg, res) {
 
-	if (bg.hasOwnProperty('name') == false) {
-		res.status(400);
-		res.send('background must have a name');
-		return(false);
-	}
 	if (bg.hasOwnProperty('volume') == false) {
 		res.status(400);
 		res.send('background must have a volume');
 		return(false);
 	}
-	if (config.backgrounds.names.includes(bg.name) == false) {
+	if ((bg.volume < 0) || (bg.volume > 100)) {
 		res.status(400);
-		res.send(bg.name + ' is not a supported name');
+		res.send('volume '+bg.volume+' out of range');
 		return(false);
+	}
+	// If volume is zero, ignore name
+	if (bg.volume == 0) {
+		bg.name = ''
+	}
+	else {
+		if (bg.hasOwnProperty('name') == false) {
+			res.status(400);
+			res.send('background must have a name');
+			return(false);
+		}
+		if (config.backgrounds.names.includes(bg.name) == false) {
+			res.status(400);
+			res.send(bg.name + ' is not a supported name');
+			return(false);
+		}
 	}
 
 	g_scape.background.name = bg.name;
@@ -239,7 +250,7 @@ function effects_put(eff, res) {
 
 	// Validate input
 	for (const [key, value] of Object.entries(eff)) {
-		console.log(' validating %s object %s ',key,JSON.stringify(value));
+		//console.log(' validating %s object %s ',key,JSON.stringify(value));
 		// is the name valid
 		if (config.effects.names.includes(key) == false) {
 			res.status(400);
@@ -311,7 +322,7 @@ function zones_put(z, res) {
 
 	// Validate input
 	for (const [key, value] of Object.entries(z)) {
-		console.log(' validating %s object %s ',key,JSON.stringify(value));
+		//console.log(' validating %s object %s ',key,JSON.stringify(value));
 		// is the name valid
 		if (config.zones.names.includes(key) == false) {
 			res.status(400);
@@ -358,7 +369,7 @@ app.put('/audio/sinks', (req, res) => {
 
 	// Validate input
 	for (const [key, value] of Object.entries(req.body)) {
-		console.log(' validating %s object %s ',key,JSON.stringify(value));
+		//console.log(' Sinks: validating %s object %s ',key,JSON.stringify(value));
 		// is the name valid
 		if (config.sinks.names.includes(key) == false) {
 			res.status(400);
