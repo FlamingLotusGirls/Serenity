@@ -49,6 +49,27 @@ const runFireProgram = function(programName) {
     });
 };
 
+const getFireflyLEDs = function() {
+    return new Promise(function(resolve, reject) {
+        return fetch(`${smallFireflyLEDControllerURL}/firefly_leds`, {
+            method: 'GET'
+        })
+        .then(res => {
+            // handle non-success responses
+            if (!res.ok) {
+                return reject(`Unable to save swarm LED settings. Request failed with status ${res.status} ${res.statusText}`);
+            }
+            return res;
+        })
+        .then(res => res.json())
+        .then(result => {
+            return resolve(result);
+        }, error => {
+            return reject(`Failed to save swarm LED settings with error ${error}`);
+        });
+    });
+};
+
 const setFireflyLEDs = function(swarmNumber, sequence, colorObject) {
     let formData = new FormData();
     formData.append('swarm', swarmNumber);
@@ -78,5 +99,6 @@ const setFireflyLEDs = function(swarmNumber, sequence, colorObject) {
 export {
     getFireProgramNameList,
     runFireProgram,
+    getFireflyLEDs,
     setFireflyLEDs
 };

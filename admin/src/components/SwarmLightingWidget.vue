@@ -5,11 +5,11 @@
             <h5>Swarm {{swarmNumberString}}</h5>
             <div>
                 <label>Pick a Color:</label>
-                <ColorPicker class="color-slider" color="#ff0000" v-model="selectedColor" v-on:input="saveSwarmSettings" />
+                <ColorPicker class="color-slider" v-model="selectedColor" v-on:input="saveSwarmSettings" />
             </div>
             <div>
                 <label for="blinkPattern">Set a Blink Pattern (tap to turn on or off)</label>
-                <PatternToggleSet v-bind:patternLength="10" v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
+                <PatternToggleSet v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
             </div>
             <!-- light programs don't exist currently
             <label>Select a Light Program:</label>
@@ -22,18 +22,36 @@
 </template>
 
 <script>
-import { setFireflyLEDs } from '../requests';
+import { getFireflyLEDs, setFireflyLEDs } from '../requests';
 import ColorPicker from './ColorPicker';
 import PatternToggleSet from './PatternToggleSet';
 
 // TODO: put this into a util file so it can be shared
-let hexToRgb = function(hex) {
+const hexToRgb = function(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16)
   } : null;
+};
+
+// TODO: put this into a util file so it can be shared
+const zeroPad = function(number, width) {
+    var padded = number + '';
+    while (padded.length < width) {
+        padded = '0' + padded;
+    }
+    return padded;
+};
+
+// TODO: put this into a util file so it can be shared
+const rgbToHex = function(r, g, b) {
+    const componentToHex = (component) => {
+        return zeroPad(Math.round(component).toString(16), 2);
+    };
+
+    return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 };
 
 export default {
@@ -43,6 +61,20 @@ export default {
             selectedColor: '#ff0000',
             blinkPattern: new Array(10).fill(false)
         };
+    },
+    beforeMount() {
+        // fetch current settings
+        return getFireflyLEDs()
+            .then((allSettings) => {
+                let swarmSettings = allSettings.find((settings) => {
+                    return settings.board_id === this.swarmNumber;
+                });
+
+                this.selectedColor = rgbToHex(swarmSettings.color[0] * 255, swarmSettings.color[1] * 255, swarmSettings.color[2] * 255);
+                this.blinkPattern = swarmSettings.pattern.split('').map(c => (c === '1') ? true : false);
+            }, error => {
+                alert(error);
+            });
     },
     components: {
         ColorPicker,

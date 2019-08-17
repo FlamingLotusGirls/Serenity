@@ -1,9 +1,9 @@
 <template>
     <div class="input-group color-picker" ref="colorpicker">
-        <input type="text" class="form-control" v-model="colorValue" @focus="showPicker()" @input="updateFromInput" />
+        <input type="text" class="form-control" v-model="value" @focus="showPicker()" @input="updateFromInput" />
          <div class="input-group-append">
             <span class="input-group-text">
-                <span class="current-color" :style="'background-color: ' + colorValue" @click="togglePicker()"></span>
+                <span class="current-color" :style="'background-color: ' + value" @click="togglePicker()"></span>
                 <SwatchPicker :value="colors" @input="updateFromPicker" v-if="displayPicker" />
             </span>
         </div>
@@ -20,24 +20,16 @@ export default {
 	components: {
 		'SwatchPicker': Swatches,
 	},
-	props: ['color'],
+	props: ['value'],
 	data() {
 		return {
 			colors: {
-				hex: '#000000',
+				hex: '#ff0000',
 			},
-			colorValue: '',
 			displayPicker: false,
 		}
 	},
-	mounted() {
-		this.setColor(this.color || '#000000');
-	},
 	methods: {
-		setColor(color) {
-			this.updateColors(color);
-			this.colorValue = color;
-		},
 		updateColors(color) {
 			if(color.slice(0, 1) == '#') {
 				this.colors = {
@@ -65,16 +57,19 @@ export default {
 			this.displayPicker ? this.hidePicker() : this.showPicker();
 		},
 		updateFromInput() {
-			this.updateColors(this.colorValue);
+			this.updateColors(this.value);
 		},
 		updateFromPicker(color) {
 			this.colors = color;
+			let newValue;
 			if(color.rgba.a == 1) {
-				this.colorValue = color.hex;
+				newValue = color.hex;
 			}
 			else {
-				this.colorValue = 'rgba(' + color.rgba.r + ', ' + color.rgba.g + ', ' + color.rgba.b + ', ' + color.rgba.a + ')';
+				newValue = 'rgba(' + color.rgba.r + ', ' + color.rgba.g + ', ' + color.rgba.b + ', ' + color.rgba.a + ')';
 			}
+
+			this.$emit('input', newValue);
 		},
 		documentClick(e) {
 			var el = this.$refs.colorpicker,
@@ -85,7 +80,7 @@ export default {
 		}
 	},
 	watch: {
-		colorValue(val) {
+		value(val) {
 			if(val) {
 				this.updateColors(val);
 				this.$emit('input', val);
