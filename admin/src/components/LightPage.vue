@@ -26,9 +26,9 @@
                 </div>
             </div>
             <div class="small-bugs-content row">
-                <SwarmLightingWidget v-bind:swarmNumber="0" swarmNumberString="One" class="col-4" />
-                <SwarmLightingWidget v-bind:swarmNumber="1" swarmNumberString="Two" class="col-4" />
-                <SwarmLightingWidget v-bind:swarmNumber="2" swarmNumberString="Three" class="col-4" />
+                <SwarmLightingWidget v-bind:swarmNumber="1" swarmNumberString="One" class="col-4" />
+                <SwarmLightingWidget v-bind:swarmNumber="2" swarmNumberString="Two" class="col-4" />
+                <SwarmLightingWidget v-bind:swarmNumber="3" swarmNumberString="Three" class="col-4" />
             </div>
         </div>
         <!-- these APIs got cut so do not exist!

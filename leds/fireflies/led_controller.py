@@ -52,6 +52,7 @@ class FireflyLedController():
             }       
     def __init__(self):
         self.createBroadcastSender()
+        # swarms are 1-indexed, because swarm ID 0 means broadcast
         self.patterns = {
             board_id : FireflyLedController.FireflyPattern(
                 board_id,
@@ -61,7 +62,7 @@ class FireflyLedController():
                 2, 
                 "01100110000",
                 "Default") \
-            for board_id in range(0, NUM_SWARMS)
+            for board_id in range(1, NUM_SWARMS + 1)
         }
 
         self.patternLock = Lock()
