@@ -123,8 +123,11 @@ If either INTENSITY or VOLUME is zero, then the Effect is not active.
 
 GET /audio/effects - JSON object with the list of all available Effects, and the volume and intensity of each.
 
+The name field will have the list of all possible things.
+
 ```
 {
+	"names": ["Crickets", "Crickets2", "Crickets3"],
 	"Crickets1": {
 		"intensity": 3,
 		"volume": 50
@@ -142,7 +145,8 @@ GET /audio/effects - JSON object with the list of all available Effects, and the
 
 PUT /audio/effects
 
-Sets the attributes of a set of effects.
+Sets the attributes of a set of effects. If you leave out an effect, it goes to 0 intensity
+and zero volume.
 
 ```
 {

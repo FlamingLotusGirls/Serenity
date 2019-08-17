@@ -18,7 +18,7 @@ var g_scape = null;
 // Read from the default file
 function scape_init() {
 	// first try to load the last thing that was set
-	console.log('scape init');
+	//console.log('scape init');
 	var rawdata = null;
 	if (fs.existsSync(config.currentScape)) {
 		rawdata = fs.readFileSync(config.currentScape);
@@ -53,7 +53,7 @@ g_scape = scape_init();
 //
 
 
-// 
+// Get the list of all possible backgrounds
 app.get('/audio/backgrounds', (req, res) => {
 	res.json(config.backgrounds)
 })
@@ -101,6 +101,13 @@ app.post('/audio/soundscapes', (req, res) => {
 	res.send('Got a PUT audio backgrounds request')
 })
 
+app.get('/audio/effects', (req,res) => {
+	res.send('got a GET request for the effects')
+})
+
+app.put('/audio/effects', (req,res) => {
+	res.send('got a PUT request for the effects')
+})
 
 app.get('/audio/zones', (req, res) => {
 	console.log(' endpoint audio zones called ');

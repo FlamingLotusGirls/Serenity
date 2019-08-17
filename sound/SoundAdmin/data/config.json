@@ -12,6 +12,7 @@
   "soundscapeDir": "data/scapes/",
   "currentScape": "data/scapes/recentScape.json",
   "currentSinks": "data/",
+  "soundDir":  "../flg_sound/",
 
   "sinks": [
   	"PergolaRight1",
@@ -36,13 +37,17 @@
   	"Depot"
   ],
   "backgrounds": {
-    "names": ["Austin", "Ambient1"],
-    "Austin": {"file": "Austin.mp3"},
-    "Ambient1": {"file": "ambient1.wav"}
+    "names": ["Ambient1", "Ambient2", "Ambient3"],
+    "Ambient1": {"file": "ambient_1.wav"},
+    "Ambient2": {"file": "ambient_2.wav"},
+    "Ambient3": {"file": "ambient_3.wav"}
   },
-  "effects": [
-    { "name": "crickets", "l1": "crickets-1.mp3", "l2": "crickets-2.mp3", "l3": "crickets-3.mp3"},
-    { "name": "katydids", "l1": "katydids-1.mp3", "l2": "katydids-2.mp3", "l3": "katydids-3.mp3"}
-  ]
-
+  "effects": {
+    "names": ["birds" , "cicadas" , "crickets" , "frogs" , "frogsAlt" ],
+    "cicadas": { "file1": "cicadas_1.wav", "file2": "cicadas_2.wav", "file3": "cicadas_3.wav"},
+    "crickets": { "file1": "crickets_1.wav", "file2": "crickets_2.wav", "file3": "crickets_3.wav"},
+    "birds": { "file1": "birds_1.wav", "file2": "birds_2.wav", "file3": "birds_3.wav"},
+    "frogs": { "file1": "frogs_1.wav", "file2": "frogs_2.wav", "file3": "frogs_3.wav"},
+    "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"}
+  }
 }
