@@ -101,6 +101,7 @@ Zones values are always set through the scape, so use that.
 
 ```
 {
+	"names": ["LeftPergola", "RightPergola", "Jars"],
 	"LeftPergola": {
 		"volume": 50
 	},

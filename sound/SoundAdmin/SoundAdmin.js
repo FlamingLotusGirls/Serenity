@@ -165,8 +165,15 @@ app.put('/audio/effects', (req,res) => {
 })
 
 app.get('/audio/zones', (req, res) => {
-	console.log(' endpoint audio zones called ');
-	res.json(g_scape.zones);
+	//console.log(' endpoint audio zones called ');
+	var ret = {}
+	ret.names = config.zones.names;
+	for (const [key, value] of Object.entries(g_scape.zones)) {
+		if (value.volume > 0) {
+			ret[key] = value;
+		}
+	}
+	res.send(ret);
 })
 
 // set zones only through the put scape stuff

@@ -30,13 +30,10 @@
   	"JarJohn",
   	"Depot"
   ],
-  "zones": [
-  	"PergolaRight",
-  	"PergolaLeft",
-  	"Jars",
-  	"Depot"
-  ],
-  "backgrounds": {
+  "zones": {
+    "names": ["PergolaRight", "PergolaLeft", "Jars", "Depot"]
+  },
+ "backgrounds": {
     "names": ["Ambient1", "Ambient2", "Ambient3"],
     "Ambient1": {"file": "ambient_1.wav"},
     "Ambient2": {"file": "ambient_2.wav"},
