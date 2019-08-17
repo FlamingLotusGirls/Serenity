@@ -1,0 +1,27 @@
+{
+	"background": {
+		"name": "Ambient",
+		"volume": 50
+	},
+	"effects": {
+		"crickets": {
+			"intensity": 3,
+			"volume": 50
+		},
+		"crickets1": {
+			"intensity": 2,
+			"volume": 45
+		}
+	},
+	"zones": {
+		"LeftPergola": {
+			"volume": 50
+		},
+		"RightPergola": {
+			"volume": 45
+		},
+		"Jars": {
+			"volume": 75
+		}
+	}
+}

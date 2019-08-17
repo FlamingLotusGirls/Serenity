@@ -1,0 +1,44 @@
+{
+  "controllers": [
+	  "sa1",
+	  "sa2",
+	  "sa3",
+	  "sa4",
+	  "sa5",
+	  "sa6",
+	  "sa7"
+  ],
+  "dataDir": "data"
+  "soundscapeDir": "data/scapes/",
+  "sinks": [
+  	"PergolaRight1",
+  	"PergolaRight2",
+  	"PergolaRight3",
+  	"PergolaRight4",
+  	"PergolaRight5",
+  	"PergolaLeft1",
+  	"PergolaLeft2",
+  	"PergolaLeft3",
+  	"PergolaLeft4",
+  	"PergolaLeft4",
+  	"JarBrazen",
+  	"JarM3tric",
+  	"JarJohn",
+  	"Depot"
+  ],
+  "zones": [
+  	"PergolaRight",
+  	"PergolaLeft",
+  	"Jars",
+  	"Depot"
+  ],
+  "backgrounds": [
+  	{ "name": "Austin", "file": "austin.mp3" },
+  	{ "name": "Ambient1", "file": "ambient2.mp3" }
+  ],
+  "effects": [
+    { "name": "crickets", "l1": "crickets-1.mp3", "l2": "crickets-2.mp3", "l3": "crickets-3.mp3"},
+    { "name": "katydids", "l1": "katydids-1.mp3", "l2": "katydids-2.mp3", "l3": "katydids-3.mp3"}
+  ]
+
+}

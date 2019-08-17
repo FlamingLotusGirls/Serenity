@@ -181,10 +181,12 @@ GET /audio/background
 
 Returns the background that is currently playing.
 
+```
 {
 	"name": "Ambient",
 	"volume": 50
 }
+```
 
 PUT /audio/background
 
@@ -192,10 +194,12 @@ Set the background that is currently playing, or the attribute.
 
 Note: for style, we could use these as URL parameters intead of a JSON object. I just picked this.
 
+```
 {
 	"name": "Ambient",
 	"volume": 75
 }
+```
 
 ## Soundscapes
 
@@ -206,7 +210,9 @@ by the server ( and then having a name internally )
 
 GET /audio/soundscapes - returns a JSON array of soundscapes. For simplicity, we will use the
 
+```
 [ "MyScape", "BrianScape", "Muzzy" ]
+```
 
 DELETE /audio/soundscapes/<id>
 
@@ -236,6 +242,7 @@ If a ZONE is left out, it is.... ? off ?
 
 SINKs are NOT a part of a soundscape. Set them individually.
 
+```
 {
 	"background": {
 		"name": "Ambient",
@@ -263,6 +270,7 @@ SINKs are NOT a part of a soundscape. Set them individually.
 		}
 	}
 }
+```
 
 
 
