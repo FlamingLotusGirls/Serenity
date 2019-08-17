@@ -31,18 +31,6 @@
                 <SwarmLightingWidget v-bind:swarmNumber="3" swarmNumberString="Three" class="col-4" />
             </div>
         </div>
-        <!-- these APIs got cut so do not exist!
-        <div class="extra-lights-section row">
-            <div class="col-6">
-                <label><span class="icon">👀</span> Big Bug Eyes</label>
-                <ToggleButton labels />
-            </div>
-            <div class="col-6">
-                <label for="benchBrightness"><span class="icon">💺</span> Set Bench Brightness:</label>
-                <input type="range" name="benchBrightness" id="benchBrightness" />
-            </div>
-        </div>
-        -->
         <button class="btn btn-primary apply-changes-button">💡Apply Changes</button>
     </div>
 </template>

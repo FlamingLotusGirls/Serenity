@@ -8,10 +8,6 @@
                 <ColorPicker class="color-slider" color="#ff0000" v-model="selectedColor" v-on:input="saveSwarmSettings" />
             </div>
             <div>
-                <label for="swarmBrightness">Set Brightness:</label>
-                <input type="range" name="swarmBrightness" class="swarm-brightness-control" id="swarmBrightness" v-model="swarmBrightness" v-on:change="saveSwarmSettings" />
-            </div>
-            <div>
                 <label for="blinkPattern">Set a Blink Pattern (tap to turn on or off)</label>
                 <PatternToggleSet v-bind:patternLength="10" v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
             </div>
@@ -45,7 +41,6 @@ export default {
     data() {
         return {
             selectedColor: '#ff0000',
-            swarmBrightness: 100,
             blinkPattern: new Array(10).fill(false)
         };
     },
@@ -85,8 +80,5 @@ export default {
 .swarm-lighting-widget label {
     display: block;
     margin-top: 6px;
-}
-.swarm-brightness-control {
-    width: 100%;
 }
 </style>

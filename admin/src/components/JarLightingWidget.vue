@@ -8,8 +8,6 @@
             <select class="custom-select">
                 <option value="0" selected>soothingFlow</option>
             </select>
-            <label for="jarBrightness">Set {{bugName}}'s Jar Brightness:</label>
-            <input type="range" name="jarBrightness" class="jar-brightness-control" id="jarBrightness" />
         </div>
     </div>
 </template>
@@ -38,8 +36,5 @@ export default {
 }
 .jar-lighting-widget .custom-select {
     margin-bottom: 12px;
-}
-.jar-brightness-control {
-    width: 100%;
 }
 </style>
