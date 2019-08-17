@@ -91,7 +91,7 @@ example:
 
 ## Zones
 
-GET /audio/zones - JSON object with the set of SINKs, with the key being the name, and objects being the values
+GET /audio/zones - JSON object with the set of ZONEs, with the key being the name, and objects being the values
 
 This is also the way to get the list of zones, if you want to double check
 

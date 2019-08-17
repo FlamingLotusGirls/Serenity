@@ -8,8 +8,9 @@
 	  "sa6",
 	  "sa7"
   ],
-  "dataDir": "data"
+  "dataDir": "data",
   "soundscapeDir": "data/scapes/",
+  "currentScape": "data/scapes/mostrecent.json",
   "sinks": [
   	"PergolaRight1",
   	"PergolaRight2",
