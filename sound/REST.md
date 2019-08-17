@@ -6,6 +6,8 @@ of there.
 In terms of interfaces, there will be a number of SINKS. We will adopt the PulseAudio definition,
 where a SOURCE is INPUT ( like a microphone ), and a SINK is a thing that plays audio ( like a speaker ).
 
+**NOTE: All PUTs and POSTs expect JSON object format.**
+
 ## Sinks
 
 Sinks are speakers, but they are also zones of speakers.
@@ -95,6 +97,8 @@ GET /audio/zones - JSON object with the set of ZONEs, with the key being the nam
 
 This is also the way to get the list of zones, if you want to double check
 
+Zones values are always set through the scape, so use that.
+
 ```
 {
 	"LeftPergola": {
@@ -109,19 +113,7 @@ This is also the way to get the list of zones, if you want to double check
 }
 ```
 
-PUT /audio/zones - Similar JSON object with values. If a SINK is omitted, its OLD value is retained
 
-example:
-```
-{
-	"LeftPergola": {
-		"volume": 50
-	},
-	"RightPergola": {
-		"volume": 45
-	}
-}
-```
 
 ## Effects
 
@@ -173,9 +165,12 @@ GET /audio/backgrounds
 
 Returns a list of the background names that have been loaded.
 
-( It is considered "wrong" to return an array. OK to propose other. )
+```
+{
+	"names": [ "Ambient1", "Ambient2", "Texas", "Bulgaria" ]
 
-[ "Ambient1", "Ambient2", "Texas", "Bulgaria" ]
+}
+```
 
 GET /audio/background
 

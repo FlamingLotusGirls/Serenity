@@ -1,11 +1,12 @@
 
-const fs = require('fs')
+const fs = require('fs');
 
-const express = require('express')
-const app = express()
-app.use(express.json())
+const express = require('express');
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // I think this means we support that too
 
-const port = 3000
+const port = 3000;
 
 // https://codeburst.io/node-js-best-practices-smarter-ways-to-manage-config-files-and-variables-893eef56cbef
 const config = require('./data/config.json')
@@ -26,7 +27,7 @@ function scape_init() {
 		rawdata = fs.readFileSync(config.soundscapeDir + 'default.json');
 	}
 	var s = JSON.parse(rawdata);
-	console.log(s);
+	//console.log(s);
 	return(s);
 }
 
@@ -52,13 +53,42 @@ g_scape = scape_init();
 //
 
 
-
+// 
 app.get('/audio/backgrounds', (req, res) => {
 	res.json(config.backgrounds)
 })
 
-app.put('/audio/backgrounds', (req, res) => {
-	res.send('Got a PUT audio backgrounds request')
+// the current playing
+app.get('/audio/background', (req,res) => {
+	res.json(g_scape.background);
+})
+
+app.put('/audio/background', (req, res) => {
+	console.log('got a PUT audio background request');
+	console.log(req.body);
+
+	if (req.body.hasOwnProperty('name') == false) {
+		res.status(400);
+		res.send('background must have a name');
+		return;
+	}
+	if (req.body.hasOwnProperty('volume') == false) {
+		res.status(400);
+		res.send('background must have a volume');
+		return;
+	}
+	if (config.backgrounds.names.includes(req.body.name) == false) {
+		res.status(400);
+		res.send('name is not a supported value');
+		return;
+	}
+
+	g_scape.background.name = req.body.name;
+	g_scape.background.volume = req.body.volume;
+
+	// TODO: notify all players of new background
+
+	res.send('OK')
 })
 
 // Returns the current list of sounscapes as an array
@@ -90,7 +120,6 @@ app.put('/audio/sinks', (req, res) => {
 app.get('/', (req, res) => res.send('Hello World from SoundAdmin!'))
 
 app.listen(port, () => {
-	console.log(`example app listening on port ${port}!`)
-	console.log(config.soundscapeDir)
+	console.log(`SoundAdmin listening on port ${port}`)
 })
 

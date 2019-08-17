@@ -10,7 +10,9 @@
   ],
   "dataDir": "data",
   "soundscapeDir": "data/scapes/",
-  "currentScape": "data/scapes/mostrecent.json",
+  "currentScape": "data/scapes/recentScape.json",
+  "currentSinks": "data/",
+
   "sinks": [
   	"PergolaRight1",
   	"PergolaRight2",
@@ -33,10 +35,11 @@
   	"Jars",
   	"Depot"
   ],
-  "backgrounds": [
-  	{ "name": "Austin", "file": "austin.mp3" },
-  	{ "name": "Ambient1", "file": "ambient2.mp3" }
-  ],
+  "backgrounds": {
+    "names": ["Austin", "Ambient1"],
+    "Austin": {"file": "Austin.mp3"},
+    "Ambient1": {"file": "ambient1.wav"}
+  },
   "effects": [
     { "name": "crickets", "l1": "crickets-1.mp3", "l2": "crickets-2.mp3", "l3": "crickets-3.mp3"},
     { "name": "katydids", "l1": "katydids-1.mp3", "l2": "katydids-2.mp3", "l3": "katydids-3.mp3"}
