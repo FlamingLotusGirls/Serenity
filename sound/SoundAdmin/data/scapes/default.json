@@ -1,6 +1,6 @@
 {
 	"background": {
-		"name": "Ambient",
+		"name": "Ambient2",
 		"volume": 50
 	},
 	"effects": {
@@ -8,7 +8,7 @@
 			"intensity": 3,
 			"volume": 50
 		},
-		"crickets1": {
+		"birds": {
 			"intensity": 2,
 			"volume": 45
 		}

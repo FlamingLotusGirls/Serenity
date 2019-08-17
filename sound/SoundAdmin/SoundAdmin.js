@@ -79,7 +79,7 @@ app.put('/audio/background', (req, res) => {
 	}
 	if (config.backgrounds.names.includes(req.body.name) == false) {
 		res.status(400);
-		res.send('name is not a supported value');
+		res.send(req.body.name + ' is not a supported name');
 		return;
 	}
 
@@ -102,11 +102,66 @@ app.post('/audio/soundscapes', (req, res) => {
 })
 
 app.get('/audio/effects', (req,res) => {
-	res.send('got a GET request for the effects')
+	//console.log(" getting effects ");
+	var effects = {};
+	effects.names = config.effects.names;
+	for (const [key, value] of Object.entries(g_scape.effects)) {
+		if ( (value.volume > 0) &&
+			 (value.intensity > 0) ) {
+			effects[key] = value;
+		}
+	}
+	//console.log(effects);
+	res.send(effects)
 })
 
 app.put('/audio/effects', (req,res) => {
-	res.send('got a PUT request for the effects')
+	//console.log('got a PUT effects request');
+	//console.log(req.body);
+
+	// Validate input
+	for (const [key, value] of Object.entries(req.body)) {
+		console.log(' validating %s object %s ',key,JSON.stringify(value));
+		// is the name valid
+		if (config.effects.names.includes(key) == false) {
+			res.status(400);
+			res.send(key + ' is not a supported name')
+			return;
+		}
+		if (value.hasOwnProperty('intensity') == false) {
+			res.status(400);
+			res.send(key + ' must have intensity')
+			return;
+		}
+		if ((value.intensity > 3) || (value.intensity < 0)) {
+			res.status(400);
+			res.send(key + ' intensity out of range');
+			return;
+		}
+		if (value.hasOwnProperty('volume') == false) {
+			res.status(400);
+			res.send(key + ' must have volume')
+			return;
+		}
+		if ((value.volume > 100) || (value.volume < 0)) {
+			res.status(400);
+			res.send(key + ' volume out of range');
+			return;
+		}
+	}
+
+	// valid, replace
+	g_scape.effects = {};
+	for (const [key, value] of Object.entries(req.body)) {
+		if ( (value.volume > 0) &&
+			 (value.intensity > 0) ) {
+			g_scape.effects[key] = value;
+		}
+	}
+
+	// Todo: update sound players
+
+	res.send("OK")
 })
 
 app.get('/audio/zones', (req, res) => {
