@@ -1,20 +1,14 @@
 <template>
   <!-- for accessibility etc, would be better if this was actually a checkbox input underneath -->
-  <button class="pattern-toggle-button" v-on:click="toggleState" v-bind:class="{ lit: lit }"></button>
+  <button class="pattern-toggle-button" v-on:click="toggleState" v-bind:class="{ lit: value }"></button>
 </template>
 
 <script>
 export default {
-  props: ['initiallyLit', 'patternIndex'],
-  data() {
-    return {
-      lit: this.initiallyLit
-    }
-  },
+  props: ['value', 'patternIndex'],
   methods: {
     toggleState: function() {
-        this.lit = !this.lit;
-        this.$emit('toggle-state-changed', this.lit, this.patternIndex);
+      this.$emit('input', !this.value);
     }
   }
 };

@@ -9,7 +9,7 @@
             </div>
             <div>
                 <label for="blinkPattern">Set a Blink Pattern (tap to turn on or off)</label>
-                <PatternToggleSet v-bind:patternLength="10" v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
+                <PatternToggleSet v-model="blinkPattern" v-on:input="saveSwarmSettings"></PatternToggleSet>
             </div>
             <!-- light programs don't exist currently
             <label>Select a Light Program:</label>
@@ -47,7 +47,6 @@ const zeroPad = function(number, width) {
 
 // TODO: put this into a util file so it can be shared
 const rgbToHex = function(r, g, b) {
-    console.log('rgb to hex: ', r, g, b);
     const componentToHex = (component) => {
         return zeroPad(Math.round(component).toString(16), 2);
     };
@@ -67,14 +66,12 @@ export default {
         // fetch current settings
         return getFireflyLEDs()
             .then((allSettings) => {
-                console.log('got firefly LEDs result', allSettings);
                 let swarmSettings = allSettings.find((settings) => {
                     return settings.board_id === this.swarmNumber;
                 });
 
                 this.selectedColor = rgbToHex(swarmSettings.color[0] * 255, swarmSettings.color[1] * 255, swarmSettings.color[2] * 255);
-                console.log('this swarm settings are ', swarmSettings);
-                console.log(`so selected color is ${this.selectedColor}`)
+                this.blinkPattern = swarmSettings.pattern.split('').map(c => (c === '1') ? true : false);
             }, error => {
                 alert(error);
             });
