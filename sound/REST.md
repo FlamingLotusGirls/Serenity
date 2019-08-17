@@ -211,24 +211,32 @@ by the server ( and then having a name internally )
 GET /audio/soundscapes - returns a JSON array of soundscapes. For simplicity, we will use the
 
 ```
-[ "MyScape", "BrianScape", "Muzzy" ]
+{
+	"names": ["MyScape", "BrianScape", "Muzzy"]
+}
 ```
 
-DELETE /audio/soundscapes/<id>
+DELETE /audio/soundscapes/<name>
 
 Removes this Soundscape from the server system.
 
-POST /audio/soundscapes/<id> - Create a new soundscape with that ID, using the format below.
+POST /audio/soundscapes/<name> - Create a new soundscape with that Name, using the format below.
 
 NOTE: for safety reasons, we are not supporting overwriting a soundscape. The server will inforce
 that if a soundscape already exists, an attempt to write the values a second time will return an error.
 If you wish to set the values to something new, you must DELETE then POST.
 
-DELETE /soundscapes/<id> - deletes the soundscape with given ID
+### Soundscape
 
-GET /soundscapes/current - returns the JSON object of the current settings
+Soundscape is the current playing one. This persists over server restarts and everything. 
 
-PUT /soundscapes/current - takes as param a JSON blob containing some or all settings. Server updates current settings with whatever properties are set in the update object, leaving other properties untouched, and returns the current soundscape after updates are applied.
+GET /audio/soundscape - returns the JSON object of the current settings
+
+PUT /audio/soundscape - takes as param a JSON blob containing some or all settings. Server updates current settings with whatever properties are set in the update object, leaving other properties untouched, and returns the current soundscape after updates are applied.
+
+### Default Soundscapes
+
+Brian is not so sure about the idea of resetting the default. The default should be baked in. Let's talk.
 
 GET /soundscapes/default - returns the ID of the default soundscape
 
