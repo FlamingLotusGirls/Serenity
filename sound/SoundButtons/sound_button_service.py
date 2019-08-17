@@ -2,7 +2,7 @@ from gpiozero import Button
 import requests
 
 from time import sleep
-SOUND_SERVER = "localhost:8000"
+SOUND_SERVER = "localhost:9000"
 
 buttons = [
     # Bank 1
