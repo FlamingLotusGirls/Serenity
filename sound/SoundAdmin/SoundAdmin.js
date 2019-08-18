@@ -1,10 +1,12 @@
 
 const fs = require('fs');
-
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // I think this means we support that too
+app.use(cors());
 
 const port = 3000;
 
@@ -405,4 +407,3 @@ app.get('/', (req, res) => res.send('Hello World from SoundAdmin!'))
 app.listen(port, () => {
 	console.log(`SoundAdmin listening on port ${port}`)
 })
-
