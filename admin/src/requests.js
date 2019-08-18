@@ -277,7 +277,7 @@ const getSoundscapesList = function() {
             })
             .then(res => res.json())
             .then(result => {
-                return resolve(result);
+                return resolve(result.names);
             }, error => {
                 // triggers only on network errors, not unsuccessful responses
                 return reject(`Failed to fetch list of soundscapes with error ${error}`);
