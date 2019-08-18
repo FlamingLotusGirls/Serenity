@@ -1,15 +1,7 @@
 <template>
     <div class="sound-page container">
         <div class="soundscape-row">
-            <div class="soundscape-selector col-12">
-                <label for="soundscapeName">Choose a Soundscape to Play:</label>
-                <select class="custom-select" name="soundscapeName" id="soundscapeName">
-                    <option value="0" selected>Texas Hill Country</option>
-                    <option value="1">Charlie's Cool Soundscape</option>
-                    <option value="2">Lots and lots of crickets</option>
-                    <option value="3">Burn Baby Burn</option>
-                </select>
-            </div>
+            <SoundscapeSelector class="col-12" />
         </div>
         <hr>
         <div class="main-section row">
@@ -29,8 +21,17 @@
             <div class="right-columns col-8">
                 <div class="ambient-tracks row">
                     <div class="col-6">
+                        <label for="ambientTrackName">Select An Ambient Track:</label>
+                        <select class="custom-select" name="ambientTrackName" id="ambientTrackName">
+                            <option value="0" selected>soothingFlow</option>
+                            <option value="1">Charlie's Cool Soundscape</option>
+                            <option value="2">Lots and lots of crickets</option>
+                            <option value="3">Burn Baby Burn</option>
+                        </select>
                     </div>
                     <div class="col-6">
+                        <label for="ambientTrackName">Set Ambient Track Volume:</label>
+                        <input type="range" />
                     </div>
                 </div>
                 <p>
@@ -94,6 +95,7 @@
 <script>
 import BalanceControl from './BalanceControl';
 import SoundSnippetButton from './SoundSnippetButton';
+import SoundscapeSelector from './SoundscapeSelector';
 
 export default {
     data: function() {
@@ -103,7 +105,8 @@ export default {
     },
     components: {
         BalanceControl,
-        SoundSnippetButton
+        SoundSnippetButton,
+        SoundscapeSelector
     },
     methods: {
     }
