@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // I think this means we support that too
 app.use(cors());
 
-const port = 3000;
+const port = 9000;
 
 // https://codeburst.io/node-js-best-practices-smarter-ways-to-manage-config-files-and-variables-893eef56cbef
 const config = require('./data/config.json')
