@@ -149,9 +149,8 @@ app.get('/audio/soundscapes', (req, res) => {
 
 // create a new soundscale with id 'id' using the current senttings
 //if no object is passed in, or with the passed in object
-app.post('/audio/soundscapes/*', (req, res) => {
-
-	var id = req.path.replace('/audio/soundscapes/','')
+app.post('/audio/soundscapes/:id', (req, res) => {
+	var id = req.params.id;
 	// if exists fail
 	var fn = config.soundscapeDir+id+'.json';
 	if (fs.existsSync(fn)) {
@@ -174,25 +173,27 @@ app.post('/audio/soundscapes/*', (req, res) => {
 })
 
 // Get any named one... and make it current or not?
-app.get('/audio/soundscapes/*', (req, res) => {
-	var id = req.path.replace('/audio/soundscapes/','')
-	var fn = config.soundscapeDir+id+'.json';
-	if (fs.existsSync(fn) == false) {
-		res.status(400);
-		res.send(id + ' does not exist')
-		return;
-	}
+app.get('/audio/soundscapes/:id', (req, res) => {
+    const fileName = config.soundscapeDir + req.params.id + '.json';
 
-	var rawdata = fs.readFileSync(fn, JSON.stringify(g_scape));
-	var ret = JSON.parse(rawdata)
-	// if you want to also make it current, 
-	// just set it to g_scape and flush
-	res.send(ret);
+    return fs.readFile(fileName, function(err, data) {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(404);
+            } else {
+                res.status(500);
+            }
+
+            return res.send(`Error reading soundscape file ${fileName}: ${err.message}`);
+        }
+
+        return res.send(data);
+    });
 })
 
 // Delete the soundscape /audio/soundscapes/NAME
-app.delete('/audio/soundscapes/*', (req, res) => {
-	var id = req.path.replace('/audio/soundscapes/','')
+app.delete('/audio/soundscapes/:id', (req, res) => {
+	var id = req.params.id;
 	var fn = config.soundscapeDir+id+'.json';
 	if (fs.existsSync(fn) == false) {
 		res.status(400);
