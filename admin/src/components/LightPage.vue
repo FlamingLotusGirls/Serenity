@@ -2,12 +2,9 @@
     <div class="lights-page container">
         <div class="jars-section">
             <div class="jars-header row">
-                <div class="col-8 align-self-left">
+                <div class="col-12 align-self-left">
                     <h2><img class="jars-icon" src="/images/firefly-jar.png"></img> Jars</h2>
                     <a class="view-color-sources-link" href="#">view color palette sources</a>
-                </div>
-                <div class="col-4 align-self-right synchronize-column">
-                    <button class="btn btn-primary">Save Jars</button>
                 </div>
             </div>
             <div class="jars-content row">
@@ -18,11 +15,8 @@
         </div>
         <div class="small-bugs-section">
             <div class="small-bugs-header row">
-                <div class="col-8 align-self-left">
+                <div class="col-12 align-self-left">
                     <h2><img class="small-bugs-icon" src="/images/firefly.png"></img> Small Bugs</h2>
-                </div>
-                <div class="col-4 align-self-right synchronize-column">
-                    <button class="btn btn-primary">Save Swarms</button>
                 </div>
             </div>
             <div class="small-bugs-content row">
@@ -31,7 +25,6 @@
                 <SwarmLightingWidget v-bind:swarmNumber="3" swarmNumberString="Three" class="col-4" />
             </div>
         </div>
-        <button class="btn btn-primary apply-changes-button">💡Apply Changes</button>
     </div>
 </template>
 
@@ -64,9 +57,6 @@ export default {
 .view-color-sources-link {
     margin-top: 20px;
     margin-left: 40px;
-}
-.synchronize-column {
-    text-align: right;
 }
 .lights-page h2 {
     display: inline-block;
