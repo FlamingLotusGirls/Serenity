@@ -217,16 +217,16 @@ app.get('/audio/soundscape', (req, res) => {
 
 // Update the current soundscape
 app.post('/audio/soundscape', (req, res) => {
-	if (req.hasOwnProperty('background')) {
-		if ( background_put ( req.background ) == false )
+	if (req.body.background) {
+		if (!background_put(req.body.background, res))
 			return;
 	}
-	if (req.hasOwnProperty('effects')) {
-		if ( effects_put ( req.effects ) == false )
+	if (req.body.effects) {
+		if (!effects_put(req.body.effects, res))
 			return;
 	}
-	if (req.hasOwnProperty('zones')) {
-		if ( zones_put ( req.zones ) == false )
+	if (req.body.zones) {
+		if (!zones_put(req.body.zones, res))
 			return;
 	}
 

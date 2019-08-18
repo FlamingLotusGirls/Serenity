@@ -12,22 +12,16 @@ export default {
     },
     computed: {
         classObject: function() {
-            switch (this.activationLevel) {
-                case 0:
-                    return {};
-                case 1:
-                    return { 'half-activated': true };
-                case 2:
-                    return { 'full-activated': true };
-
-                default:
-                    return {};
+            if (this.activationLevel === 0) {
+                return {};
+            } else {
+                return `intensity-${this.activationLevel}`;
             }
         }
     },
     methods: {
         onClick: function() {
-            if (this.activationLevel >= 2) {
+            if (this.activationLevel >= 3) {
                 this.activationLevel = 0;
             } else {
                 this.activationLevel++;
@@ -46,10 +40,13 @@ export default {
         padding: 10px 25px;
         margin: 20px 12px 0 0;
     }
-    .sound-snippet-button.half-activated {
+    .sound-snippet-button.intensity-1 {
         background: #d8f0fe;
     }
-    .sound-snippet-button.full-activated {
+    .sound-snippet-button.intensity-2 {
+        background: #a7dfff;
+    }
+    .sound-snippet-button.intensity-3 {
         background: #79d5ff;
     }
 </style>
