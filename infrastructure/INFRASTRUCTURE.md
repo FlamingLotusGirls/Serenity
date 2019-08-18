@@ -36,3 +36,8 @@ Addresses are as follows:
   - **Jar LED webservice:** 8000
   - **Audio webservice:** 9000
 All services use REST protocols. 
+
+##Raspberry Pi Installation Notes
+- We are currently using BUSTER.
+- In order to get the led code running, you also need the fadecandy server. It can be downloaded from https://github.com/scanlime/fadecandy.git
+- There are dependency issues with numpy if you just pip3 install numpy. Use sudo apt-get install python3-numpy instead 
