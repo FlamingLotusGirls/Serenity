@@ -3,8 +3,8 @@ Description=FLG Serenity Jar LED Service. Controls LEDs in jars
 After=network.target
 
 [Service]
-ExecStart=/home/flaming/serenity/leds/jars/jar_service.py
-WorkingDirectory=/home/flaming/serenity/leds/jars
+ExecStart=/usr/bin/python3 /home/flaming/Serenity/leds/jars/jar_service.py
+WorkingDirectory=/home/flaming/Serenity/leds/jars
 Restart=Always
 User=flaming
 
