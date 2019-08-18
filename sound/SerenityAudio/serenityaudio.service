@@ -3,12 +3,11 @@ Description=Flaming Lotus Girls 2019 Serenity SoundScape Server
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/serenity/sound/SerenityAudio
-ExecStart=/home/pi/serenity/sound/SerenityAudio/saplay
+User=flaming
+WorkingDirectory=/home/flaming/Serenity/sound/SerenityAudio
+ExecStart=/home/flaming/Serenity/sound/SerenityAudio/saplay
 Restart=always
 RestartSec=2
 
-# a little confused about this, I think I'm a user service but wtf is that really
 [Install]
 WantedBy=multi-user.target
