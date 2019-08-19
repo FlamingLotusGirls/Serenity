@@ -54,6 +54,12 @@ A soundscape is a collection of:
 - A single Background
 - A set of Zone volumes
 - A set of Sink volumes
+- A master volume
+
+## Master
+
+There may be parameters that effect everything, currently we only have a master volume.
+Thus the master object ( in the scape and normally ) just has the one parameter.
 
 ## Buttons
 
@@ -224,6 +230,16 @@ and 0 is the right button and 1 is the left button.
 
 There is a configuration which maps a given button-group to an effect in the config file,
 and we'll do the "business logic" ( like figuring the "clamping" ) in SoundAdmin.
+
+## Master
+
+GET /audio/master
+
+Returns a single JSON object which has a Volume field.
+
+PUT /audio/master
+
+Send a single JSON object which has a volume field.
 
 ## Soundscapes
 

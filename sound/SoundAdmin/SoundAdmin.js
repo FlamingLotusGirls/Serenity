@@ -229,6 +229,15 @@ app.post('/audio/soundscape', (req, res) => {
 		if (!zones_put(req.body.zones, res))
 			return;
 	}
+	if (req.body.master) {
+		var master = req.body.master;
+		if ((master.volume > 100) || (master.volume < 0)) {
+			res.status(400);
+			res.send(key + ' volume out of range');
+			return;
+		}
+		g_scape.master = master;
+	}
 
 	scape_flush(g_scape);
 
@@ -351,6 +360,29 @@ function zones_put(z, res) {
 	return(true);
 
 }
+
+app.get('/audio/master', (req,res) => {
+	res.send( g_scape.master )
+})
+
+app.put('/audio/master', (req, res) => {
+	//console.log(' setting the master object ')
+	//console.log(req.body)
+	var master = req.body
+
+	if ((master.volume > 100) || (master.volume < 0)) {
+		res.status(400);
+		res.send(key + ' volume out of range');
+		return(false);
+	}
+
+	g_scape.master = master;
+
+	scape_flush(g_scape);
+
+	res.send('OK')
+
+})
 
 
 // set zones only through the put scape stuff

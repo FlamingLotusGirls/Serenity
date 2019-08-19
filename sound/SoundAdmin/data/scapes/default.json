@@ -38,5 +38,8 @@
 		"Depot": {
 			"volume": 40
 		}
+	},
+	"master": {
+		"volume": 50
 	}
 }
