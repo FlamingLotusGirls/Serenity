@@ -4,7 +4,7 @@
   "description": "Coordinating HTTP server for the Serenity Sound system",
   "private": true,
   "engines": {
-    "node": "^10.15.3",
+    "node": "10.15.*",
     "yarn": "*"
   },
   "main": "SoundAdmin.js",
