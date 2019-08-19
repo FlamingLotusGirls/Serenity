@@ -4,30 +4,26 @@
 
 <script>
 export default {
-    props: ['soundName'],
-    data: function() { 
-        return {
-            activationLevel: 0
-        };
-    },
+    props: ['value'],
     computed: {
         classObject: function() {
-            if (this.activationLevel === 0) {
+            if (this.value === 0) {
                 return {};
             } else {
-                return `intensity-${this.activationLevel}`;
+                return `intensity-${this.value}`;
             }
         }
     },
     methods: {
         onClick: function() {
-            if (this.activationLevel >= 3) {
-                this.activationLevel = 0;
+            let newValue;
+            if (this.value >= 3) {
+                newValue = 0;
             } else {
-                this.activationLevel++;
+                newValue = this.value + 1;
             }
 
-            this.$emit('activation-level-changed');
+            this.$emit('input', newValue);
         }
     }
 };

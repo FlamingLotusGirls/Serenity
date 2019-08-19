@@ -1,5 +1,5 @@
 <template>
-    <vue-slider :marks="marks" v-bind:value="value" v-on:change="onValueChanged" />
+    <vue-slider :marks="marks" :duration="0.25" v-bind:value="value" v-on:change="onValueChanged" />
 </template>
 
 <script>

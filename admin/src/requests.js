@@ -336,13 +336,14 @@ const deleteAudioSoundscape = function(name) {
     });
 };
 
-const saveNewAudioSoundscape = function(soundscapeObject) {
-    const name = soundscapeObject.name;
-
+const saveNewAudioSoundscape = function(name, soundscapeObject) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/soundscapes/${name}`, {
             method: 'POST',
-            body: JSON.stringify(soundscapeObject)
+            body: JSON.stringify(soundscapeObject),
+            headers: {
+                'Content-Type': 'application/json'
+              },
         })
         .then(res => {
             // handle non-success responses

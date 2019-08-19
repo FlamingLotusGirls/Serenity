@@ -1,6 +1,6 @@
 <template>
     <div class="soundscape-selector col-12">
-        <label for="soundscapeName">Choose a Soundscape to Load:</label>
+        <label for="soundscapeName">Choose a Saved Soundscape to Load:</label>
         <select class="custom-select" name="soundscapeName" id="soundscapeName" v-model="selectedSoundscapeName">
             <option v-for="soundscapeName in soundscapeNames" v-bind:value="soundscapeName">{{soundscapeName}}</option>
         </select>

@@ -36,24 +36,32 @@
                 </p>
                 <label>Set individual sound densities and volumes</label>
                 <div class="single-sound-buttons">
-                    <IndividualSoundControl v-for="(effectSettings, effectName) in soundscape.effects" v-bind:effectName="effectName" v-bind:volume="effectSettings.volume" v-bind:intensity="effectSettings.intensity" />
+                    <EffectControl
+                        v-for="(effectSettings, effectName) in soundscape.effects"
+                        v-bind:effectName="effectName"
+                        v-bind:volume="effectSettings.volume"
+                        v-bind:intensity="effectSettings.intensity"
+                        v-on:update-volume="updateVolume"
+                        v-on:update-intensity="updateIntensity"
+                        />
                 </div>
             </div>
         </div>
+        <hr>
         <div class="save-soundscape-section row">
-            <input type="text" placeholder="Enter a unique name">
-            <button class="btn btn-primary" type="submit">Save This Soundscape</button>
+            <input type="text" placeholder="Enter a unique name" v-model="newSoundscapeName" >
+            <button class="btn btn-primary" type="submit" v-on:click="saveNewSoundscape">Save This Soundscape</button>
         </div>
     </div>
 </template>
 
 <script>
-import { getAudioZones, getCurrentSoundscape, setCurrentSoundscapeSettings, getAudioBackgroundNames } from '../requests';
+import { getAudioZones, getCurrentSoundscape, setCurrentSoundscapeSettings, getAudioBackgroundNames, saveNewAudioSoundscape } from '../requests';
 import BalanceControl from './BalanceControl';
 import SoundSnippetButton from './SoundSnippetButton';
 import SoundscapeSelector from './SoundscapeSelector';
 import VolumeSlider from './VolumeSlider';
-import IndividualSoundControl from './IndividualSoundControl';
+import EffectControl from './EffectControl';
 
 export default {
     data: function() {
@@ -66,13 +74,13 @@ export default {
                 },
                 effects: {},
                 zones: {}
-            }
+            },
+            newSoundscapeName: ''
         };
     },
     beforeMount() {
         getCurrentSoundscape()
             .then(soundscape => {
-                    console.log('retrieved soundscape', soundscape);
                     this.soundscape = soundscape;
                 }, error => {
                     alert(error);
@@ -80,7 +88,6 @@ export default {
 
         getAudioBackgroundNames()
             .then(names => {
-                    console.log('retrieved backrounds', names);
                     this.backgroundNames = names;
                 }, error => {
                     alert(error);
@@ -91,21 +98,35 @@ export default {
         SoundSnippetButton,
         SoundscapeSelector,
         VolumeSlider,
-        IndividualSoundControl
+        EffectControl
     },
     methods: {
         loadSoundscape(soundscape) {
             console.log('Loaded soundscape: ', soundscape);
             this.soundscape = soundscape;
+        },
+        saveNewSoundscape() {
+            saveNewAudioSoundscape(this.newSoundscapeName, this.soundscape)
+                .then(zones => {
+                        alert(`Saved new soundscape ${this.newSoundscapeName} successfully`);
+                    }, error => {
+                        alert(error);
+                    });
+        },
+        updateVolume(updateObj) {
+            this.soundscape.effects[updateObj.effectName].volume = updateObj.newValue;
+        },
+        updateIntensity(updateObj) {
+            this.soundscape.effects[updateObj.effectName].intensity = updateObj.newValue;
         }
     },
     watch: {
         soundscape: {
             handler() {
-                // save soundscape to the server
+                // save current soundscape changes to the server
                 setCurrentSoundscapeSettings(this.soundscape)
                     .then(zones => {
-                        console.log('Saved soundscape successfully: ' + JSON.stringify(this.soundscape));
+                        console.log('Updated current soundscape successfully: ' + JSON.stringify(this.soundscape));
                     }, error => {
                         alert(error);
                     });
@@ -123,10 +144,16 @@ export default {
 .bottom-section p {
     font-weight: bold;
 }
-.sound-page .individual-sound-control {
+.sound-page .effect-control {
     width: 48%;
     margin: 1%;
     display: inline-block;
+}
+.save-soundscape-section {
+    margin-top: 40px;
+}
+.save-soundscape-section input {
+    margin-right: 20px;
 }
 </style>
 
