@@ -10,7 +10,7 @@
   ],
   "dataDir": "data",
   "soundscapeDir": "data/scapes/",
-  "currentScape": "data/scapes/recentScape.json",
+  "currentScape": "data/recentScape.json",
   "defaultSink": "data/defaultSink.json",
   "currentSink": "data/recentSink.json",
   "soundDir":  "../flg_sound/",
