@@ -26,14 +26,17 @@
 		}
 	},
 	"zones": {
-		"LeftPergola": {
+		"PergolaLeft": {
 			"volume": 50
 		},
-		"RightPergola": {
+		"PergolaRight": {
 			"volume": 45
 		},
 		"Jars": {
 			"volume": 75
+		},
+		"Depot": {
+			"volume": 40
 		}
 	}
 }
