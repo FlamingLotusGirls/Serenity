@@ -1,7 +1,7 @@
 <template>
     <div class="sound-page container">
         <div class="soundscape-row">
-            <SoundscapeSelector class="col-12" />
+            <SoundscapeSelector class="col-12" v-on:load-soundscape="loadSoundscape"/>
         </div>
         <hr>
         <div class="main-section row">
@@ -12,10 +12,7 @@
                 </div>
                 <div class="zone-volume-controls">
                     <label>Set Zone Volume Controls:</label>
-                    <BalanceControl controllerId="pergolaleft">Pergola Left</BalanceControl>
-                    <BalanceControl controllerId="pergolaright">Pergola Right</BalanceControl>
-                    <BalanceControl controllerId="jars">Jars</BalanceControl>
-                    <BalanceControl controllerId="fueldepot">Fuel Depot</BalanceControl>
+                    <BalanceControl v-for="(zone, zoneName) in soundscape.zones" v-model="zone.volume">{{zoneName}}</BalanceControl>
                 </div>
             </div>
             <div class="right-columns col-8">
@@ -93,6 +90,7 @@
 </template>
 
 <script>
+import { getAudioZones, getCurrentSoundscape, setCurrentSoundscapeSettings } from '../requests';
 import BalanceControl from './BalanceControl';
 import SoundSnippetButton from './SoundSnippetButton';
 import SoundscapeSelector from './SoundscapeSelector';
@@ -100,8 +98,24 @@ import SoundscapeSelector from './SoundscapeSelector';
 export default {
     data: function() {
         return {
-            
+            soundscape: {
+                background: {
+                    name: 'Ambient2',
+                    volume: 100
+                },
+                effects: {},
+                zones: {}
+            }
         };
+    },
+    beforeMount() {
+        getCurrentSoundscape()
+            .then(soundscape => {
+                    console.log('retrieved soundscape', soundscape);
+                    this.soundscape = soundscape;
+                }, error => {
+                    alert(error);
+                })
     },
     components: {
         BalanceControl,
@@ -109,6 +123,24 @@ export default {
         SoundscapeSelector
     },
     methods: {
+        loadSoundscape(soundscape) {
+            console.log('Loaded soundscape: ', soundscape);
+            this.soundscape = soundscape;
+        }
+    },
+    watch: {
+        soundscape: {
+            handler() {
+                // save soundscape to the server
+                setCurrentSoundscapeSettings(this.soundscape)
+                    .then(zones => {
+                        console.log('Saved soundscape successfully with zones ' + JSON.stringify(this.soundscape.zones));
+                    }, error => {
+                        alert(error);
+                    });
+            },
+            deep: true
+        }
     }
 };
 </script>

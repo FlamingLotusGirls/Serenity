@@ -1,9 +1,10 @@
 <template>
     <div class="soundscape-selector col-12">
         <label for="soundscapeName">Choose a Soundscape to Load:</label>
-        <select class="custom-select" name="soundscapeName" id="soundscapeName" v-model="selectedSoundscapeName" v-on:change="loadSoundscape">
+        <select class="custom-select" name="soundscapeName" id="soundscapeName" v-model="selectedSoundscapeName">
             <option v-for="soundscapeName in soundscapeNames" v-bind:value="soundscapeName">{{soundscapeName}}</option>
         </select>
+        <button type="submit" class="btn btn-primary" v-on:click="loadSoundscape">Load</button>
     </div>
 </template>
 
@@ -31,8 +32,8 @@ export default {
         loadSoundscape() {
             getSoundscape(this.selectedSoundscapeName)
                 .then(soundscape => {
-                    console.log('loading soundscape ', soundscape);
                     this.$emit('load-soundscape', soundscape);
+                    this.selectedSoundscapeName = null;
                 }, error => {
                     alert(error);
                 });
@@ -47,6 +48,7 @@ export default {
 }
 .soundscape-selector select {
     width: auto;
+    margin-right: 16px;
 }
 </style>
 

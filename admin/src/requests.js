@@ -154,8 +154,19 @@ const getAudioZones = function() {
             return res;
             })
             .then(res => res.json())
-            .then(result => {
-                return resolve(result);
+            .then(zones => {
+                // if a soundscape has a zone with volume 0, it won't show up as an object prop
+                // but will show up in the names array, so pull from there
+                zones.names.forEach(function(zoneName) {
+                    if (typeof zones[zoneName] === 'undefined') {
+                        zones[zoneName] = { volume: 0 };
+                    }
+                });
+
+                // then get rid of zones.names so we don't read it as an extra zone itself
+                delete zones['names'];
+
+                return resolve(zones);
             }, error => {
                 // triggers only on network errors, not unsuccessful responses
                 return reject(`Failed to fetch audio zones with error ${error}`);
@@ -371,7 +382,7 @@ const getCurrentSoundscape = function() {
 const setCurrentSoundscapeSettings = function(newSettings) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/soundscape`, {
-            method: 'PUT',
+            method: 'POST',
             body: JSON.stringify(newSettings)
         })
         .then(res => {
