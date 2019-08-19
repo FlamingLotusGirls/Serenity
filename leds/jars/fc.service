@@ -3,10 +3,9 @@ Description=Launches Fade Candy OPC server. For Serenity
 After=network.target
 
 [Service]
-ExecStart=/home/flaming/serenity/jars/leds/start_fc_server.sh
-WorkingDirectory=/home/flaming/serenity/jars/leds
+ExecStart=/home/flaming/Serenity/jars/leds/start_fc_server.sh
+WorkingDirectory=/home/flaming/Serenity/jars/leds
 Restart=Always
-User=flaming
 
 [Install]
 WantedBy=multi-user.target
