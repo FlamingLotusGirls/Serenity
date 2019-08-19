@@ -1,3 +1,8 @@
+# json files for SoundAdmin keeping state
+#
+sound/SoundAdmin/data/scapes/recentScape.json
+sound/SoundAdmin/data/recentSink.json
+
 # Logs and databases #
 ######################
 log/
