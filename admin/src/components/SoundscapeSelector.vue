@@ -1,6 +1,6 @@
 <template>
     <div class="soundscape-selector col-12">
-        <label for="soundscapeName">Choose a Soundscape to Play:</label>
+        <label for="soundscapeName">Choose a Soundscape to Load:</label>
         <select class="custom-select" name="soundscapeName" id="soundscapeName" v-model="selectedSoundscapeName" v-on:change="loadSoundscape">
             <option v-for="soundscapeName in soundscapeNames" v-bind:value="soundscapeName">{{soundscapeName}}</option>
         </select>
@@ -29,7 +29,7 @@ export default {
     },
     methods: {
         loadSoundscape() {
-            getSoundscape()
+            getSoundscape(this.selectedSoundscapeName)
                 .then(soundscape => {
                     console.log('loading soundscape ', soundscape);
                     this.$emit('load-soundscape', soundscape);
