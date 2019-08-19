@@ -24,7 +24,7 @@ Addresses are as follows:
 - **Pergola Right Far**  192.168.1.15 
 - **Pergola Left Near** 192.168.1.16
 - **Pergola Left Far**  192.168.1.17
-- **Fuel Depot**        192.168.1.1
+- **Fuel Depot**        192.168.1.18
 
 ## Communications Protocol
 - Flame control is over an RS485 bus, using FLG's standard '!' protocol. See source code or FLG wiki for more information
