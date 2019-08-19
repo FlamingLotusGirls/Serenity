@@ -1,5 +1,5 @@
 {"1": [
-  {"point":[0,0,0], "region": "branch1"},
+  {"point":[0,0,0.1], "region": "branch1"},
   {"point":[0,1,0], "region": "branch1"},
   {"point":[0,2,0], "region": "branch1"},
   {"point":[0,3,0], "region": "branch1"},
@@ -419,7 +419,7 @@
   {"point":[35,63,0], "region": "branch8"}
  ],
  "2": [ 
-  {"point":[0,0,0], "region": "branch1"},
+  {"point":[0,0,0.1], "region": "branch1"},
   {"point":[0,1,0], "region": "branch1"},
   {"point":[0,2,0], "region": "branch1"},
   {"point":[0,3,0], "region": "branch1"},
@@ -818,7 +818,7 @@
   {"point":[35,61,0], "region": "branch8"}
  ],
  "3" : [
-  {"point":[0,0,0], "region": "branch1"},
+  {"point":[0,0,0.1], "region": "branch1"},
   {"point":[0,1,0], "region": "branch1"},
   {"point":[0,2,0], "region": "branch1"},
   {"point":[0,3,0], "region": "branch1"},
