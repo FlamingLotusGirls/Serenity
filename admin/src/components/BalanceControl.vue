@@ -27,6 +27,7 @@
 .balance-control {
     margin-top: 6px;
     margin-bottom: 32px;
+    max-width: 800px
 }
 .balance-control .slider-container {
     width: 60%;

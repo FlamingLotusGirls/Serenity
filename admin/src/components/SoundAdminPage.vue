@@ -1,61 +1,65 @@
 <template>
     <div class="sound-admin-page container">
-        <form class="row">
-            <div class="col-8">
-                <div class="row sound-admin-top-section">
-                    <div class="col-4 sound-admin-select-ambient-track">
-                        <label>Select An Ambient Track</label>
-                        <select class="custom-select">
-                            <option value="soothingFlow" selected>soothingFlow</option>
-                        </select>
-                    </div>
-                    <div class="col-8 sound-admin-overall-volume">
-                        <label>Set Overall Volume</label>
-                        <input type="range" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 sound-admin-select-sounds">
-                        <label>Select Sounds to Activate (up to 6)</label>
-                        <div>
-                            <input type="checkbox" /> Cricket
-                            <input type="range" />
-                        </div>
-                        <div>
-                            <input type="checkbox" /> Cicada
-                            <input type="range" />
-                        </div>
-                        <div>
-                            <input type="checkbox" /> Wind
-                            <input type="range" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-4 sound-admin-balance-controls">
-                <label>Set Speaker Balance Controls:</label>
+        <div class="row">
+            <div class="col-12 sound-admin-balance-controls">
+                <label>Set Individual Speaker Level Controls:</label>
                 <div class="balance-controls-list">
-                    <BalanceControl controllerId="leftpergolanear">Left Pergola Near</BalanceControl>
-                    <BalanceControl controllerId="leftpergolamid">Left Pergola Mid</BalanceControl>
-                    <BalanceControl controllerId="leftpergolafar">Left Pergola Far</BalanceControl>
-                    <BalanceControl controllerId="rightpergolanear">Right Pergola Near</BalanceControl>
-                    <BalanceControl controllerId="rightpergolamid">Right Pergola Mid</BalanceControl>
-                    <BalanceControl controllerId="rightpergolafar">Right Pergola Far</BalanceControl>
-                    <BalanceControl controllerId="metric">Metric</BalanceControl>
-                    <BalanceControl controllerId="brazen">Brazen</BalanceControl>
-                    <BalanceControl controllerId="john">John</BalanceControl>
-                    <BalanceControl controllerId="jar3">Jar 3</BalanceControl>
-                    <BalanceControl controllerId="fueldepot">Fuel Depot</BalanceControl>
+                    <BalanceControl v-for="(sinkObj, sinkName) in sinks" v-model="sinkObj.volume">{{sinkName}}</BalanceControl>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </template>
 
 <script>
 import BalanceControl from './BalanceControl';
+import { getSoundscapesList, getDefaultSoundscapeId, getAudioSinks, setAudioSinkVolumes } from '../requests';
 
 export default {
+    data: function() {
+        return {
+            soundscapeNames: [],
+            defaultSoundscapeName: null,
+            sinks: {}
+        };
+    },
+    beforeMount() {
+        getSoundscapesList()
+            .then(soundscapes => {
+                    this.soundscapeNames = soundscapes;
+                }, error => {
+                    alert(error);
+                });
+
+        getDefaultSoundscapeId()
+            .then(name => {
+                    this.defaultSoundscapeName = name;
+                    console.log('got default soundscape name ', this.defaultSoundscapeName);
+                }, error => {
+                    alert(error);
+                });
+
+        getAudioSinks()
+            .then(sinks => {
+                    this.sinks = sinks;
+                }, error => {
+                    alert(error);
+                });
+    },
+    watch: {
+        sinks: {
+            handler() {
+                // save sinks, since they've changed
+                setAudioSinkVolumes(this.sinks)
+                    .then(() => {
+                        console.log('Saved sink levels successfully');
+                    }, error => {
+                        alert(error);
+                    });
+            },
+            deep: true
+        }
+    },
     components: {
         BalanceControl
     }
@@ -81,9 +85,6 @@ export default {
 }
 .sound-admin-overall-volume input {
     width: 100%;
-}
-.sound-admin-balance-controls {
-    border-left: 1px solid rgb(151, 151, 151);
 }
 .sound-admin-balance-controls .balance-controls-list {
     padding-left: 20px;

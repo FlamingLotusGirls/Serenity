@@ -182,8 +182,19 @@ const getAudioSinks = function() {
             return res;
             })
             .then(res => res.json())
-            .then(result => {
-                return resolve(result);
+            .then(sinks => {
+                // if a soundscape has a sink with volume 0, it won't show up as an object prop
+                // but will show up in the names array, so pull from there
+                sinks.names.forEach(function(sinkName) {
+                    if (typeof sinks[sinkName] === 'undefined') {
+                        sinks[sinkName] = { volume: 0 };
+                    }
+                });
+
+                // then get rid of sinks.names so we don't read it as an extra sink itself
+                delete sinks['names'];
+
+                return resolve(sinks);
             }, error => {
                 // triggers only on network errors, not unsuccessful responses
                 return reject(`Failed to fetch audio sinks with error ${error}`);
@@ -195,7 +206,10 @@ const setAudioSinkVolumes = function(newSinkVolumes) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/sinks`, {
             method: 'PUT',
-            body: JSON.stringify(newSinkVolumes)
+            body: JSON.stringify(newSinkVolumes),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
         .then(res => {
             // handle non-success responses
@@ -267,7 +281,10 @@ const setAudioEffectSettings = function(newEffectSettings) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/effects`, {
             method: 'PUT',
-            body: JSON.stringify(newEffectSettings)
+            body: JSON.stringify(newEffectSettings),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
         .then(res => {
             // handle non-success responses
@@ -328,7 +345,10 @@ const setAudioBackground = function(newBackgroundObj) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/background`, {
             method: 'PUT',
-            body: JSON.stringify(newBackgroundObj)
+            body: JSON.stringify(newBackgroundObj),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
         .then(res => {
             // handle non-success responses
@@ -412,7 +432,7 @@ const saveNewAudioSoundscape = function(name, soundscapeObject) {
             body: JSON.stringify(soundscapeObject),
             headers: {
                 'Content-Type': 'application/json'
-              },
+            }
         })
         .then(res => {
             // handle non-success responses
@@ -500,6 +520,9 @@ const setDefaultSoundscapeId = function(newDefaultId) {
                 method: 'POST',
                 body: {
                     default: newDefaultId
+                },
+                headers: {
+                    'Content-Type': 'application/json'
                 }
             })
             .then(res => {
