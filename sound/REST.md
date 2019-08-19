@@ -55,6 +55,20 @@ A soundscape is a collection of:
 - A set of Zone volumes
 - A set of Sink volumes
 
+## Buttons
+
+There are a number of interactive buttons scattered around the peice.
+
+They send PUT requests to the endpoint /audio/buttons/button-group/button
+
+In that we expect there to be a pair of buttons, and the one on the left will take the 
+value of a given effect to 0, and the one on the right will increase it
+
+because it's always hard to tell how people will interact with a peice, changing this
+logic should be easy, so it's in one spot.... in this code. So just PUT to the
+endpoint in question, and SoundAdmin will have a configuration file that will 
+figure out what to do.
+
 # REST interface
 
 ## Sinks
@@ -200,6 +214,16 @@ Note: for style, we could use these as URL parameters intead of a JSON object. I
 	"volume": 75
 }
 ```
+
+## Buttons
+
+PUT /audio/buttons/:button-group/:button
+
+This signals that a button has been hit. We expect there to be two buttons in a group,
+and 0 is the right button and 1 is the left button.
+
+There is a configuration which maps a given button-group to an effect in the config file,
+and we'll do the "business logic" ( like figuring the "clamping" ) in SoundAdmin.
 
 ## Soundscapes
 

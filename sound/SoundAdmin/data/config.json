@@ -49,5 +49,13 @@
     "birds": { "file1": "birds_1.wav", "file2": "birds_2.wav", "file3": "birds_3.wav"},
     "frogs": { "file1": "frogs_1.wav", "file2": "frogs_2.wav", "file3": "frogs_3.wav"},
     "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"}
+  },
+  "buttons": {
+    "0": { "effect": "cicadas", "volume": 75 },
+    "1": { "effect": "crickets", "volume": 75 },
+    "2": { "effect": "frogs", "volume": 75 },
+    "3": { "effect": "birds", "volume": 75 },
+    "4": { "effect": "crickets", "volume": 75 },
+    "5": { "effect": "frogsAlt", "volume": 75 }
   }
 }

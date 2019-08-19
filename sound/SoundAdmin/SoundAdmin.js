@@ -367,8 +367,8 @@ app.get('/audio/sinks', (req, res) => {
 })
 
 app.put('/audio/sinks', (req, res) => {
-	console.log('got a PUT sinks request');
-	console.log(req.body);
+	//console.log('got a PUT sinks request');
+	//console.log(req.body);
 
 	// Validate input
 	for (const [key, value] of Object.entries(req.body)) {
@@ -401,6 +401,56 @@ app.put('/audio/sinks', (req, res) => {
 	// Todo: update sound players
 
 	res.send(g_sink)
+})
+
+
+// This is maybe a little weird.
+// There are 6 pairs of buttons on the sculpture
+// 1/1 and 1/2 ( which is a pair )
+// through
+// 6/1 and 6/2
+// When one gets hit, call this endpoint
+//
+// You don't have to put any data, putting to this means that button was hit
+//
+
+app.put('/audio/buttons/:bgroup/:button', (req, res) => {
+	var bgroup = req.params.bgroup;
+	var button = req.params.button;
+
+	// look up in Config
+
+	if (config.buttons.hasOwnProperty(bgroup) == false) {
+		res.status(400);
+		res.send('button group '+bgroup+' not defined in config');
+		return(false);
+	}
+	if ((button != "0") && (button != "1")) {
+		res.status(400);
+		res.send('button '+button+' not defined, only 0 and 1 allowed');
+		return(false);
+	}
+
+	var effect = config.buttons[bgroup].effect;
+
+	// off button
+	if (button == "0") {
+		g_scape.effects[effect].intensity = 0
+	}
+	else if ( button == "1") {
+		g_scape.effects[effect].intensity++ ;
+		if (g_scape.effects[effect].intensity > 3)
+			g_scape.effects[effect].intensity = 3;
+		if (g_scape.effects[effect].volume == 0) {
+			g_scape.effects[effect].volume = config.buttons[bgroup].volume;
+		}
+	}
+
+	//console.log(g_scape.effects[effect])
+
+	scape_flush(g_scape);
+
+	res.send('OK')
 })
 
 app.get('/', (req, res) => res.send('Hello World from SoundAdmin!'))
