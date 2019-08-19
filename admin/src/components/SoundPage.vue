@@ -8,7 +8,7 @@
             <div class="left-column col-4">
                 <div class="master-volume-control">
                     <label for="masterVolume">Set Master Volume:</label>
-                    <input type="range" name="masterVolume" id="masterVolume" />
+                    <input type="range" name="masterVolume" id="masterVolume" v-model="soundscape.master.volume" />
                 </div>
                 <div class="zone-volume-controls">
                     <label>Set Zone Volume Controls:</label>
@@ -73,7 +73,10 @@ export default {
                     volume: 100
                 },
                 effects: {},
-                zones: {}
+                zones: {},
+                master: {
+                    volume: 100
+                }
             },
             newSoundscapeName: ''
         };
