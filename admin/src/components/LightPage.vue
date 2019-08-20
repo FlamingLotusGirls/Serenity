@@ -8,9 +8,9 @@
                 </div>
             </div>
             <div class="jars-content row">
-                <JarLightingWidget bugName="Metric" class="col-4" />
-                <JarLightingWidget bugName="Brazen" class="col-4" />
-                <JarLightingWidget bugName="John" class="col-4" />
+                <JarLightingWidget bugName="Metric" jarIndex="0" class="col-4" />
+                <JarLightingWidget bugName="Brazen" jarIndex="1" class="col-4" />
+                <JarLightingWidget bugName="John" jarIndex="2" class="col-4" />
             </div>
         </div>
         <div class="small-bugs-section">

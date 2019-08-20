@@ -1,4 +1,4 @@
-import { fireControllerURL, smallFireflyLEDControllerURL, jarLEDControllerURL, soundControllerURL } from './appConfig';
+import { fireControllerURL, smallFireflyLEDControllerURL, jarLEDControllerURLs, soundControllerURL } from './appConfig';
 
 /* FIRE Requests */
 
@@ -102,13 +102,13 @@ const setFireflyLEDs = function(swarmNumber, sequence, colorObject) {
 
 /* JAR LED requests */
 
-const getJarLEDPatternLists = function() {
+const getJarLEDPatternLists = function(jarIndex) {
     return new Promise(function(resolve, reject) {
-        fetch(`${jarLEDControllerURL}/jar_leds/patterns`)
+        fetch(`${jarLEDControllerURLs[jarIndex]}/jar_leds/patterns`)
             .then(res => {
             // handle non-success responses
             if (!res.ok) {
-                return reject(`Unable to fetch list of jar LED patterns. Request failed with status ${res.status} ${res.statusText}`);
+                return reject(`Unable to fetch list of jar ${jarIndex} LED patterns. Request failed with status ${res.status} ${res.statusText}`);
             }
             return res;
             })
@@ -117,20 +117,20 @@ const getJarLEDPatternLists = function() {
                 return resolve(result);
             }, error => {
                 // triggers only on network errors, not unsuccessful responses
-                return reject(`Failed to fetch jar LED pattern list with error ${error}`);
+                return reject(`Failed to fetch jar ${jarIndex} LED pattern list with error ${error}`);
             });
     });
 };
 
-const getJarLEDs = function() {
+const getJarLEDs = function(jarIndex) {
     return new Promise(function(resolve, reject) {
-        return fetch(`${jarLEDControllerURL}/jar_leds`, {
+        return fetch(`${jarLEDControllerURLs[jarIndex]}/jar_leds`, {
             method: 'GET'
         })
         .then(res => {
             // handle non-success responses
             if (!res.ok) {
-                return reject(`Unable to retrieve jar LED settings. Request failed with status ${res.status} ${res.statusText}`);
+                return reject(`Unable to retrieve jar ${jarIndex} LED settings. Request failed with status ${res.status} ${res.statusText}`);
             }
             return res;
         })
@@ -138,33 +138,33 @@ const getJarLEDs = function() {
         .then(result => {
             return resolve(result);
         }, error => {
-            return reject(`Failed to retrieve jar LED settings with error ${error}`);
+            return reject(`Failed to retrieve jar ${jarIndex} LED settings with error ${error}`);
         });
     });
 };
 
-const setJarLEDs = function(foregroundPatternName, backgroundPatternName, intensity) {
+const setJarLEDs = function(jarIndex, foregroundPatternName, backgroundPatternName, intensity) {
     let formData = new FormData();
     formData.append('foreground', foregroundPatternName);
     formData.append('background', backgroundPatternName);
     formData.append('intensity', intensity);
 
     return new Promise(function(resolve, reject) {
-        return fetch(`${jarLEDControllerURL}/jar_leds`, {
+        return fetch(`${jarLEDControllerURLs[jarIndex]}/jar_leds`, {
             method: 'POST',
             body: formData
         })
         .then(res => {
             // handle non-success responses
             if (!res.ok) {
-                return reject(`Unable to save jar LED settings. Request failed with status ${res.status} ${res.statusText}`);
+                return reject(`Unable to save jar ${jarIndex} LED settings. Request failed with status ${res.status} ${res.statusText}`);
             }
             return res;
         })
         .then(res => {
             return resolve();
         }, error => {
-            return reject(`Failed to save jar LED settings with error ${error}`);
+            return reject(`Failed to save jar ${jarIndex} LED settings with error ${error}`);
         });
     });
 };

@@ -21,20 +21,19 @@ import ColorPicker from './ColorPicker';
 import { getJarLEDPatternLists, getJarLEDs, setJarLEDs } from '../requests';
 
 export default {
-    props: ['bugName'],
+    props: ['bugName', 'jarIndex'],
     beforeMount() {
         // get lists of jar LED patterns to show in the menus
-        getJarLEDPatternLists()
+        getJarLEDPatternLists(this.jarIndex)
             .then(lists => {
                 this.backgroundPatternNames = lists.backgrounds.map(obj => obj.name);
                 this.foregroundPatternNames = lists.foregrounds;
-                console.log('background: ', this.foregroundPatternNames, 'foreground', this.foregroundPatternNames);
             }, error => {
                 alert(error);
             });
 
         // fetch current jar LED settings
-        getJarLEDs()
+        getJarLEDs(this.jarIndex)
             .then((settings) => {
                 this.selectedForegroundPattern = settings.foreground;
                 this.selectedBackgroundPattern = settings.background;
@@ -54,7 +53,7 @@ export default {
     },
     methods: {
         saveJarSettings() {
-            return setJarLEDs(this.selectedForegroundPattern, this.selectedBackgroundPattern, this.intensity)
+            return setJarLEDs(this.jarIndex, this.selectedForegroundPattern, this.selectedBackgroundPattern, this.intensity)
                 .then(() => {
                     console.log(`Saved jar LED settings`);
                 }, error => {
