@@ -30,8 +30,77 @@ function scape_init() {
 		rawdata = fs.readFileSync(config.soundscapeDir + 'default.json');
 	}
 	var s = JSON.parse(rawdata);
+	s = scape_correctify(s)
 	//console.log(s);
 	return(s);
+}
+
+// There are cases where there might be sub-entities which are "named"
+// but have never been set or never configured. They should all have
+// 0's for volume and-or intentisty. While the code is supposed to no longer
+// remove elements, some might, so write this helper function that
+// will make sure all the items are where they are supposed to be.
+// returns the newly fixed object
+
+function scape_correctify(s) {
+
+	// ZONES
+	if (s.hasOwnProperty('zones') == false) {
+		s.zones = {};
+	}
+	if (s.zones.hasOwnProperty('names') == false) {
+		s.zones.names = config.zones.names;
+	}
+	var zones = s.zones.names;
+	for (let zone of zones) {
+		if (zones.hasOwnProperty(zone) == false) {
+			zones[zone] = {}
+		}
+		if (zones[zone].hasOwnProperty("volume")==false) {
+			zones[zone].volume = 0
+		}
+	}
+	// EFFECTS
+	if (s.hasOwnProperty('effects') == false) {
+		s.effects = {};
+	}
+	if (s.effects.hasOwnProperty('names') == false) {
+		s.effects.names = config.effects.names;
+	}
+	var names = s.effects.names;
+	for (let name of names) {
+		if (names.hasOwnProperty(name) == false) {
+			names[name] = {}
+		}
+		if (names[name].hasOwnProperty("volume")==false) {
+			names[name].volume = 0
+		}
+		if (names[name].hasOwnProperty("intensity")==false) {
+			names[name].intensity = 0
+		}
+	}
+
+	// MASTER
+	if (s.hasOwnProperty('master') == false) {
+		s.master = {}
+	}
+	if (s.master.hasOwnProperty('volume') == false) {
+		s.master.volume = 0;
+	}
+	// BACKGROUND
+	if (s.hasOwnProperty('background') == false) {
+		s.background = {}
+	}
+	if (s.background.hasOwnProperty('name') == false) {
+		s.background.name = '';
+	}
+	if (s.background.hasOwnProperty('volume') == false) {
+		s.background.volume = 0;
+	}
+
+	return(s);
+
+
 }
 
 // write the newly changed scape to the last file 
@@ -159,6 +228,8 @@ app.post('/audio/soundscapes/:id', (req, res) => {
 		return;
 	}
 
+	g_scape = scape_correctify(g_scape);
+
 	// if empty body use default
 	if (Object.keys(req.body).length==0) {
 		fs.writeFileSync(fn, JSON.stringify(g_scape));
@@ -194,6 +265,11 @@ app.get('/audio/soundscapes/:id', (req, res) => {
 // Delete the soundscape /audio/soundscapes/NAME
 app.delete('/audio/soundscapes/:id', (req, res) => {
 	var id = req.params.id;
+	if (id == 'default') {
+		res.status(400)
+		res.send(' cant remove the default');
+		return
+	}
 	var fn = config.soundscapeDir+id+'.json';
 	if (fs.existsSync(fn) == false) {
 		res.status(400);
@@ -212,11 +288,11 @@ app.get('/audio/soundscape', (req, res) => {
 	//ret.background.names = config.backgrounds.names
 	//ret.effects.names = config.effects.names
 	//res.send(ret)
-	res.send(g_scape);
+	res.json(g_scape);
 })
 
 // Update the current soundscape
-app.post('/audio/soundscape', (req, res) => {
+app.put('/audio/soundscape', (req, res) => {
 	if (req.body.background) {
 		if (!background_put(req.body.background, res))
 			return;
@@ -239,9 +315,12 @@ app.post('/audio/soundscape', (req, res) => {
 		g_scape.master = master;
 	}
 
+	// make sure the result has all the things
+	g_scape = scape_correctify(g_scape)
+
 	scape_flush(g_scape);
 
-	res.send(g_scape)
+	res.json(g_scape)
 })
 
 app.get('/audio/effects', (req,res) => {
@@ -249,10 +328,7 @@ app.get('/audio/effects', (req,res) => {
 	var effects = {};
 	effects.names = config.effects.names;
 	for (const [key, value] of Object.entries(g_scape.effects)) {
-		if ( (value.volume > 0) &&
-			 (value.intensity > 0) ) {
-			effects[key] = value;
-		}
+		effects[key] = value;
 	}
 	//console.log(effects);
 	res.send(effects)
@@ -269,35 +345,37 @@ function effects_put(eff, res) {
 			res.send(key + ' is not a supported name')
 			return(false);
 		}
-		if (value.hasOwnProperty('intensity') == false) {
-			res.status(400);
-			res.send(key + ' must have intensity')
-			return(false);
+		if (value.hasOwnProperty('intensity') == true) {
+			if ((value.intensity > 3) || (value.intensity < 0)) {
+				res.status(400);
+				res.send(key + ' intensity out of range');
+				return(false);
+			}
 		}
-		if ((value.intensity > 3) || (value.intensity < 0)) {
-			res.status(400);
-			res.send(key + ' intensity out of range');
-			return(false);
-		}
-		if (value.hasOwnProperty('volume') == false) {
-			res.status(400);
-			res.send(key + ' must have volume')
-			return(false);
-		}
-		if ((value.volume > 100) || (value.volume < 0)) {
-			res.status(400);
-			res.send(key + ' volume out of range');
-			return(false);
+
+		if (value.hasOwnProperty('volume') == true) {
+			if ((value.volume > 100) || (value.volume < 0)) {
+				res.status(400);
+				res.send(key + ' volume out of range');
+				return(false);
+			}
 		}
 	}
 
 	// valid, replace
 	for (const [key, value] of Object.entries(eff)) {
-		if ((value.volume == 0) || (value.intensity == 0)) {
-			value.volume = 0;
-			value.intensity = 0;
+		if (g_scape.effects.hasOwnProperty(key)==false) {
+			g_scape.effects[key] = {}
+			g_scape.effects[key].intensity = 0;
+			g_scape.effects[key].volume = 0;
 		}
-		g_scape.effects[key] = value;
+		if (value.hasOwnProperty('intensity')==true) {
+			g_scape.effects[key].intensity = value.intensity;
+		}
+
+		if (value.hasOwnProperty('volume')==true) {
+			g_scape.effects[key].volume = value.volume;
+		}
 	}
 	return(true);
 
@@ -310,11 +388,13 @@ app.put('/audio/effects', (req,res) => {
 	if (effects_put(req.body, res) == false)
 		return;
 
+	scape = scape_correctify(g_scape);
+
 	scape_flush(g_scape);
 
 	// Todo: update sound players
 
-	res.send(g_scape.effects)
+	res.json(g_scape.effects)
 })
 
 app.get('/audio/zones', (req, res) => {
@@ -327,7 +407,7 @@ app.get('/audio/zones', (req, res) => {
 		}
 	}
 
-	res.send(ret);
+	res.json(ret);
 })
 
 function zones_put(z, res) {
@@ -357,6 +437,7 @@ function zones_put(z, res) {
 	for (const [key, value] of Object.entries(z)) {
 		g_scape.zones[key] = value;
 	}
+
 	return(true);
 
 }
