@@ -34,6 +34,10 @@ SOFTWARE.
 #define MAX_SA_SINKS 6 // having 6 sound inputs seems very reasonable
 #define STREAM_INDEX_NULL UINT32_MAX
 
+// max that can play simultaneously. We have 5 or 6 defined now.
+#define MAX_EFFECTS 12
+
+
 typedef struct sa_soundplay {
 
 	pa_stream *stream; // gets reset to NULL when file is over
@@ -86,6 +90,9 @@ typedef void (*callback_fn_t) (void);
 /* Forward References */
 
 // Saplay
+
+extern sa_soundscape_t *g_scape_effects[];
+extern sa_soundscape_t *g_scape_background;
 
 extern pa_context *g_context;
 extern bool g_context_connected;

@@ -1,86 +1,13 @@
 {
-    "speakers": [
-        {
-            "name": "PergolaLeftFront",
+    "speakers": {
+        "PergolaLeft1": {
             "usb_bus": "somethingsomething"
         },
-        {
-            "name": "PergolaLeftFront",
+        "PergolaLeft2": {
             "usb_bus": "somethingsomething"
         }
-    ],
-    "directory": "/home/pi/SerenityAudio/sounds/flg",
-    "ambients": [
-        {
-            "name": "texas01",
-            "file": "ambient_bg_01.wav"
-        },
-        {
-            "name": "texas02",
-            "file": "ambient_bg_02.wav"
-        },
-        {
-            "name": "ambient",
-            "file": "ambient.wav"
-        },
-        {
-            "name": "ambient01",
-            "file": "../ambient_01.wav"
-        },
-        {
-            "name": "flg sample",
-            "file": "../flg_sample_3.wav"
-        }
-    ],
-    "soundscapes": [
-        {
-            "name": "crickets",
-            "file-1": "crickets_01.wav",
-            "file-2": "crickets_02.wav",
-            "file-3": "crickets_03.wav"
-        },
-        {
-            "name": "crickets2",
-            "file-1": "trigger_C01.wav",
-            "file-2": "trigger_C02.wav",
-            "file-3": "trigger_C02.wav"
-        },
-        {
-            "name": "bullfrogs",
-            "file-1": "bullfrog_trigger.wav",
-            "file-2": "bullfrog_trigger.wav",
-            "file-3": "bullfrog_trigger.wav"
-        },
-        {
-            "name": "peepers",
-            "file-1": "peepers.wav",
-            "file-2": "peepers.wav",
-            "file-3": "peepers.wav"
-        },
-        {
-            "name": "thunder",
-            "file-1": "thunder_distance_trigger.wav",
-            "file-2": "thunder_distance_trigger.wav",
-            "file-3": "thunder_distance_trigger.wav"
-        },
-        {
-            "name": "nightengale",
-            "file-1": "nightengale_1_trigger.wav",
-            "file-2": "nightengale_2_trigger.wav",
-            "file-3": "nightengale_3_trigger.wav"
-        },
-        {
-            "name": "owl",
-            "file-1": "great_horned_owl_trigger.wav",
-            "file-2": "great_horned_owl_trigger.wav",
-            "file-3": "great_horned_owl_trigger.wav"
-        },
-        {
-            "name": "birds",
-            "file-1": "birds_evening.wav",
-            "file-2": "birds_evening.wav",
-            "file-3": "birds_evening.wav"
-        }
-
-    ]
+    },
+    "zone": "PergolaLeft",
+    "soundDir": "/home/pi/SerenityAudio/sounds/flg_sound",
+    "adminConfig": "/home/pi/Serenity/sound/SoundAdmin/data/config.json"
 }

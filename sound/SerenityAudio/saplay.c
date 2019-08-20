@@ -58,19 +58,18 @@ SOFTWARE.
 
 int g_verbose = 0;
 
-// for now, the single oneg
-//static char *g_filename1 = "sounds/crickets-dawn.wav";  // this is not duped, it's from the inputs
-//static char *g_filename2 = "sounds/bullfrog-2.wav";  // this is not duped, it's from the inputs
 
-static char *g_filename1 = "../sounds/flg_sample_3.wav";  
-static char *g_filename2 = "../sounds/owl_01.wav";  
+static char *g_sound_directory = NULL; // loaded from the config file
 
-static char *g_directory = NULL; // loaded from the config file
+static char *g_admin_config_filename = NULL;
+
+static char *g_zone = NULL;
 
 static char *g_config_filename = "config.json";
 
-static sa_soundscape_t *g_scape1 = NULL;
-static sa_soundscape_t *g_scape2 = NULL;
+sa_soundscape_t *g_scape_background = NULL;
+
+sa_soundscape_t *g_scape_effects[MAX_EFFECTS] = {0};
 
 static sa_sink_t g_sa_sinks[MAX_SA_SINKS] = {0}; // null terminated array of pointers
 
@@ -311,22 +310,8 @@ void sa_soundscape_start(void) {
 
     if (g_verbose) fprintf(stderr, "sa_soundscape_start: \n");
 
-    // Create a player for each file
-    sa_soundscape_t *scape;
-    scape = sa_soundscape_new( g_filename1, PA_VOLUME_NORM );
-    if (scape == NULL) {
-        fprintf(stderr, "scape file1 failed FATAL\n");
-    } else {
-        g_scape1 = scape; // for freeing only
-    }
-
-    scape = sa_soundscape_new( g_filename2, PA_VOLUME_NORM );
-    if (scape == NULL) {
-        fprintf(stderr, "scape file2 failed\n");
-    }
-    else {
-        g_scape2 = scape; // for freeing only
-    }
+    // Fetch from the HTTP server and take the response and parse it?
+    // or nothing goes here?
 
 }
 
@@ -413,52 +398,16 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
         // next function
         sa_sinks_populate(g_context, sa_soundscape_start);
 
-		// Create a player for each file
-		sa_soundscape_t *scape;
-		scape = sa_soundscape_new( g_filename1, PA_VOLUME_NORM );
-		if (scape == NULL) {
-            fprintf(stderr, "scape file1 failed\n");
-            goto NEXT;
-		}
-		g_scape1 = scape; // for freeing only
-
-		scape = sa_soundscape_new( g_filename2, PA_VOLUME_NORM );
-		if (scape == NULL) {
-			fprintf(stderr, "scape file2 failed\n");
-	       goto NEXT;
-		}
-		g_scape2 = scape; // for freeing only
-
+        // Kick off fetching the HTTP to load the initial JSON
 
 		g_started = true;
         goto NEXT;
 	}
 
     // This happens every time after the first
-    if (g_scape1) sa_soundscape_timer(g_scape1);
-    if (g_scape2) sa_soundscape_timer(g_scape2);
-
-// TEST CODE FOR VOLUMES
-
-    if (!g_volume_timer_set) {
-    	g_volume_timer_set = true;
-    	pa_gettimeofday(&g_volume_timer_next);
-    	pa_timeval_add(&g_volume_timer_next, PA_USEC_PER_SEC);
-    	g_volume_next = PA_VOLUME_NORM;
-    }
-
-    struct timeval tv_now;
-    pa_gettimeofday(&tv_now);
-    if (pa_timeval_cmp(&g_volume_timer_next, &tv_now) <= 0) {
-
-	    if (g_scape1) sa_soundscape_volume_set(g_scape1, g_volume_next);
-	    // if (g_scape2) sa_soundscape_volume_set(g_scape2, g_volume_next);
-
-	    g_volume_next -= PA_VOLUME_NORM / 10;
-	    if (g_volume_next < 0) g_volume_next = PA_VOLUME_NORM;
-
-    	g_volume_timer_next = tv_now; 
-    	pa_timeval_add( &g_volume_timer_next , PA_USEC_PER_SEC );
+    if (g_scape_background) sa_soundscape_timer(g_scape_background);
+    for (int i=0;i<MAX_EFFECTS;i++) {
+        if (g_scape_effects[i]) sa_soundscape_timer(g_scape_effects[i]);
     }
 
 
@@ -535,6 +484,8 @@ static bool config_load(const char *filename) {
     // nice to have for debugging
     json_error_t    js_err;
 
+    // note, the auto directories have fancieness because they free themselves
+    // outside of scope
     json_auto_t *js_root = json_load_file(filename, JSON_DECODE_ANY | JSON_DISABLE_EOF_CHECK, &js_err);
 
     if (js_root == NULL) {
@@ -543,17 +494,41 @@ static bool config_load(const char *filename) {
         return(false);
     }
 
-    json_auto_t *js_dir = json_object_get(js_root, "directory");
-    if (!js_dir) {
-        fprintf(stderr, "dirctory not found, using null string");
-        g_directory = strdup("");
+    json_auto_t *js_sdir = json_object_get(js_root, "soundDir");
+    if (!js_sdir) {
+        fprintf(stderr, "dirctory not found in config file, fail");
+        goto quit;
     }
     else {
-        const char *dir_s = json_string_value(js_dir);
-        if (!dir_s) 
-            g_directory = strdup("");
-        else
-            g_directory = strdup(dir_s);
+        g_sound_directory = strdup( json_string_value(js_sdir) );
+    }
+
+    json_auto_t *js_zone = json_object_get(js_root, "zone");
+    if (!js_zone) {
+        fprintf(stderr, "zone not found in config file, fail");
+        goto quit;
+    }
+    else {
+        g_zone = strdup( json_string_value(js_zone) );
+    }
+
+    json_auto_t *js_admin_config_filename = json_object_get(js_root, "adminConfig");
+    if (!js_admin_config_filename) {
+        fprintf(stderr, "adminConfig not found in config file, fail");
+        goto quit;
+    }
+    else {
+        g_admin_config_filename = strdup( json_string_value(js_admin_config_filename) );
+    }
+
+
+    // load in the adminConfig file
+    json_auto_t *js_admin_root = json_load_file(g_admin_config_filename, JSON_DECODE_ANY | JSON_DISABLE_EOF_CHECK, &js_err);
+
+    if (js_admin_root == NULL) {
+        fprintf(stderr, "JSON config parse failed on %s\n",g_admin_config_filename);
+        fprintf(stderr, "position: (%d,%d)  %s\n",js_err.line,js_err.column,js_err.text);
+        return(false);
     }
 
     if (g_verbose) fprintf(stderr, "json file loaded successfully\n");
@@ -727,15 +702,17 @@ quit:
     if (g_context)
         pa_context_unref(g_context);
 
-    if (g_directory)
-        free(g_directory);
+    if (g_sound_directory)      free(g_sound_directory);
+    if (g_zone)                 free(g_zone);
 
     if (m) {
         pa_signal_done();
         pa_mainloop_free(m);
     }
-	if (g_scape1) { sa_soundscape_free(g_scape1); g_scape1 = NULL; }
-    if (g_scape2) { sa_soundscape_free(g_scape2); g_scape2 = NULL; }	
+    if (g_scape_background) sa_soundscape_free(g_scape_background);
+    for (int i=0;i<MAX_EFFECTS;i++) {
+        if (g_scape_effects[i]) sa_soundscape_free(g_scape_effects[i]);
+    }
 
     pa_xfree(server);
     pa_xfree(g_device);
