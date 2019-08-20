@@ -63,7 +63,10 @@ static char *g_sound_directory = NULL; // loaded from the config file
 static char *g_admin_config_filename = NULL;
 static char *g_zone = NULL;
 static char *g_config_filename = "config.json";
+
 static char *g_master_url = NULL; // the URL to pull configuration from
+static char *g_master_data = NULL; // fetched
+static size_t g_master_data_len = 0;
 
 sa_soundscape_t *g_scape_background = NULL;
 
@@ -645,8 +648,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* do the one initial HTTP request to get the older state */
-    fprintf(stderr,"making HTTP request\n");
-    if (sa_http_request(g_master_url) == false) {
+    if (sa_http_request(g_master_url, &g_master_data, &g_master_data_len) == false) {
         fprintf(stderr, "could not fetch initial state, will wait for update\n");
     }
     else {
@@ -724,6 +726,7 @@ quit:
     if (g_zone)                 free(g_zone);
     if (g_admin_config_filename) free(g_admin_config_filename);
     if (g_master_url)           free(g_master_url);
+    if (g_master_data)          free(g_master_data);
 
     if (m) {
         pa_signal_done();

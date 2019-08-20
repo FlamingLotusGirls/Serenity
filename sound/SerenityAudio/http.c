@@ -62,7 +62,7 @@ static size_t curlWriteFunction(void* ptr, size_t size/*always==1*/,
     return nmemb;
 }
 
-bool sa_http_request(const char *url) {
+bool sa_http_request(const char *url, char **result, size_t *result_len) {
 
   if (g_verbose) fprintf(stderr,"starting HTTP request\n");
 
@@ -82,19 +82,36 @@ bool sa_http_request(const char *url) {
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &curlWriteFunction);
 
+  // signals would be bad
+  curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 0);
+  // but we're on a local network wtihout DNS. Don't wait long.
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
+
   /* Perform the request, res will get the return code */ 
   res = curl_easy_perform(curl);
 
   /* Check for errors */ 
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+    curl_easy_cleanup(curl);
     return false;
   }
 
-  fprintf(stderr, "curl received data %s\n",data);
+  long response_code;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+  if (response_code != 200) {
+    fprintf(stderr, "curl received response, bad error code %ld\n",response_code);
+    curl_easy_cleanup(curl);
+    return false;
+  }
+
+  if (g_verbose) fprintf(stderr, "curl received data %s\n",data);
 
   /* always cleanup */ 
   curl_easy_cleanup(curl);
+
+  *result = data;
+  *result_len = strlen(data);
 
   return true;
 }

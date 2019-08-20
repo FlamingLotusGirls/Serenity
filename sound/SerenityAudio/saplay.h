@@ -91,7 +91,7 @@ typedef void (*callback_fn_t) (void);
 
 // http
 
-extern bool sa_http_request(const char *url);
+extern bool sa_http_request(const char *url, char **result, size_t *result_len);
 
 // Saplay
 
