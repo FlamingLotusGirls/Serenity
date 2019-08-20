@@ -78,7 +78,12 @@ typedef struct sa_soundscape {
 
 } sa_soundscape_t;
 
-typedef struct sa_sound_ambient {
+// This is populated by the masterConfig. It has the list of
+// all the effect names, the effect file names,
+// the backgrounds, and background names
+
+typedef struct sa_sound_files {
+
 
   
 
@@ -92,6 +97,13 @@ typedef void (*callback_fn_t) (void);
 // http
 
 extern bool sa_http_request(const char *url, char **result, size_t *result_len);
+
+// files - quick accessors to find the files for the different Effects and Backgrounds
+extern bool sa_filedb_effect_get(const char *effect, int intensity, char **filename );
+extern bool sa_filedb_background_get(const char *background, char ** filename);
+extern bool sa_filedb_init(const char *filename );
+// uses all statics. No freeing.
+
 
 // Saplay
 

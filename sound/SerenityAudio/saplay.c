@@ -531,16 +531,6 @@ static bool config_load(const char *filename) {
         g_master_url = strdup( json_string_value(js_master_url) );
     }
 
-
-    // load in the adminConfig file
-    json_auto_t *js_admin_root = json_load_file(g_admin_config_filename, JSON_DECODE_ANY | JSON_DISABLE_EOF_CHECK, &js_err);
-
-    if (js_admin_root == NULL) {
-        fprintf(stderr, "JSON config parse failed on %s\n",g_admin_config_filename);
-        fprintf(stderr, "position: (%d,%d)  %s\n",js_err.line,js_err.column,js_err.text);
-        return(false);
-    }
-
     if (g_verbose) fprintf(stderr, "json file loaded successfully\n");
     return(true);
 
@@ -634,6 +624,11 @@ int main(int argc, char *argv[]) {
     }
 
     if (! config_load(g_config_filename)) {
+        goto quit;
+    }
+
+    if (sa_filedb_init(g_admin_config_filename) == false ) {
+        fprintf(stderr, "could not load admin config to get filenames");
         goto quit;
     }
 
