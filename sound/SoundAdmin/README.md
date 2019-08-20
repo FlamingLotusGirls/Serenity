@@ -14,16 +14,14 @@ sudo apt install npm
 sudo npm install npm@latest -g
 ```
 
-In the directory, the npm is not most recent? `sudo npm install npm@latest -g`
+Install Yarn.
 
 ```
-sudo npm install
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update
+sudo apt install yarn
 ```
-
-Get the ARM v8 version from nodejs.org
-sudo tar xvf node-... -C /opt
-sudo mv /opt/node.... /opt/node
-Add node to everyone's path: /opt/node/bin to /etc/profile
 
 # test code
 
