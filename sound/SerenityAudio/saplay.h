@@ -89,6 +89,10 @@ typedef void (*callback_fn_t) (void);
 
 /* Forward References */
 
+// http
+
+extern bool sa_http_request(const char *url);
+
 // Saplay
 
 extern sa_soundscape_t *g_scape_effects[];

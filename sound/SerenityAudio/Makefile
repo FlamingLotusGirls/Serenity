@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS =  -O3 -march=native -std=gnu11 -I. 
-LDFLAGS = -lpulse -lsndfile -ljansson -lmicrohttpd
+LDFLAGS = -lpulse -lsndfile -ljansson -lmicrohttpd -lcurl
 DEPS = saplay.h 
 
 %.o: %.c $(DEPS)
@@ -10,7 +10,7 @@ DEPS = saplay.h
 %: %.o 
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-saplay: saplay.o httpd.o stream.o
+saplay: saplay.o httpd.o http.o stream.o
 all: saplay
 clean: 
 	rm saplay

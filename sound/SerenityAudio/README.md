@@ -18,6 +18,19 @@ pulseaudio - sudo apt install libpulse-dev
 soundfile - sudo apt install libsndfile1-dev
 microhttpd - sudo apt install libmicrohttpd-dev
 
+# Also need libcurl, package seems bad?
+
+Have to install from scratch
+
+```
+wget https://curl.haxx.se/download/curl-7.65.3.tar.gz
+tar xzf curl-7.65.3.tar.gz
+cd curl-7.65.3
+./configure --without-ssl --prefix=/usr
+make
+sudo make install
+```
+
 # use
 Type 'make' to get the executable.
 

@@ -60,12 +60,10 @@ int g_verbose = 0;
 
 
 static char *g_sound_directory = NULL; // loaded from the config file
-
 static char *g_admin_config_filename = NULL;
-
 static char *g_zone = NULL;
-
 static char *g_config_filename = "config.json";
+static char *g_master_url = NULL; // the URL to pull configuration from
 
 sa_soundscape_t *g_scape_background = NULL;
 
@@ -521,6 +519,15 @@ static bool config_load(const char *filename) {
         g_admin_config_filename = strdup( json_string_value(js_admin_config_filename) );
     }
 
+    json_auto_t *js_master_url = json_object_get(js_root, "masterUrl");
+    if (!js_master_url) {
+        fprintf(stderr, "adminConfig not found in config file, fail");
+        goto quit;
+    }
+    else {
+        g_master_url = strdup( json_string_value(js_master_url) );
+    }
+
 
     // load in the adminConfig file
     json_auto_t *js_admin_root = json_load_file(g_admin_config_filename, JSON_DECODE_ANY | JSON_DISABLE_EOF_CHECK, &js_err);
@@ -637,6 +644,15 @@ int main(int argc, char *argv[]) {
         goto quit;
     }
 
+    /* do the one initial HTTP request to get the older state */
+    fprintf(stderr,"making HTTP request\n");
+    if (sa_http_request(g_master_url) == false) {
+        fprintf(stderr, "could not fetch initial state, will wait for update\n");
+    }
+    else {
+        fprintf(stderr, "initial fetch succeeded\n");
+    }
+
     /* Set up a new main loop */
     if (!(m = pa_mainloop_new())) {
         fprintf(stderr, "pa_mainloop_new() failed.\n");
@@ -686,6 +702,8 @@ int main(int argc, char *argv[]) {
 	}
 
 
+
+
     /* Run the main loop - hangs here forever? */
     if (pa_mainloop_run(m, &ret) < 0) {
         fprintf(stderr, "pa_mainloop_run() failed.\n");
@@ -704,6 +722,8 @@ quit:
 
     if (g_sound_directory)      free(g_sound_directory);
     if (g_zone)                 free(g_zone);
+    if (g_admin_config_filename) free(g_admin_config_filename);
+    if (g_master_url)           free(g_master_url);
 
     if (m) {
         pa_signal_done();
