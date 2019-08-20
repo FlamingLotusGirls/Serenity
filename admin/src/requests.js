@@ -461,6 +461,10 @@ const getCurrentSoundscape = function() {
             })
             .then(res => res.json())
             .then(result => {
+                // the names properties are annoying and break if we send them back up to the server
+                delete result.effects.names;
+                delete result.zones.names;
+
                 return resolve(result);
             }, error => {
                 // triggers only on network errors, not unsuccessful responses
@@ -472,7 +476,7 @@ const getCurrentSoundscape = function() {
 const setCurrentSoundscapeSettings = function(newSettings) {
     return new Promise(function(resolve, reject) {
         return fetch(`${soundControllerURL}/audio/soundscape`, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
             },

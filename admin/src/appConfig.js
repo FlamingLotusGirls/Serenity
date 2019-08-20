@@ -1,5 +1,5 @@
 // define network paths to various controllers
-const IS_PRODUCTION = true;
+const IS_PRODUCTION = false;
 
 const MASTER_PI_IP = '192.168.1.10';
 const JAR_1_IP = '192.168.1.11';
