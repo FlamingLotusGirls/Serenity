@@ -8,7 +8,7 @@ export default {
   props: ['value', 'patternIndex'],
   methods: {
     toggleState: function() {
-      this.$emit('input', !this.value);
+      this.$emit('input', { newValue: !this.value, patternIndex: this.patternIndex });
     }
   }
 };

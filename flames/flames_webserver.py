@@ -163,7 +163,7 @@ def flame_pattern(patternName):
     elif request.method == "DELETE":
         pattern_manager.deletePattern(patternName)
         pattern_manager.savePatterns()
-        return CORSREsponse("Success", 200)
+        return CORSResponse("Success", 200)
 
     else:
         if (not patternName_valid(patternName)):

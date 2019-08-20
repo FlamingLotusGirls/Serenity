@@ -49,7 +49,7 @@
         </div>
         <hr>
         <div class="save-soundscape-section row">
-            <input type="text" placeholder="Enter a unique name" v-model="newSoundscapeName" >
+            <input type="text" class="form-control" placeholder="Enter a unique name" v-model="newSoundscapeName" >
             <button class="btn btn-primary" type="submit" v-on:click="saveNewSoundscape">Save This Soundscape</button>
         </div>
     </div>

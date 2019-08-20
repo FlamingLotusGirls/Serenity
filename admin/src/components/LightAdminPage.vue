@@ -6,7 +6,7 @@
         <SwarmLightAdminWidget swarmNumberString="Three" />
         <SwarmLightAdminWidget swarmNumberString="Four" />
         <div class="save-section">
-            <input type="text" placeholder="Enter a unique name" />
+            <input type="text" class="form-control" placeholder="Enter a unique name" />
             <button class="btn btn-primary">Save Lights</button>
         </div>
     </div>

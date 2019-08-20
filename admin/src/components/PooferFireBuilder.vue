@@ -3,19 +3,24 @@
         <h3>{{ pooferName }}</h3>
         <div class="custom-poof-pattern">
             <label>Set A Pattern</label>
-            <PatternToggleButton v-for="n in 20"></PatternToggleButton>
+            <PatternToggleSet v-bind:value="value" v-on:input="updatePattern"></PatternToggleSet>
         </div>
   </div>
 </template>
 
 <script>
-import PatternToggleButton from './PatternToggleButton';
+import PatternToggleSet from './PatternToggleSet';
 
 export default {
     name: 'PooferFireBuilder',
-    props: ['pooferName'],
+    props: ['value', 'pooferName', 'bugName'],
     components: {
-        PatternToggleButton
+        PatternToggleSet
+    },
+    methods: {
+        updatePattern(newPattern) {
+            this.$emit('input', newPattern);
+        }
     }
 };
 </script>

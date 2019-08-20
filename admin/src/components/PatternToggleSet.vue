@@ -1,6 +1,6 @@
 <template>
   <div class="pattern-toggle-set">
-    <PatternToggleButton v-for="(patternValue, index) in value" v-model="value[index]" v-on:input="patternChanged"></PatternToggleButton>
+    <PatternToggleButton v-for="(patternValue, index) in value" v-bind:value="value[index]" v-bind:patternIndex="index" v-on:input="patternToggleChanged"></PatternToggleButton>
   </div>
 </template>
 
@@ -13,8 +13,10 @@ export default {
     PatternToggleButton
   },
   methods: {
-    patternChanged: function() {
-      this.$emit('input', this.value);
+    patternToggleChanged: function(updateObj) {
+      let newPattern = this.value.slice();
+      newPattern[updateObj.patternIndex] = updateObj.newValue;
+      this.$emit('input', newPattern);
     }
   }
 };
