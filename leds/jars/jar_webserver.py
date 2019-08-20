@@ -26,17 +26,18 @@ def init(cmd_queue, resp_queue, jarId):
     global command_queue
     global response_queue
     global jar_id
+    global command_id
 
     command_queue = cmd_queue
     response_queue = resp_queue
     jar_id = jarId
+    command_id = 0
 
 def serve_forever(httpPort=PORT):
     print("Fireflies Jar LED WebServer: port {}".format(httpPort))
     app.run(host="0.0.0.0", port=httpPort, threaded=True)
     print("Serve forever returns...")
 
-command_id = 0
 def my_rpc(function_name, params):
     ''' Generic RPC for communicating with the led driver 
     '''
@@ -99,8 +100,12 @@ def jar_status():
             params['intensity']  = request.values['intensity']  if 'intensity'  in request.values else None
             resp = my_rpc("set_current_status", params)
             return CORSResponse("Success", 200)
-        except:
-            return CORSResponse("Internal Error", 500)
+        except Exception as e:
+            print(f"jar status post has exception {e}")
+            if e.args[0] == "Invalid State":
+                return CORSResponse("Pattern In Transition", 409)
+            else:
+                return CORSResponse("Internal Error", 500)
     else:
         return CORSResponse("Method Not Allowed", 405)
 

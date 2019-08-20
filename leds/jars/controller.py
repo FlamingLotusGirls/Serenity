@@ -190,20 +190,28 @@ class AnimationController(object):
         
         if errStr is not None:
             raise ValueError(errStr) 
-         
-        new_routines = self.renderer.getActivePlaylist().routines.copy()
-        if background_photo is not None:
-            new_routines[0][0] = PhotoColorsLayer(self.model, background_photo)
-            self.background = background
-        if foreground_effect is not None:
-            new_routines[0][1] = foreground_effect(*foreground_params)
-            self.foreground = foreground
-        if intensity_val is not None:
-            new_routines[0][2] = IntensityLayer(intensity_val)
-            self.intensity = intensity_val
 
-        new_playlist = Playlist(new_routines)
-        self.renderer.changePlaylist(new_playlist)
+        if (background_photo is not None and background != self.background) \
+           or (foreground_effect is not None and foreground != self.foreground):
+            new_routines = self.renderer.getActivePlaylist().routines.copy()
+            if background_photo is not None:
+                new_routines[0][0] = PhotoColorsLayer(self.model, background_photo)
+            if foreground_effect is not None:
+                new_routines[0][1] = foreground_effect(*foreground_params)
+            if intensity_val is not None:
+                new_routines[0][2] = IntensityLayer(intensity_val)
+
+            new_playlist = Playlist(new_routines)
+            self.renderer.changePlaylist(new_playlist)
+        elif intensity_val is not None:
+            self.renderer.changeIntensity(intensity_val)
+
+        if foreground is not None:
+            self.foreground = foreground
+        if background is not None:
+            self.background = background
+        if intensity is not None:
+            self.intensity = intensity_val
 
     def process_commands(self):
         while not self.cmd_queue.empty():
@@ -238,14 +246,15 @@ class AnimationController(object):
                                          }
                             }
             except Exception as e:
-                traceback.print_exc()
+                if e.args[0] != 'Invalid State': # hack - special case for expected error
+                    traceback.print_exc()
                 resp = {
                         'id' : command['id'],
                         'response' : {
                                       'error' : str(e)
                                      }
                         }
-                
+
             self.resp_queue.put(resp)
 
     def start(self):

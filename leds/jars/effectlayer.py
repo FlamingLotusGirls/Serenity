@@ -109,6 +109,14 @@ class IntensityLayer(EffectLayer):
 
         frame[:] *= self.intensity
 
+    def set_intensity(self, intensityLevel):
+        if intensityLevel > 1.0:
+            self.intensity = 1.0
+        elif intensityLevel < 0.0:
+            self.intensity = 0.0
+        else:
+            self.intensity = intensityLevel
+
     def get_intensity(self):
         return self.intensity
 

@@ -93,6 +93,10 @@ class Renderer:
     def _fadeTimeForTransition(self, playlist):
         return max([effect.transitionFadeTime for effect in playlist.selection()])
 
+    def changeIntensity(self, newIntensity):
+        intensityLayer = self._active().selection()[2]
+        intensityLayer.set_intensity(newIntensity)
+
     def changePlaylist(self, newPlaylist):
         if self.fade is not None:
             print("Warning. Already in transition")
