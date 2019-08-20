@@ -7,11 +7,12 @@ import queue
 def main():
     # get id of this jar.
     try: 
-        with open("/etc/jar_id", "r") as id_file:
+        with open("/etc/jar.id", "r") as id_file:
             jar_id = int(id_file.read())
     except:
         jar_id = 1
         print(f"Cannot read jar id from file, defaulting to {jar_id}")
+    print(f"JAR LED DRIVER - JAR IS {jar_id}")
 
     # create communication queues for passing messages between the webserver
     # and the lower level code. The webserver will pass a command on the 
