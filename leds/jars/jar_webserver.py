@@ -35,7 +35,7 @@ def init(cmd_queue, resp_queue, jarId):
 
 def serve_forever(httpPort=PORT):
     print("Fireflies Jar LED WebServer: port {}".format(httpPort))
-    app.run(host="0.0.0.0", port=httpPort, threaded=True)
+    app.run(host="0.0.0.0", port=httpPort, threaded=False)
     print("Serve forever returns...")
 
 def my_rpc(function_name, params):
