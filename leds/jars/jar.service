@@ -8,7 +8,7 @@ ExecStart=/usr/bin/python3 /home/flaming/Serenity/leds/jars/jar_service.py
 WorkingDirectory=/home/flaming/Serenity/leds/jars
 Restart=Always
 User=flaming
-Environment=PYTHONPATH=/home/flamimg/Serenity/util
+Environment=PYTHONPATH=/home/flaming/Serenity/util
 
 [Install]
 WantedBy=multi-user.target

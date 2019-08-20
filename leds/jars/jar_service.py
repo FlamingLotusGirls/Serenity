@@ -11,7 +11,7 @@ def main():
             jar_id = int(id_file.read())
     except:
         jar_id = 1
-        print("Cannot read jar id from file, defaulting to {jar_id}")
+        print(f"Cannot read jar id from file, defaulting to {jar_id}")
 
     # create communication queues for passing messages between the webserver
     # and the lower level code. The webserver will pass a command on the 

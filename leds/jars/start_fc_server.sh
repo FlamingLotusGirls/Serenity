@@ -21,6 +21,7 @@ OPC_CONFIG=$HOME/Serenity/leds/jars/serenity_fc-config_$JARID.json
 #$CYCLELOGS $LEDLOG
 
 # start OPC server
-stdbuf -oL $OPC_SERVER $OPC_CONFIG  &
+$OPC_SERVER $OPC_CONFIG
+#stdbuf -oL $OPC_SERVER $OPC_CONFIG  &
 
 
