@@ -1,5 +1,5 @@
 <template>
-    <vue-slider :marks="marks" :duration="0.25" v-bind:value="value" v-on:change="onValueChanged" />
+    <vue-slider :marks="sliderMarks" v-bind:min="sliderMin" v-bind:max="sliderMax" :duration="0.25" v-bind:value="value" v-on:change="onValueChanged" />
 </template>
 
 <script>
@@ -7,10 +7,12 @@
     import 'vue-slider-component/theme/default.css'
 
     export default {
-        props: ['value'],
+        props: ['value', 'marks', 'min', 'max'],
         data() {
             return {
-                marks: [0, 100]
+                sliderMarks: this.marks || [0, 100],
+                sliderMin: this.min || 0,
+                sliderMax: this.max || 100
             }
         },
         components: {

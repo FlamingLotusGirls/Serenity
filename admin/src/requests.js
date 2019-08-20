@@ -51,6 +51,52 @@ const runFireProgram = function(programName) {
     });
 };
 
+const createNewFirePattern = function(programName) {
+    let formData = new FormData();
+    formData.append('active', 'true');
+
+    return new Promise(function(resolve, reject) {
+        fetch(`${fireControllerURL}/flame/patterns/${programName}`, {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => {
+                // handle non-success responses
+                if (!res.ok) {
+                    return reject(`Unable to start fire. Request failed with status ${res.status} ${res.statusText}`);
+                }
+                return res;
+            })
+            .then(res => {
+                return resolve();
+            }, error => {
+                return reject(`Failed to start fire with error ${error}`);
+            });
+    });
+};
+
+const deleteFirePattern = function(programName) {
+    return new Promise(function(resolve, reject) {
+        fetch(`${fireControllerURL}/flame/patterns/${programName}`, {
+            method: 'DELETE',
+        })
+            .then(res => {
+                // handle non-success responses
+                if (!res.ok) {
+                    return reject(`Unable to delete fire program. Request failed with status ${res.status} ${res.statusText}`);
+                }
+                return res;
+            })
+            .then(res => {
+                return resolve();
+            }, error => {
+                return reject(`Failed to delete fire program with error ${error}`);
+            });
+    });
+};
+
+
+
 /* FIREFLY LED requests */
 
 const getFireflyLEDs = function() {
@@ -549,6 +595,8 @@ const setDefaultSoundscapeId = function(newDefaultId) {
 export {
     getFireProgramNameList,
     runFireProgram,
+    createNewFirePattern,
+    deleteFirePattern,
 
     getFireflyLEDs,
     setFireflyLEDs,
