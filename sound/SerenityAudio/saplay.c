@@ -61,12 +61,12 @@ int g_verbose = 0;
 
 static char *g_sound_directory = NULL; // loaded from the config file
 static char *g_admin_config_filename = NULL;
-static char *g_zone = NULL;
+char *g_zone = NULL;
 static char *g_config_filename = "config.json";
 
-static char *g_master_url = NULL; // the URL to pull configuration from
-static char *g_master_data = NULL; // fetched
-static size_t g_master_data_len = 0;
+static char *g_admin_url = NULL; // the URL to pull scapes from
+static char *g_scape_data = NULL; // most recent data fetches ( or, first time only? )
+static size_t g_scape_data_len = 0;
 
 sa_soundscape_t *g_scape_background = NULL;
 
@@ -400,6 +400,15 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
         sa_sinks_populate(g_context, sa_soundscape_start);
 
         // Kick off fetching the HTTP to load the initial JSON
+        // Should have the initial JSON by this point, call the code to act on it
+        if (g_scape_data) {
+            if ( sa_scape_process(g_scape_data) ) {
+                fprintf(stderr, "successfully processed inital scape data\n");
+            }
+            else {
+                fprintf(stderr, " initial scape processing failed\n");
+            }
+        }
 
 		g_started = true;
         goto NEXT;
@@ -522,16 +531,16 @@ static bool config_load(const char *filename) {
         g_admin_config_filename = strdup( json_string_value(js_admin_config_filename) );
     }
 
-    json_auto_t *js_master_url = json_object_get(js_root, "masterUrl");
-    if (!js_master_url) {
+    json_auto_t *js_admin_url = json_object_get(js_root, "adminUrl");
+    if (!js_admin_url) {
         fprintf(stderr, "adminConfig not found in config file, fail");
         goto quit;
     }
     else {
-        g_master_url = strdup( json_string_value(js_master_url) );
+        g_admin_url = strdup( json_string_value(js_admin_url) );
     }
 
-    if (g_verbose) fprintf(stderr, "json file loaded successfully\n");
+    if (g_verbose) fprintf(stderr, "config json file loaded successfully\n");
     return(true);
 
 quit:
@@ -643,11 +652,16 @@ int main(int argc, char *argv[]) {
     }
 
     /* do the one initial HTTP request to get the older state */
-    if (sa_http_request(g_master_url, &g_master_data, &g_master_data_len) == false) {
-        fprintf(stderr, "could not fetch initial state, will wait for update\n");
+    char scape_url[120];
+    scape_url[0] = 0; 
+    strcpy(scape_url, g_admin_url);
+    strcat(scape_url,"soundscape");
+    fprintf(stderr, "pulling from url: %s\n",scape_url);
+    if (sa_http_request(scape_url, &g_scape_data, &g_scape_data_len) == false) {
+        fprintf(stderr, "could not fetch initial scapes, will wait for push\n");
     }
     else {
-        fprintf(stderr, "initial fetch succeeded\n");
+        fprintf(stderr, "initial fetch of scapes succeeded\n");
     }
 
     /* Set up a new main loop */
@@ -720,8 +734,8 @@ quit:
     if (g_sound_directory)      free(g_sound_directory);
     if (g_zone)                 free(g_zone);
     if (g_admin_config_filename) free(g_admin_config_filename);
-    if (g_master_url)           free(g_master_url);
-    if (g_master_data)          free(g_master_data);
+    if (g_admin_url)            free(g_admin_url);
+    if (g_scape_data)          free(g_scape_data);
 
     if (m) {
         pa_signal_done();

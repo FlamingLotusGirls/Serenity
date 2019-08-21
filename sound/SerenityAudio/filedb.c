@@ -44,9 +44,6 @@ SOFTWARE.
 
 #include "saplay.h"
 
-//
-#define MAX_NAME_SZ 40
-#define MAX_FILE_SZ 120
 
 #define MAX_REGISTERED_EFFECTS 20
 #define MAX_REGISTERED_BACKGROUNDS 40
@@ -147,6 +144,8 @@ bool sa_filedb_init(const char *config_filename) {
       if (g_verbose) fprintf(stderr, " parsed background: name %s file %s\n",
           backgrounds[bg_index].name,backgrounds[bg_index].file);
 
+      json_decref(value);
+
       bg_index++;
       if (bg_index > MAX_REGISTERED_BACKGROUNDS)
         return(false);
@@ -173,6 +172,8 @@ bool sa_filedb_init(const char *config_filename) {
 
       if (g_verbose) fprintf(stderr, " parsed effects: name %s file1 %s file2 %s file3 %s\n",
           effects[ef_index].name,effects[ef_index].file_i2,effects[ef_index].file_i1,effects[ef_index].file_i3);
+
+      json_decref(value);
 
       ef_index++;
       if (ef_index > MAX_REGISTERED_EFFECTS)

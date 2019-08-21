@@ -35,7 +35,10 @@ SOFTWARE.
 #define STREAM_INDEX_NULL UINT32_MAX
 
 // max that can play simultaneously. We have 5 or 6 defined now.
-#define MAX_EFFECTS 12
+#define MAX_EFFECTS 20
+#define MAX_ZONES 8
+#define MAX_NAME_SZ 40     // bytes in a name
+#define MAX_FILE_SZ 120     // bytes in a file
 
 
 typedef struct sa_soundplay {
@@ -104,6 +107,9 @@ extern bool sa_filedb_background_get(const char *background, char ** filename);
 extern bool sa_filedb_init(const char *filename );
 // uses all statics. No freeing.
 
+//scape
+extern bool sa_scape_process(const char *scape_string);
+
 
 // Saplay
 
@@ -112,6 +118,8 @@ extern sa_soundscape_t *g_scape_background;
 
 extern pa_context *g_context;
 extern bool g_context_connected;
+
+extern char *g_zone;
 
 extern void quit(int ret);
 

@@ -10,5 +10,5 @@
     "zone": "PergolaLeft",
     "soundDir": "/home/pi/SerenityAudio/sounds/flg_sound",
     "adminConfig": "/home/pi/Serenity/sound/SoundAdmin/data/config.json",
-    "masterUrl": "http://localhost:9000/audio/soundscape"
+    "adminUrl": "http://localhost:9000/audio/"
 }
