@@ -73,11 +73,14 @@ typedef struct sa_sink {
 // the scape plays on all speakers attached to this pi
 typedef struct sa_soundscape {
 
+    bool is_playing;
+    char *filename;
+
     int n_splays;
 
     sa_soundplay_t *splays[MAX_SA_SINKS];
 
-    pa_volume_t volume; // persists a bit!
+    int volume; // persists a bit!
 
 } sa_soundscape_t;
 
@@ -109,12 +112,12 @@ extern bool sa_filedb_init(const char *filename );
 
 //scape
 extern bool sa_scape_process(const char *scape_string);
+extern void sa_scape_timer();
+extern void sa_scape_free();
 
 
 // Saplay
 
-extern sa_soundscape_t *g_scape_effects[];
-extern sa_soundscape_t *g_scape_background;
 
 extern pa_context *g_context;
 extern bool g_context_connected;
@@ -123,11 +126,18 @@ extern char *g_zone;
 
 extern void quit(int ret);
 
+// These volumes are pulse volumes
 extern void sa_soundplay_start(sa_soundplay_t *);
+extern bool sa_soundplay_playing(sa_soundplay_t *);
 extern void sa_soundplay_free(sa_soundplay_t *);
 extern void sa_soundplay_volume_set(sa_soundplay_t *, pa_volume_t);
 
-extern sa_soundscape_t *sa_soundscape_new(char *filename, pa_volume_t volume);
+// These volumes are 0 to 100
+extern sa_soundscape_t *sa_soundscape_new(char *filename, int volume);
+extern bool sa_soundscape_filename_change(sa_soundscape_t *scape, char *filename, int volume);
+extern void sa_soundscape_timer(sa_soundscape_t *scape);
+extern void sa_soundscape_volume_change(sa_soundscape_t *scape, int volume);
+extern void sa_soundscape_free(sa_soundscape_t *scape);
 
 extern void sa_sinks_populate( pa_context *c, callback_fn_t next_fn );
 

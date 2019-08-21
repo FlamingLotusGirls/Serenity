@@ -84,7 +84,7 @@ void stream_write_callback(pa_stream *s, size_t length, void *userdata) {
     sf_count_t bytes;
     void *data;
 
-	//if (splay->verbose) fprintf(stderr,"stream write callback\n");
+	// if (splay->verbose) fprintf(stderr,"stream write callback %s\n",splay->stream_name);
 
     assert(s && length);
 
@@ -105,8 +105,9 @@ void stream_write_callback(pa_stream *s, size_t length, void *userdata) {
         bytes = sf_read_raw(splay->sndfile, data, (sf_count_t) length);
 	}
 
-    if (bytes > 0)
+    if (bytes > 0) {
         pa_stream_write(s, data, (size_t) bytes, pa_xfree, 0, PA_SEEK_RELATIVE);
+    }
     else
         pa_xfree(data);
 

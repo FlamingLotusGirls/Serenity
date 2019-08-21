@@ -49,16 +49,18 @@ SOFTWARE.
 #define MAX_REGISTERED_BACKGROUNDS 40
 
 
-struct effect {
-  char name[MAX_NAME_SZ];
-  char file_i1[MAX_FILE_SZ];
-  char file_i2[MAX_FILE_SZ];
-  char file_i3[MAX_FILE_SZ];
+struct effect
+{
+    char name[MAX_NAME_SZ];
+    char file_i1[MAX_FILE_SZ];
+    char file_i2[MAX_FILE_SZ];
+    char file_i3[MAX_FILE_SZ];
 };
 
-struct background {
-  char name[MAX_NAME_SZ];
-  char file[MAX_NAME_SZ];
+struct background
+{
+    char name[MAX_NAME_SZ];
+    char file[MAX_NAME_SZ];
 };
 
 int n_effects = 0;
@@ -67,42 +69,60 @@ struct effect effects[MAX_REGISTERED_EFFECTS] = {0};
 int n_backgrounds = 0;
 struct background backgrounds[MAX_REGISTERED_BACKGROUNDS] = {0};
 
+static bool inited = false;
+
 
 // files - quick accessors to find the files for the different Effects and Backgrounds
-bool sa_filedb_effect_get(const char *effect, int intensity, char **filename ) {
-
-  for (int i=0;i<n_effects;i++) {
-    if (0 == strcmp(effect, effects[i].name)) {
-      switch (intensity) {
-        case 1:
-          *filename = effects[i].file_i1;
-          return true;
-        case 2:
-          *filename = effects[i].file_i2;
-          return true;
-        case 3:
-          *filename = effects[i].file_i3;
-          return true;
-        default:
-          fprintf(stderr, " requested bad effect intensity %d\n",intensity);
-          return false;
-      }
-
+bool sa_filedb_effect_get(const char *effect, int intensity, char **filename )
+{
+    if (!inited)
+    {
+        fprintf(stderr, "filedb use without init\n");
+        return false;
     }
-  }
-  return false;
+    for (int i = 0; i < n_effects; i++)
+    {
+        if (0 == strcmp(effect, effects[i].name))
+        {
+            switch (intensity)
+            {
+            case 1:
+                *filename = effects[i].file_i1;
+                return true;
+            case 2:
+                *filename = effects[i].file_i2;
+                return true;
+            case 3:
+                *filename = effects[i].file_i3;
+                return true;
+            default:
+                fprintf(stderr, " requested bad effect intensity %d\n", intensity);
+                return false;
+            }
+
+        }
+    }
+    return false;
 
 }
 
-bool sa_filedb_background_get(const char *background, char ** filename) {
-
-  for (int i=0;i<n_backgrounds;i++) {
-    if (0==strcmp(background, backgrounds[i].name)) {
-      *filename = backgrounds[i].file;
-      return(true);
+bool sa_filedb_background_get(const char *background, char **filename)
+{
+    if (!inited)
+    {
+        fprintf(stderr, "filedb use without init\n");
+        return false;
     }
-  }
-  return(false);
+
+    for (int i = 0; i < n_backgrounds; i++)
+    {
+        if (0 == strcmp(background, backgrounds[i].name))
+        {
+            *filename = backgrounds[i].file;
+            return(true);
+        }
+    }
+    return(false);
 
 }
 
@@ -110,16 +130,22 @@ bool sa_filedb_background_get(const char *background, char ** filename) {
 // Grabs the config filename from the global
 //
 
-bool sa_filedb_init(const char *config_filename) {
+bool sa_filedb_init(const char *config_filename)
+{
 
-  json_error_t    js_err;
+    json_error_t    js_err;
+
+    // don't call twice. Willg et confused.
+    if ( inited ) return false;
+    inited = true;
 
     // load in the adminConfig file
     json_auto_t *js_root = json_load_file(config_filename, JSON_DECODE_ANY | JSON_DISABLE_EOF_CHECK, &js_err);
 
-    if (js_root == NULL) {
-        fprintf(stderr, "JSON config parse failed on %s\n",config_filename);
-        fprintf(stderr, "position: (%d,%d)  %s\n",js_err.line,js_err.column,js_err.text);
+    if (js_root == NULL)
+    {
+        fprintf(stderr, "JSON config parse failed on %s\n", config_filename);
+        fprintf(stderr, "position: (%d,%d)  %s\n", js_err.line, js_err.column, js_err.text);
         return(false);
     }
 
@@ -132,54 +158,58 @@ bool sa_filedb_init(const char *config_filename) {
 
     json_auto_t *bg = json_object_get(js_root, "backgrounds");
     json_auto_t *bg_n = json_object_get(bg, "names");
-    json_array_foreach( bg_n, index, value ) {
-      const char *bg_name = json_string_value(value);
-      json_auto_t *o = json_object_get(bg, bg_name);
-      json_auto_t *fn = json_object_get(o, "file");
+    json_array_foreach( bg_n, index, value )
+    {
+        const char *bg_name = json_string_value(value);
+        json_auto_t *o = json_object_get(bg, bg_name);
+        json_auto_t *fn = json_object_get(o, "file");
 
-      strncpy(backgrounds[bg_index].name, bg_name, sizeof( backgrounds[bg_index].name) );
-      strncpy(backgrounds[bg_index].file, json_string_value(fn), sizeof( backgrounds[bg_index].file ));
+        strncpy(backgrounds[bg_index].name, bg_name, sizeof( backgrounds[bg_index].name) );
+        strncpy(backgrounds[bg_index].file, json_string_value(fn), sizeof( backgrounds[bg_index].file ));
 
 
-      if (g_verbose) fprintf(stderr, " parsed background: name %s file %s\n",
-          backgrounds[bg_index].name,backgrounds[bg_index].file);
+        if (g_verbose) fprintf(stderr, " parsed background: name %s file %s\n",
+                                   backgrounds[bg_index].name, backgrounds[bg_index].file);
 
-      json_decref(value);
+        json_decref(value);
 
-      bg_index++;
-      if (bg_index > MAX_REGISTERED_BACKGROUNDS)
-        return(false);
+        bg_index++;
+        if (bg_index > MAX_REGISTERED_BACKGROUNDS)
+            return(false);
 
     }
+    n_backgrounds = bg_index;
 
     // effects
     int ef_index = 0;
 
     json_auto_t *ef = json_object_get(js_root, "effects");
     json_auto_t *ef_n = json_object_get(ef, "names");
-    json_array_foreach( ef_n, index, value ) {
-      const char *ef_name = json_string_value(value);
-      json_auto_t *o = json_object_get(ef, ef_name);
-      json_auto_t *f1 = json_object_get(o, "file1");
-      json_auto_t *f2 = json_object_get(o, "file2");
-      json_auto_t *f3 = json_object_get(o, "file3");
+    json_array_foreach( ef_n, index, value )
+    {
+        const char *ef_name = json_string_value(value);
+        json_auto_t *o = json_object_get(ef, ef_name);
+        json_auto_t *f1 = json_object_get(o, "file1");
+        json_auto_t *f2 = json_object_get(o, "file2");
+        json_auto_t *f3 = json_object_get(o, "file3");
 
-      strncpy(effects[ef_index].name, ef_name, sizeof( effects[ef_index].name) );
-      strncpy(effects[ef_index].file_i1, json_string_value(f1), sizeof( effects[ef_index].file_i1 ));
-      strncpy(effects[ef_index].file_i2, json_string_value(f2), sizeof( effects[ef_index].file_i2 ));
-      strncpy(effects[ef_index].file_i3, json_string_value(f3), sizeof( effects[ef_index].file_i3 ));
+        strncpy(effects[ef_index].name, ef_name, sizeof( effects[ef_index].name) );
+        strncpy(effects[ef_index].file_i1, json_string_value(f1), sizeof( effects[ef_index].file_i1 ));
+        strncpy(effects[ef_index].file_i2, json_string_value(f2), sizeof( effects[ef_index].file_i2 ));
+        strncpy(effects[ef_index].file_i3, json_string_value(f3), sizeof( effects[ef_index].file_i3 ));
 
 
-      if (g_verbose) fprintf(stderr, " parsed effects: name %s file1 %s file2 %s file3 %s\n",
-          effects[ef_index].name,effects[ef_index].file_i2,effects[ef_index].file_i1,effects[ef_index].file_i3);
+        if (g_verbose) fprintf(stderr, " parsed effects: name %s file1 %s file2 %s file3 %s\n",
+                                   effects[ef_index].name, effects[ef_index].file_i2, effects[ef_index].file_i1, effects[ef_index].file_i3);
 
-      json_decref(value);
+        json_decref(value);
 
-      ef_index++;
-      if (ef_index > MAX_REGISTERED_EFFECTS)
-        return(false);
+        ef_index++;
+        if (ef_index > MAX_REGISTERED_EFFECTS)
+            return(false);
 
     }
+    n_effects = ef_index;
 
 }
 
