@@ -1,4 +1,4 @@
 while :
 do
-	./voleff1.sh
+	./birds1.sh
 done
