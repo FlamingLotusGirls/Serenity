@@ -52,6 +52,7 @@ SOFTWARE.
 
 // Jannson for parsing Json
 #include <jansson.h>
+#include <curl/curl.h>
 
 
 #include "saplay.h"
@@ -882,7 +883,7 @@ int main(int argc, char *argv[])
             g_client_name = pa_utf8_filter(bn);
     }
 
-    if (! config_load(g_config_filename))
+    if (! config_load(g_config_filename) )
     {
         goto quit;
     }
@@ -898,6 +899,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "about to set up mainloop\n");
     }
 
+    /* curl needs a global init */
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
     /* set up the http server */
     if ( ! sa_http_start() )
     {
@@ -907,6 +911,7 @@ int main(int argc, char *argv[])
 
     /* do the two initial HTTP requests to get the scape and sink state */
     char req_url[120];
+#if 1
     strcpy(req_url, g_admin_url);
     strcat(req_url, "soundscape");
     fprintf(stderr, "pulling scapes from url: %s\n", req_url);
@@ -916,6 +921,9 @@ int main(int argc, char *argv[])
     else {
         fprintf(stderr, "initial fetch of scapes succeeded\n");
     }
+#endif
+
+#if 0
     strcpy(req_url, g_admin_url);
     strcat(req_url, "sinks");
     fprintf(stderr, "pulling sinks from url: %s\n", req_url);
@@ -925,6 +933,7 @@ int main(int argc, char *argv[])
     else {
         fprintf(stderr, "initial fetch of sinks succeeded\n");
     }
+#endif
 
     /* Set up a new main loop */
     if (!(m = pa_mainloop_new()))
@@ -997,6 +1006,8 @@ quit:
     }
 
     sa_http_terminate();
+
+    curl_global_cleanup();
 
     if (g_context)
         pa_context_unref(g_context);

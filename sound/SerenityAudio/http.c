@@ -49,24 +49,33 @@ static size_t dataSize=0;
 static size_t curlWriteFunction(void* ptr, size_t size/*always==1*/,
                                 size_t nmemb, void* userdata)
 {
+    fprintf(stderr,"curl write function: ptr %p size %zu nmemb %zu userdata %p\n",ptr,size,nmemb,userdata);
+
     char** stringToWrite=(char**)userdata;
     const char* input=(const char*)ptr;
+
     if(nmemb==0) return 0;
-    if(!*stringToWrite)
+
+    if(!*stringToWrite) {
         *stringToWrite=malloc(nmemb+1);
-    else
+        fprintf(stderr, "calling malloc with %zu\n",nmemb+1);
+      }
+    else {
         *stringToWrite=realloc(*stringToWrite, dataSize+nmemb+1);
+        fprintf(stderr, "calling realloc with %zu\n",dataSize+nmemb+1);
+    }
     memcpy(*stringToWrite+dataSize, input, nmemb);
     dataSize+=nmemb;
     (*stringToWrite)[dataSize]='\0';
+    fprintf(stderr," leaving curl write function\n");
     return nmemb;
 }
 
 bool sa_http_request(const char *url, char **result, size_t *result_len) {
 
-  if (g_verbose) fprintf(stderr,"starting HTTP request\n");
+  fprintf(stderr,"starting HTTP request %s\n",url);
 
-  CURL *curl;
+  CURL *curl = 0;
   CURLcode res;
   char *data = 0;
  
@@ -74,6 +83,7 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   if (!curl) {
     fprintf(stderr, " could not init curl ");
   }
+  fprintf(stderr," curl object is: %p\n",curl);
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   /* example.com is redirected, so we tell libcurl to follow redirection */ 
@@ -88,7 +98,9 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
 
   /* Perform the request, res will get the return code */ 
+  fprintf(stderr, "about to curl easy perform %s\n",url);
   res = curl_easy_perform(curl);
+  fprintf(stderr, "got curl result\n");
 
   /* Check for errors */ 
   if(res != CURLE_OK) {
@@ -105,10 +117,10 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
     return false;
   }
 
-  if (g_verbose) fprintf(stderr, "curl received data %s\n",data);
+  //fprintf(stderr, "curl received data %s\n",data);
 
   /* always cleanup */ 
-  curl_easy_cleanup(curl);
+  //curl_easy_cleanup(curl);
 
   *result = data;
   *result_len = strlen(data);
