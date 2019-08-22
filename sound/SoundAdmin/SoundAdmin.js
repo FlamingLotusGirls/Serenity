@@ -111,41 +111,44 @@ function scape_send(scape) {
 
 	const postData = JSON.stringify(scape);
 
-	console.log('content length %d',postData.length);
-
 	// todo: for each host in configured list, try to get just the first one going first :-)
 
-	const options = {
-	  hostname: 'localhost',
-	  port: 8000,
-	  path: '/soundscape',
-	  method: 'PUT',
-	  headers: {
-	    'Content-Type': 'application/json',
-	    'Content-Length': postData.length
-	  }
-	};
+	config.controllers.forEach(function(hostname){
 
-	const req = http.request(options, (res) => {
-	  console.log(`HTTP REQUEST STATUS: ${res.statusCode}`);
-	  res.setEncoding('utf8');
-	  res.on('data', (chunk) => {
-	    console.log(`BODY: ${chunk}`);
-	  });
-	  res.on('end', () => {
-	    console.log('No more data in response.');
-	  });
+		console.log('posting to %s',host);
+
+		const options = {
+		  hostname: host,
+		  port: 8000,
+		  path: '/soundscape',
+		  method: 'PUT',
+		  headers: {
+		    'Content-Type': 'application/json',
+		    'Content-Length': postData.length
+		  }
+		};
+
+		const req = http.request(options, (res) => {
+		  console.log(`HTTP REQUEST STATUS: ${res.statusCode}`);
+		  res.setEncoding('utf8');
+		  res.on('data', (chunk) => {
+		    console.log(`BODY: ${chunk}`);
+		  });
+		  res.on('end', () => {
+		    console.log('No more data in response.');
+		  });
+		});
+
+		req.on('error', (e) => {
+		  console.error(`problem with request: ${e.message}`);
+		});
+
+		// Write data to request body
+		// console.log('writing the data: len %d\n',postData.length);
+		req.setTimeout(500); // don't want to get too far behind, better to give up
+		req.write(postData);
+		req.end();
 	});
-
-	req.on('error', (e) => {
-	  console.error(`problem with request: ${e.message}`);
-	});
-
-	// Write data to request body
-	console.log('writing the data: len %d\n',postData.length);
-	req.setTimeout(1000); // should be able to hit a remote server in 200 ms otherwise complain
-	req.write(postData);
-	req.end();
 }
 
 // write the newly changed scape to the last file 

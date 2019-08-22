@@ -1,12 +1,13 @@
 {
   "controllers": [
-	  "sa1",
-	  "sa2",
-	  "sa3",
-	  "sa4",
-	  "sa5",
-	  "sa6",
-	  "sa7"
+	  "192.168.1.11",
+    "192.168.1.12",
+    "192.168.1.13",
+    "192.168.1.14",
+    "192.168.1.15",
+    "192.168.1.16",
+    "192.168.1.17",
+    "192.168.1.18"
   ],
   "dataDir": "data",
   "soundscapeDir": "data/scapes/",
@@ -28,7 +29,7 @@
     	"PergolaLeft4",
     	"PergolaLeft5",
     	"JarBrazen",
-    	"JarM3tric",
+    	"JarMetric",
     	"JarJohn",
     	"Depot"
     ]
