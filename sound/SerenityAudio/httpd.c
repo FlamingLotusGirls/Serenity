@@ -58,13 +58,16 @@ struct connection_info {
   char *data;
 };
 
+static bool ldebug = false;
+
 // I will usually get posts less than 1k
 #define POST_BUFFER_SIZE (1024 * 2)
 
 int header_iterator (void *cls, enum MHD_ValueKind kind, const char *key, const char *value) {
   struct connection_info *ci = (struct connection_info *) cls;
 
-  fprintf(stderr,"header type %x key %s value %s\n",kind,key,value);
+  //fprintf(stderr,"header type %x key %s value %s\n",kind,key,value);
+
   if (strcmp(key, "Content-Length") == 0) {
     char *endptr;
     ci->expected_size = strtol(value,&endptr,10);
@@ -87,7 +90,7 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
 
   struct connection_info *ci;
 
-  fprintf(stderr, "httpd_request_handler called\n");
+  if (ldebug) fprintf(stderr, "httpd_request_handler called\n");
 
   // the con_cls is a structure which is used to distinguish between incoming
   // connections. On a new connection, you get called with NULL, and you need
@@ -101,7 +104,7 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
   if (NULL == *con_cls)
   {
 
-      fprintf(stderr, "httpd_request_handler: no con_cls, creating\n");
+      //fprintf(stderr, "httpd_request_handler: no con_cls, creating\n");
 
       ci = malloc (sizeof (struct connection_info));
       memset(ci, 0, sizeof(struct connection_info));
@@ -115,7 +118,7 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
         ci->alloc_size = ci->expected_size + 1; // for null termination
       }
 
-      fprintf(stderr, "httpd_request_handler: size will be %zu\n",ci->expected_size);
+      if (ldebug) fprintf(stderr, "httpd_request_handler: size will be %zu\n",ci->expected_size);
 
       return MHD_YES;
   }
@@ -123,28 +126,32 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
   // have my connection info.... parse data in
   ci = *con_cls;
   if (*upload_data_size) {
+    size_t sz = *upload_data_size;
+    if (ldebug) fprintf(stderr, "upload data size: %zu alloc_sz %zu offset %zu\n", sz,ci->alloc_size,ci->offset);
     if (ci->data == NULL) {
-      ci->data = malloc((*upload_data_size) + 1);
-      ci->alloc_size = (*upload_data_size) + 1;
+      if (ldebug) fprintf(stderr,"had to alloc an empty pointer, unexpected\n");
+      ci->data = malloc(sz + 1);
+      ci->alloc_size = sz + 1;
     }
-    if (((*upload_data_size) + ci->offset) < ( ci->alloc_size + 1 ) )   {
-      fprintf(stderr, "have to realloc the http buffer\n");
-      ci->data = realloc(ci->data, ci->offset + (*upload_data_size) + 1);
-      ci->alloc_size = ci->offset + (*upload_data_size) + 1;
+    if ( (sz + ci->offset + 1) > ( ci->alloc_size  ) )   {
+      if (ldebug) fprintf(stderr, "have to realloc the http buffer\n");
+      ci->data = realloc(ci->data, ci->offset + sz + 1);
+      ci->alloc_size = ci->offset + sz + 1;
     }
-    memcpy(ci->data,upload_data,*upload_data_size);
-    ci->offset += *upload_data_size;
+    memcpy(ci->data + ci->offset,upload_data,sz);
+    ci->offset += sz;
   }
 
   bool complete = ci->offset == ci->expected_size ? true : false;
 
   if (complete == false) {
-    // get more responses!
+    // get more responses?
+    *upload_data_size = 0;
     return MHD_YES;
   }
 
   // past here, got all the data we are expecting, handle it
-  fprintf(stderr, "http request handler called url %s method %s\n",url,method);
+  if (ldebug) fprintf(stderr, "http request handler called url %s method %s\n",url,method);
 
   int ret = 0;
   bool parsed = false;
@@ -154,18 +161,20 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
     fprintf(stderr, "internal error, not enough space to null terminate incoming http request\n");
     return MHD_NO;
   }
-  * ((char *)(ci->data + ci->offset )) = 0;
+  // setting null
+  if (ldebug) fprintf(stderr,"data %p offset %zu result %p\n",ci->data,ci->offset,ci->data + ci->offset);
+  ((char *)ci->data)[ci->offset] = 0;
 
   if (strcmp(url,"/soundscape") == 0) {
     // should have an extra byte at the end?
 
-    fprintf(stderr, "httpd received soundscape: %s\n",ci->data);
+    if (ldebug) fprintf(stderr, "httpd received soundscape: %s\n",ci->data);
 
     if (strcmp(method,"PUT") != 0) {
       fprintf(stderr, "server expecting method PUT but no worries\n");
     }
 
-    parsed = sa_scape_process(ci->data);
+    parsed = sa_scape_submit(ci->data);
 
   }
   else if (strcmp(url,"/sinks") == 0) {
@@ -186,19 +195,20 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
 }
 
 
+// The only way to free a request safely is this way, because there
+// are error paths where you might not reach the final state in your request
+//
 static void
 request_completed (void *cls, struct MHD_Connection *connection,
                    void **con_cls, enum MHD_RequestTerminationCode toe)
 {
-  struct connection_info *con_info = *con_cls;
+  struct connection_info *ci = *con_cls;
 
+  if (NULL == ci) return;
 
-  if (NULL == con_info)
-    return;
+  if (ci->data) free(ci->data);
 
-  if (con_info->data) free(con_info->data);
-
-  free (con_info);
+  free (ci);
   *con_cls = NULL;
 
 }
@@ -207,7 +217,7 @@ static struct MHD_Daemon *g_mhd_daemon;
 
 bool sa_http_start(void) {
 
-  fprintf(stderr,"starting HTTP server port %d\n",g_http_port);
+  fprintf(stderr,"starting HTTPd server port %d\n",g_http_port);
 
   // this kind of start returns immediately and then there is a thread
   // spawned to do epoll

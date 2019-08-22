@@ -56,6 +56,8 @@ SOFTWARE.
 
 #include "saplay.h"
 
+static bool ldebug = false;
+
 
 /* Stream draining complete */
 void stream_drain_complete(pa_stream *s, int success, void *userdata) {
@@ -84,7 +86,7 @@ void stream_write_callback(pa_stream *s, size_t length, void *userdata) {
     sf_count_t bytes;
     void *data;
 
-	// if (splay->verbose) fprintf(stderr,"stream write callback %s\n",splay->stream_name);
+	if (ldebug) fprintf(stderr,"stream write callback %s\n",splay->stream_name);
 
     assert(s && length);
 
@@ -122,7 +124,7 @@ void volume_success_callback(pa_context *c, int success, void *userdata) {
     sa_soundplay_t *splay = (sa_soundplay_t *) userdata;
 
     if (success == 0) {
-        fprintf(stderr, "setting volume failed: %s\n",splay->stream_name);
+        if (g_verbose) fprintf(stderr, "setting volume failed: %s\n",splay->stream_name);
     }
 }
 
@@ -133,7 +135,7 @@ void stream_volume_set(sa_soundplay_t *splay, pa_volume_t volume) {
     // stash the new value
     splay->volume = volume;
 
-    if (g_verbose) fprintf(stderr, "stream volume set: index %d: volume %d\n",splay->stream_index,volume);
+    if (g_verbose) fprintf(stderr, "stream volume set: name %s stream index %d: volume %d\n",splay->stream_name,splay->stream_index,volume);
 
     if (splay->stream_index != STREAM_INDEX_NULL) {
         pa_cvolume cvol;
@@ -149,9 +151,7 @@ void stream_volume_set(sa_soundplay_t *splay, pa_volume_t volume) {
 void stream_state_callback(pa_stream *s, void *userdata) {
 	sa_soundplay_t *splay = (sa_soundplay_t *)userdata;
 
-	if (splay->verbose) {
-		fprintf(stderr, "stream state callback: %d\n",pa_stream_get_state(s) );
-	}
+	if (splay->verbose) fprintf(stderr, "stream state callback: name %s %d\n",splay->stream_name,pa_stream_get_state(s) );
 
 	// just making sure
     assert(s);
@@ -164,8 +164,8 @@ void stream_state_callback(pa_stream *s, void *userdata) {
             break;
 
         case PA_STREAM_READY:
-            if (splay->verbose)
-                fprintf(stderr, "Stream successfully created: id %d\n",pa_stream_get_index(s));
+
+            if (g_verbose) fprintf(stderr, "Stream successfully created: name %s id %d\n",splay->stream_name,pa_stream_get_index(s));
             splay->stream_index = pa_stream_get_index(s);
             break;
 

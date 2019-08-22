@@ -174,8 +174,10 @@ bool sa_filedb_init(const char *config_filename)
         json_decref(value);
 
         bg_index++;
-        if (bg_index > MAX_REGISTERED_BACKGROUNDS)
+        if (bg_index > MAX_REGISTERED_BACKGROUNDS) {
+            fprintf(stderr, "filedb: too many backgrounds\n");
             return(false);
+        }
 
     }
     n_backgrounds = bg_index;
@@ -205,11 +207,15 @@ bool sa_filedb_init(const char *config_filename)
         json_decref(value);
 
         ef_index++;
-        if (ef_index > MAX_REGISTERED_EFFECTS)
+        if (ef_index > MAX_REGISTERED_EFFECTS) {
+            fprintf(stderr, "filedb: too many effects\n");
             return(false);
+        }
 
     }
     n_effects = ef_index;
+
+    return(true);
 
 }
 

@@ -306,21 +306,20 @@ void sa_soundplay_terminate( sa_soundplay_t *splay)
     if (splay->stream)
     {
         pa_stream_disconnect(splay->stream);
-        if (splay->verbose)
-        {
-            fprintf(stderr, "terminating stream %s will get a callback for draining", splay->stream_name);
-        }
+        if (splay->verbose) fprintf(stderr, "terminating stream %s will get a callback for draining", splay->stream_name);
     }
     else
-    {
-        fprintf(stderr, "soundplay_terminate but no stream in progress");
-    }
+        if (splay->verbose) fprintf(stderr, "soundplay_terminate but no stream in progress");
+
 
 }
 
 void sa_soundplay_free( sa_soundplay_t *splay )
 {
-    if (splay->stream) pa_stream_unref(splay->stream);
+    if (splay->stream) {
+        pa_stream_disconnect(splay->stream);
+        pa_stream_unref(splay->stream);
+    }
     if (splay->stream_name) pa_xfree(splay->stream_name);
     if (splay->sndfile) sf_close(splay->sndfile);
     if (splay->dev) free(splay->dev);
@@ -415,7 +414,7 @@ void sa_soundscape_volume_change(sa_soundscape_t *scape, int  volume)
 
     scape->volume = volume;
 
-    fprintf(stderr, "soundscape: change volume %d\n", volume);
+    if (g_verbose) fprintf(stderr, "soundscape: change volume %d\n", volume);
 
     for (int i = 0; i < scape->n_splays; i++)
     {

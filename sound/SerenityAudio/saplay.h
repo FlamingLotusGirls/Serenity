@@ -84,16 +84,6 @@ typedef struct sa_soundscape {
 
 } sa_soundscape_t;
 
-// This is populated by the masterConfig. It has the list of
-// all the effect names, the effect file names,
-// the backgrounds, and background names
-
-typedef struct sa_sound_files {
-
-
-  
-
-} sa_sound_ambient_t;
 
 // useful type, a void function returning void
 typedef void (*callback_fn_t) (void);
@@ -111,6 +101,9 @@ extern bool sa_filedb_init(const char *filename );
 // uses all statics. No freeing.
 
 //scape
+   // use this from non-pulse audio threads
+extern bool sa_scape_submit(const char *scape_string);
+   // use this from pulse audio threads
 extern bool sa_scape_process(const char *scape_string);
 extern void sa_scape_timer();
 extern void sa_scape_free();
