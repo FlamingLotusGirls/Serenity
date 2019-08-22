@@ -375,6 +375,16 @@ static void sa_soundscape_play(sa_soundscape_t *scape)
     scape->is_playing = true;
 }
 
+static void sa_soundscape_filename_set(sa_soundscape_t *scape, const char *filename) {
+    if (scape->filename) { scape->filename = NULL; free(scape->filename); }
+    // Filename is relative to sound directory. Slap on the prefix here.
+    char full_filename[120];
+    strcpy(full_filename, g_sound_directory);
+    strcat(full_filename, filename);
+    if (g_verbose) fprintf(stderr, "soundscape new: full filename %s\n", full_filename);
+    scape->filename = strdup(full_filename);
+}
+
 sa_soundscape_t *sa_soundscape_new(char *filename, int volume)
 {
 
@@ -384,12 +394,7 @@ sa_soundscape_t *sa_soundscape_new(char *filename, int volume)
 
     if (g_verbose) fprintf(stderr, "new soundscape: %s vol %d\n", filename,volume);
 
-    // Filename is relative to sound directory. Slap on the prefix here.
-    char full_filename[120];
-    strcpy(full_filename, g_sound_directory);
-    strcat(full_filename, filename);
-    fprintf(stderr, "soundscape new: full filename %s\n", full_filename);
-    scape->filename = strdup(full_filename);
+    sa_soundscape_filename_set(scape, filename);
 
     scape->volume = volume;
 
@@ -404,7 +409,23 @@ sa_soundscape_t *sa_soundscape_new(char *filename, int volume)
 
 bool sa_soundscape_filename_change(sa_soundscape_t *scape, char *filename, int volume)
 {
+    // wipe out the old ones
+    for (int i = 0; i < scape->n_splays; i++)
+    {
+        if (scape->splays[i])
+        {
+            sa_soundplay_free(scape->splays[i]);
+            scape->splays[i] = 0;
+        }
+    }
+    scape->n_splays = 0;
 
+    // new filename
+    sa_soundscape_filename_set(scape, filename);
+
+    // play!
+    scape->volume = volume;
+    sa_soundscape_play(scape);
 
     return true;
 }
@@ -444,7 +465,6 @@ void sa_soundscape_timer(sa_soundscape_t *scape)
 
 void sa_soundscape_free( sa_soundscape_t *scape)
 {
-    if(scape->filename) free(scape->filename);
 
     for (int i = 0; i < scape->n_splays; i++)
     {
@@ -453,6 +473,8 @@ void sa_soundscape_free( sa_soundscape_t *scape)
             sa_soundplay_free(scape->splays[i]);
         }
     }
+
+    if(scape->filename) free(scape->filename);
 
     free(scape);
 }
