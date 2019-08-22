@@ -111,6 +111,13 @@ extern bool sa_scape_process(const char *scape_string);
 extern void sa_scape_timer();
 extern void sa_scape_free();
 
+// sink ( much smaller! )
+// use this from non-pulse audio threads
+extern bool sa_sink_submit(const char *scape_string);
+   // use this from pulse audio threads
+extern bool sa_sink_process(const char *scape_string);
+extern void sa_sink_timer();
+
 
 // Saplay
 

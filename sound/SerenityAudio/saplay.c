@@ -68,6 +68,8 @@ int g_http_port = 0;
 static char *g_admin_url = NULL; // the URL to pull scapes from
 static char *g_scape_data = NULL; // most recent data fetches ( or, first time only? )
 static size_t g_scape_data_len = 0;
+static char *g_sink_data = NULL;
+static size_t g_sink_data_len = 0;
 
 static sa_sink_t g_sa_sinks[MAX_SA_SINKS] = {0}; // null terminated array of pointers
 static bool g_sa_sinks_configured = false;
@@ -515,15 +517,21 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
 
         // Kick off fetching the HTTP to load the initial JSON
         // Should have the initial JSON by this point, call the code to act on it
-        if (g_scape_data)
-        {
-            if ( sa_scape_process(g_scape_data) )
-            {
+        if (g_scape_data) {
+            if ( sa_scape_process(g_scape_data) ) {
                 fprintf(stderr, "successfully processed inital scape data\n");
             }
-            else
-            {
+            else {
                 fprintf(stderr, " initial scape processing failed\n");
+            }
+        }
+
+        if (g_sink_data) {
+            if ( sa_sink_process(g_sink_data)) {
+                fprintf(stderr, "successfully processed inital sink data\n");
+            }
+            else {
+                fprintf(stderr, " initial sink processing failed\n");
             }
         }
 
@@ -533,6 +541,7 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
 
     // This happens every time after the first
     sa_scape_timer();
+    sa_sink_timer();
 
     // put the things you want to happen in here
 
@@ -896,19 +905,25 @@ int main(int argc, char *argv[])
         goto quit;
     }
 
-    /* do the one initial HTTP request to get the older state */
-    char scape_url[120];
-    scape_url[0] = 0;
-    strcpy(scape_url, g_admin_url);
-    strcat(scape_url, "soundscape");
-    fprintf(stderr, "pulling from url: %s\n", scape_url);
-    if (sa_http_request(scape_url, &g_scape_data, &g_scape_data_len) == false)
-    {
+    /* do the two initial HTTP requests to get the scape and sink state */
+    char req_url[120];
+    strcpy(req_url, g_admin_url);
+    strcat(req_url, "soundscape");
+    fprintf(stderr, "pulling scapes from url: %s\n", req_url);
+    if (sa_http_request(req_url, &g_scape_data, &g_scape_data_len) == false) {
         fprintf(stderr, "could not fetch initial scapes, will wait for push\n");
     }
-    else
-    {
+    else {
         fprintf(stderr, "initial fetch of scapes succeeded\n");
+    }
+    strcpy(req_url, g_admin_url);
+    strcat(req_url, "sinks");
+    fprintf(stderr, "pulling sinks from url: %s\n", req_url);
+    if (sa_http_request(req_url, &g_sink_data, &g_sink_data_len) == false) {
+        fprintf(stderr, "could not fetch initial sinks, will wait for push\n");
+    }
+    else {
+        fprintf(stderr, "initial fetch of sinks succeeded\n");
     }
 
     /* Set up a new main loop */
@@ -991,6 +1006,7 @@ quit:
     if (g_admin_config_filename) free(g_admin_config_filename);
     if (g_admin_url)            free(g_admin_url);
     if (g_scape_data)          free(g_scape_data);
+    if (g_sink_data)            free(g_sink_data);
 
     if (m)
     {

@@ -15,7 +15,7 @@ DEPS = saplay.h
 %: %.o 
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-saplay: saplay.o httpd.o http.o stream.o filedb.o scape.o
+saplay: saplay.o httpd.o http.o stream.o filedb.o scape.o sink.o
 all: saplay
 clean: 
 	rm saplay
