@@ -101,7 +101,7 @@ typedef void (*callback_fn_t) (void);
 /* Forward References */
 
 // http
-
+extern int g_http_port;
 extern bool sa_http_request(const char *url, char **result, size_t *result_len);
 
 // files - quick accessors to find the files for the different Effects and Backgrounds

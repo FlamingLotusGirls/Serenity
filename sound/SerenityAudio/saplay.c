@@ -63,6 +63,7 @@ static char *g_sound_directory = NULL; // loaded from the config file
 static char *g_admin_config_filename = NULL;
 char *g_zone = NULL;
 static char *g_config_filename = "config.json";
+int g_http_port = 0;
 
 static char *g_admin_url = NULL; // the URL to pull scapes from
 static char *g_scape_data = NULL; // most recent data fetches ( or, first time only? )
@@ -646,6 +647,15 @@ static bool config_load(const char *filename)
     else
     {
         g_admin_url = strdup( json_string_value(js_admin_url) );
+    }
+
+    json_auto_t *js_http_port = json_object_get(js_root, "httpPort");
+    if (!js_http_port) {
+        fprintf(stderr, "httpPort not found in config file, using 8000\n");
+        g_http_port = 8000;
+    }
+    else {
+        g_http_port = json_integer_value(js_http_port);
     }
 
     if (g_verbose) fprintf(stderr, "config json file loaded successfully\n");
