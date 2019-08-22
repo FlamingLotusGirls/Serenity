@@ -39,6 +39,7 @@ SOFTWARE.
 #define MAX_ZONES 8
 #define MAX_NAME_SZ 40     // bytes in a name
 #define MAX_FILE_SZ 120     // bytes in a file
+#define MAX_SPEAKER_SZ 40
 
 
 typedef struct sa_soundplay {
@@ -66,8 +67,10 @@ typedef struct sa_sink {
     bool active;
     char *dev; // also known as "name" in some interfaces, malloc'd
                 // have to pass this to pa_stream_connect_playback
-    int index;
-    // oh, I'm sure there are more things to map
+    int index; // the index is used for setting per-speaker volume
+    int position; // this is the position on the back of the raspberry pi by looking at USB bus info 
+    char speaker[MAX_SPEAKER_SZ];
+    int volume; // if it wasn't connected when got a sink request, stash hear for create time
 } sa_sink_t;
 
 // the scape plays on all speakers attached to this pi
@@ -110,6 +113,14 @@ extern void sa_scape_free();
 
 
 // Saplay
+
+typedef struct g_speakers_s {
+  char name[MAX_SPEAKER_SZ];
+  int  position;
+} g_speakers_t;
+
+extern int g_n_speakers;
+extern g_speakers_t g_speakers[12];
 
 
 extern pa_context *g_context;

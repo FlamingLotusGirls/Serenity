@@ -72,6 +72,10 @@ static size_t g_scape_data_len = 0;
 static sa_sink_t g_sa_sinks[MAX_SA_SINKS] = {0}; // null terminated array of pointers
 static bool g_sa_sinks_configured = false;
 
+// maps the positions into speaker names
+int g_n_speakers;
+g_speakers_t g_speakers[12];
+
 pa_context *g_context = NULL;
 bool g_context_connected = false;
 
@@ -480,6 +484,7 @@ void sa_soundscape_free( sa_soundscape_t *scape)
 }
 
 
+
 /*
 ** timer - this is called frequently, and where we decide to start and stop effects.
 ** or loop them because they were completed or whatnot.
@@ -546,6 +551,10 @@ NEXT:
 // the indexes ( which are the easiest way to talk about sinks ) increment as things are plugged
 // and unplugged. Thus we want to iterate the structure and find out what's currently around.
 //
+// On a raspberrry pi B+, the 4 USB ports map to 2 in the upper left, 3 left lower, 4 right upper, 5 right higher ( looking from the "back ").
+// These positions will be identified if possible, or left as 0 if not. In the evice bus examples I have seen, there is a :1.x: pattern near the
+// end that maps.
+//
 
 static void sa_sink_list_cb(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
 {
@@ -557,7 +566,35 @@ static void sa_sink_list_cb(pa_context *c, const pa_sink_info *info, int eol, vo
 
     callback_fn_t next_fn = (callback_fn_t) userdata;
 
-    if (g_verbose) fprintf(stderr, "sink list callback:\n");
+    //fprintf(stderr, "sink list callback: has proplist? %p\n",info->proplist);
+    int position = 0;
+    if (info->proplist) {
+        pa_proplist *props = info->proplist;
+        const char * device_bus = pa_proplist_gets(props, PA_PROP_DEVICE_BUS_PATH);
+        // fprintf(stderr, "sinklist: device bus is %s\n",device_bus);
+        if ( strstr(device_bus, ":1.2:")) {
+            position = 2;
+        }
+        else if ( strstr(device_bus, ":1.3:") ) {
+            position = 3;
+        }
+        else if ( strstr(device_bus, ":1.4")) {
+            position = 4;
+        }
+        else if ( strstr(device_bus, ":1.5")) {
+            position = 5;
+        }
+        if (g_verbose) fprintf(stderr, "sinklist: device position is %d\n",position);
+    }
+    // if we have a position, find the name
+    const char *speaker = "";
+    if (position > 0) {
+        for (int i=0;i<g_n_speakers;i++) {
+            if (position == g_speakers[i].position) {
+                speaker = g_speakers[i].name;
+            }
+        }
+    }
 
     // find next inactive sink, set it
     int i;
@@ -568,7 +605,9 @@ static void sa_sink_list_cb(pa_context *c, const pa_sink_info *info, int eol, vo
             g_sa_sinks[i].active = true;
             g_sa_sinks[i].index = info->index;
             g_sa_sinks[i].dev = strdup(info->name);
-            if (g_verbose) fprintf(stderr, "popuated index %d with idx %d dev %s\n", i, info->index, info->name);
+            g_sa_sinks[i].position = position;
+            strncpy(g_sa_sinks[i].speaker,speaker,sizeof(g_sa_sinks[0].speaker));
+            if (g_verbose) fprintf(stderr, "popuated index %d with idx %d position %d speaker %s dev %s\n", i, info->index, position, speaker, info->name);
             break;
         }
     }
@@ -603,6 +642,44 @@ void sa_sinks_populate( pa_context *c, callback_fn_t next_fn )
     pa_operation *o = pa_context_get_sink_info_list ( c, sa_sink_list_cb, next_fn /*userdata*/ );
     pa_operation_unref(o);
 
+}
+
+// pa_cvolume
+
+
+// Set volume on a specific speaker, by name
+bool sa_sinks_volume_set( const char *name, int volume )
+{
+
+    if (!g_sa_sinks_configured) {
+        fprintf(stderr,"can't set sink volume, sinks not configured\n");
+        return false;
+    }
+
+    for(int i = 0 ; i < MAX_SA_SINKS ; i++)
+    {
+        if (g_sa_sinks[i].active)
+        {
+            if (strcmp(name, g_sa_sinks[i].speaker) == 0) {
+                if (g_context_connected) {
+
+                    pa_cvolume cv;
+                    pa_cvolume_set(&cv, 2, to_pavolume( volume ));
+
+                    /** Set the volume of a sink device specified by its index */
+                    pa_operation* o = pa_context_set_sink_volume_by_index(g_context, g_sa_sinks[i].index, &cv, 
+                        NULL, 0); // would use callback to see if its working 
+                }
+
+                g_sa_sinks[i].volume = volume;
+
+                return true;   
+            }
+        }
+    }
+
+    fprintf(stderr, "sink volume set: name %s not found\n",name);
+    return(false);
 }
 
 //
@@ -677,6 +754,24 @@ static bool config_load(const char *filename)
     }
     else {
         g_http_port = json_integer_value(js_http_port);
+    }
+
+    json_auto_t *js_speakers = json_object_get(js_root, "speakers");
+    if (!js_speakers) {
+        fprintf(stderr, "without a speakers array, we can't respond to individual speaker settings");
+        g_n_speakers = 0;
+    }
+    else {
+        const char *sp_key;
+        json_t *sp_value;
+        json_object_foreach(js_speakers, sp_key, sp_value) {
+            strncpy ( g_speakers[g_n_speakers].name, sp_key, sizeof(g_speakers[0].name));
+            g_speakers[g_n_speakers].position = (int)json_integer_value(sp_value);
+            g_n_speakers++;
+        }
+    }
+    for (int i=0;i<g_n_speakers;i++) {
+        fprintf(stderr, "config: speaker name %s position %d\n",g_speakers[i].name,g_speakers[i].position);
     }
 
     if (g_verbose) fprintf(stderr, "config json file loaded successfully\n");
