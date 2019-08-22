@@ -1,0 +1,12 @@
+{
+    "speakers": {
+        "PergolaRight3": 2,
+        "PergolaRight4": 3,
+        "PergolaRight5": 4
+    },
+    "zone": "PergolaRight",
+    "soundDir": "/home/pi/Serenity/sound/flg_sound/",
+    "adminConfig": "/home/pi/Serenity/sound/SoundAdmin/data/config.json",
+    "adminUrl": "http://192.168.1.10:9000/audio/",
+    "httpPort": 8000
+}
