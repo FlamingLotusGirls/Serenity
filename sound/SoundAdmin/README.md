@@ -23,6 +23,21 @@ sudo apt update
 sudo apt install yarn
 ```
 
+# Configuration
+
+The configuration file is in the data directory. That config json has:
+- Where to post messages on changes
+- The lists of speakers and regions
+- Several well known files and directories
+
+Unless you change the scuplture, you probably only have to deal with changing
+the controller, and there is a handy config-debug in the same directory
+which has a single controller, and localhost, so you can more easily debug
+with just changing one file.
+
+Yes, I know node has fancier ways. Like yarn things. If Charlie gets fancy with that
+so be it !
+
 # test code
 
 curl -v  http://localhost:9000/audio/background
