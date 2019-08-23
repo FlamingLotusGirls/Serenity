@@ -92,7 +92,7 @@ static pa_time_event *g_timer = NULL;
 
 // My timer will fire every 50ms
 //#define TIME_EVENT_USEC 50000
-#define TIME_EVENT_USEC 100000
+#define TIME_EVENT_USEC 50000
 
 
 /* A shortcut for terminating the application */
