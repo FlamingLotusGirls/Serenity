@@ -1,7 +1,7 @@
 {
     "speakers": {
-        "PergolaLeft1": 4,
-        "PergolaLeft2": 5
+        "PergolaLeft1": 2,
+        "PergolaLeft2": 3
     },
     "zone": "PergolaLeft",
     "soundDir": "/home/pi/Serenity/sound/flg_sound/",
