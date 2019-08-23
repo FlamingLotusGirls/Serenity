@@ -151,6 +151,7 @@ extern void sa_soundscape_volume_change(sa_soundscape_t *scape, int volume);
 extern void sa_soundscape_free(sa_soundscape_t *scape);
 
 extern void sa_sinks_populate( pa_context *c, callback_fn_t next_fn );
+extern bool sa_sinks_volume_set( const char *name, int volume );
 
 // httpd
 extern bool sa_http_start(void); // false if fail

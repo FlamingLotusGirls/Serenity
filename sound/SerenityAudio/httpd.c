@@ -58,7 +58,7 @@ struct connection_info {
   char *data;
 };
 
-static bool ldebug = false;
+static bool ldebug = true;
 
 // I will usually get posts less than 1k
 #define POST_BUFFER_SIZE (1024 * 2)
@@ -178,9 +178,14 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
 
   }
   else if (strcmp(url,"/sinks") == 0) {
+
+    if (ldebug) fprintf(stderr, "httpd received sinks: %s\n",ci->data);
+
     if (strcmp(method,"PUT") != 0) {
       fprintf(stderr, "server expecting method PUT but no worries\n");
     }
+
+    parsed = sa_sink_submit(ci->data);
   }
 
   // send the response off to be parsed by the audio system.

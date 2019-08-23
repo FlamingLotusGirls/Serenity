@@ -526,6 +526,9 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
                 fprintf(stderr, " initial scape processing failed\n");
             }
         }
+        free(g_scape_data);
+        g_scape_data = NULL;
+        g_scape_data_len = 0;
 
         if (g_sink_data) {
             if ( sa_sink_process(g_sink_data)) {
@@ -535,6 +538,9 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
                 fprintf(stderr, " initial sink processing failed\n");
             }
         }
+        free(g_sink_data);
+        g_sink_data = NULL;
+        g_sink_data_len = 0;
 
         g_started = true;
         goto NEXT;
@@ -650,14 +656,17 @@ void sa_sinks_populate( pa_context *c, callback_fn_t next_fn )
     }
 
     pa_operation *o = pa_context_get_sink_info_list ( c, sa_sink_list_cb, next_fn /*userdata*/ );
-    pa_operation_unref(o);
+    if (o) pa_operation_unref(o);
 
 }
 
 // pa_cvolume
 
 
-// Set volume on a specific speaker, by name
+// Set volume on a specific speaker, by name. DOn't consume or keep the name or the volume.
+//
+// NOTE that's this will get called by lots of things which aren't on this machine. The 
+// other layers are profligate that way
 bool sa_sinks_volume_set( const char *name, int volume )
 {
 
@@ -666,29 +675,40 @@ bool sa_sinks_volume_set( const char *name, int volume )
         return false;
     }
 
+    fprintf(stderr, "sink volume set: name %s volume %d\n",name,volume);
+
     for(int i = 0 ; i < MAX_SA_SINKS ; i++)
     {
         if (g_sa_sinks[i].active)
         {
-            if (strcmp(name, g_sa_sinks[i].speaker) == 0) {
-                if (g_context_connected) {
+            if ( strcmp(name, g_sa_sinks[i].speaker) == 0) {
 
-                    pa_cvolume cv;
-                    pa_cvolume_set(&cv, 2, to_pavolume( volume ));
+                // don't bother pulseaudio if it's the same anyway
+                if (g_sa_sinks[i].volume != volume) {
 
-                    /** Set the volume of a sink device specified by its index */
-                    pa_operation* o = pa_context_set_sink_volume_by_index(g_context, g_sa_sinks[i].index, &cv, 
-                        NULL, 0); // would use callback to see if its working 
+                    if (g_context_connected) {
+
+                        pa_cvolume cv;
+                        pa_cvolume_set(&cv, 2, to_pavolume( volume ));
+
+                        /** Set the volume of a sink device specified by its index */
+                        pa_operation* o = pa_context_set_sink_volume_by_index(g_context, g_sa_sinks[i].index, &cv, 
+                            NULL, 0); // would use callback to see if its working 
+                        if (o) pa_operation_unref(o);
+
+                        fprintf(stderr, "sink volume set: actually set %s to %d was %d\n",
+                            name,volume,g_sa_sinks[i].volume);
+                    }
+
+                    g_sa_sinks[i].volume = volume;
                 }
-
-                g_sa_sinks[i].volume = volume;
 
                 return true;   
             }
         }
     }
 
-    fprintf(stderr, "sink volume set: name %s not found\n",name);
+    //fprintf(stderr, "sink volume set: name %s not found\n",name);
     return(false);
 }
 
