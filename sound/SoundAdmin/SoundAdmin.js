@@ -17,6 +17,54 @@ const config = require('./data/config.json')
 var g_scape = null;
 var g_sinks = null;
 
+
+// PUT to listening SerenityAudio controllers. They might be down so timeouts, and async!
+function controllers_update(path, scape) {
+
+	console.log('notifying Sound players of changes');
+
+	const postData = JSON.stringify(scape);
+
+	// todo: for each host in configured list, try to get just the first one going first :-)
+
+	config.controllers.forEach(function(host){
+
+		console.log('posting to %s',host);
+
+		const options = {
+		  hostname: host,
+		  port: 8000,
+		  path: path,
+		  method: 'PUT',
+		  headers: {
+		    'Content-Type': 'application/json',
+		    'Content-Length': postData.length
+		  }
+		};
+
+		const req = http.request(options, (res) => {
+		  console.log(`HTTP REQUEST STATUS: ${res.statusCode}`);
+		  res.setEncoding('utf8');
+		  res.on('data', (chunk) => {
+		    console.log(`BODY: ${chunk}`);
+		  });
+		  res.on('end', () => {
+		    console.log('No more data in response.');
+		  });
+		});
+
+		req.on('error', (e) => {
+		  console.error(`problem with request: ${e.message}`);
+		});
+
+		// Write data to request body
+		// console.log('writing the data: len %d\n',postData.length);
+		req.setTimeout(500); // don't want to get too far behind, better to give up
+		req.write(postData);
+		req.end();
+	});
+}
+
 // SCAPE FILES
 
 // Read from the default file
@@ -104,60 +152,13 @@ function scape_correctify(s) {
 
 }
 
-// PUT to listening SerenityAudio servers. They might be down so timeouts, and async!
-function scape_send(scape) {
-
-	console.log('notifying Sound players of changes in scape');
-
-	const postData = JSON.stringify(scape);
-
-	// todo: for each host in configured list, try to get just the first one going first :-)
-
-	config.controllers.forEach(function(hostname){
-
-		console.log('posting to %s',host);
-
-		const options = {
-		  hostname: host,
-		  port: 8000,
-		  path: '/soundscape',
-		  method: 'PUT',
-		  headers: {
-		    'Content-Type': 'application/json',
-		    'Content-Length': postData.length
-		  }
-		};
-
-		const req = http.request(options, (res) => {
-		  console.log(`HTTP REQUEST STATUS: ${res.statusCode}`);
-		  res.setEncoding('utf8');
-		  res.on('data', (chunk) => {
-		    console.log(`BODY: ${chunk}`);
-		  });
-		  res.on('end', () => {
-		    console.log('No more data in response.');
-		  });
-		});
-
-		req.on('error', (e) => {
-		  console.error(`problem with request: ${e.message}`);
-		});
-
-		// Write data to request body
-		// console.log('writing the data: len %d\n',postData.length);
-		req.setTimeout(500); // don't want to get too far behind, better to give up
-		req.write(postData);
-		req.end();
-	});
-}
-
 // write the newly changed scape to the last file 
 function scape_flush(s) {
 	fs.writeFileSync(config.currentScape, JSON.stringify(s));
 	//console.log(' flushed current scape ');
 
-	// and send it to any players who might be listening.... asynchrnously!!!
-	scape_send(s);
+	console.log("updating controllers with new soundscape");
+	controllers_update("/soundscape", s);
 
 }
 
@@ -186,6 +187,11 @@ function sink_init() {
 function sink_flush(s) {
 	fs.writeFileSync(config.currentSink, JSON.stringify(g_sink));
 	//console.log(' flushed current sink ');
+
+	console.log(" pushing sink changes to remotes ");
+
+	// and send it to any players who might be listening.... asynchrnously!!!
+	controllers_update("/sinks", s);
 }
 
 // Init function, load the scape
