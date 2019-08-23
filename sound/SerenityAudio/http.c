@@ -45,30 +45,35 @@ SOFTWARE.
 
 #include "saplay.h"
 
-static size_t dataSize=0;
-static size_t curlWriteFunction(void* ptr, size_t size/*always==1*/,
+typedef struct write_data_s {
+  char *buf;
+  size_t alloc_sz;
+  size_t len;
+} write_data_t;
+
+
+static size_t curlWriteFunction(void *ptr, size_t size/*always==1*/,
                                 size_t nmemb, void* userdata)
 {
     fprintf(stderr,"curl write function: ptr %p size %zu nmemb %zu userdata %p\n",ptr,size,nmemb,userdata);
 
-    char** stringToWrite=(char**)userdata;
-    const char* input=(const char*)ptr;
+    size_t realSize = size * nmemb; // kinda sumb because size is always 1 but api is api
+    write_data_t *buf = (write_data_t *)userdata;
 
     if(nmemb==0) return 0;
 
-    if(!*stringToWrite) {
-        *stringToWrite=malloc(nmemb+1);
-        fprintf(stderr, "calling malloc with %zu\n",nmemb+1);
-      }
-    else {
-        *stringToWrite=realloc(*stringToWrite, dataSize+nmemb+1);
-        fprintf(stderr, "calling realloc with %zu\n",dataSize+nmemb+1);
+    if (buf->alloc_sz < (buf->len + realSize + 1) ) {
+      fprintf(stderr, "reallloc in curl function\n");
+      buf->alloc_sz = buf->len + realSize + 1;
+      buf->buf = realloc(buf->buf, buf->alloc_sz);
     }
-    memcpy(*stringToWrite+dataSize, input, nmemb);
-    dataSize+=nmemb;
-    (*stringToWrite)[dataSize]='\0';
+    memcpy(buf->buf + buf->len, ptr, realSize);
+    buf->len += realSize;
+    buf->buf[buf->len] = 0;
+
     fprintf(stderr," leaving curl write function\n");
-    return nmemb;
+
+    return realSize;
 }
 
 bool sa_http_request(const char *url, char **result, size_t *result_len) {
@@ -77,7 +82,8 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
 
   CURL *curl = 0;
   CURLcode res;
-  char *data = 0;
+  
+  write_data_t write_data = {0};
  
   curl = curl_easy_init();
   if (!curl) {
@@ -85,17 +91,27 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   }
   fprintf(stderr," curl object is: %p\n",curl);
 
+  // start with a reasonable buffer. Seems like these usually fit in 1k.
+  write_data.buf = malloc(1000);
+  write_data.alloc_sz = 1000;
+  write_data.len = 0;
+
   curl_easy_setopt(curl, CURLOPT_URL, url);
   /* example.com is redirected, so we tell libcurl to follow redirection */ 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &curlWriteFunction);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&write_data);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);
 
   // signals would be bad
   curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 0);
   // but we're on a local network wtihout DNS. Don't wait long.
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
+
+  // start with a reasonable buffer. Seems like these usually fit in 1k.
+  write_data.buf = malloc(1000);
+  write_data.alloc_sz = 1000;
+  write_data.len = 0;
 
   /* Perform the request, res will get the return code */ 
   fprintf(stderr, "about to curl easy perform %s\n",url);
@@ -120,10 +136,10 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   //fprintf(stderr, "curl received data %s\n",data);
 
   /* always cleanup */ 
-  //curl_easy_cleanup(curl);
+  curl_easy_cleanup(curl);
 
-  *result = data;
-  *result_len = strlen(data);
+  *result = write_data.buf;
+  *result_len = write_data.len;
 
   return true;
 }

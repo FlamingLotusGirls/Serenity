@@ -98,7 +98,7 @@ void sa_sink_timer(void)
 // A fancier system would parse inline and act on it later....
 bool sa_sink_submit( const char *sink_str) {
 
-    fprintf(stderr, "sink received a submit: %s\n",sink_str);
+  if (ldebug) fprintf(stderr, "sink received a submit: %s\n",sink_str);
 
   // might as well copy the data outside the loop
   const char *data = strdup( sink_str );
