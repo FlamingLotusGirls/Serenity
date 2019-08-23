@@ -1,0 +1,55 @@
+{
+  "controllers": [
+    "localhost"
+  ],
+  "dataDir": "data",
+  "soundscapeDir": "data/scapes/",
+  "currentScape": "data/recentScape.json",
+  "defaultSink": "data/defaultSink.json",
+  "currentSink": "data/recentSink.json",
+  "soundDir":  "../flg_sound/",
+
+  "sinks": {
+    "names": [
+    	"PergolaRight1",
+    	"PergolaRight2",
+    	"PergolaRight3",
+    	"PergolaRight4",
+    	"PergolaRight5",
+    	"PergolaLeft1",
+    	"PergolaLeft2",
+    	"PergolaLeft3",
+    	"PergolaLeft4",
+    	"PergolaLeft5",
+    	"JarBrazen",
+    	"JarMetric",
+    	"JarJohn",
+    	"Depot"
+    ]
+  },
+  "zones": {
+    "names": ["PergolaRight", "PergolaLeft", "Jars", "Depot"]
+  },
+ "backgrounds": {
+    "names": ["Ambient1", "Ambient2", "Ambient3"],
+    "Ambient1": {"file": "ambient_1.wav"},
+    "Ambient2": {"file": "ambient_2.wav"},
+    "Ambient3": {"file": "ambient_3.wav"}
+  },
+  "effects": {
+    "names": ["birds" , "cicadas" , "crickets" , "frogs" , "frogsAlt" ],
+    "cicadas": { "file1": "cicadas_1.wav", "file2": "cicadas_2.wav", "file3": "cicadas_3.wav"},
+    "crickets": { "file1": "crickets_1.wav", "file2": "crickets_2.wav", "file3": "crickets_3.wav"},
+    "birds": { "file1": "birds_1.wav", "file2": "birds_2.wav", "file3": "birds_3.wav"},
+    "frogs": { "file1": "frogs_1.wav", "file2": "frogs_2.wav", "file3": "frogs_3.wav"},
+    "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"}
+  },
+  "buttons": {
+    "0": { "effect": "cicadas", "volume": 75 },
+    "1": { "effect": "crickets", "volume": 75 },
+    "2": { "effect": "frogs", "volume": 75 },
+    "3": { "effect": "birds", "volume": 75 },
+    "4": { "effect": "crickets", "volume": 75 },
+    "5": { "effect": "frogsAlt", "volume": 75 }
+  }
+}
