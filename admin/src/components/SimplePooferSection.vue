@@ -22,5 +22,10 @@ export default {
 .middle-bug {
   top: 80px;
 }
+@media (max-device-width: 863px) {
+  .middle-bug {
+    top: 0;
+  }
+}
 </style>
 

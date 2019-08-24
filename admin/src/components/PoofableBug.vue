@@ -1,7 +1,7 @@
 <template>
     <div class="poofable-bug">
         <img src="/images/firefly.png" />
-        <h3><a href="#" v-on:click="poof">{{bugName}}</a></h3>
+        <h3><a href="#" v-on:click.prevent="poofAll">{{bugName}}</a></h3>
         <Poofer v-for="pooferId in pooferIds" v-bind:pooferId="pooferId" v-bind:bugNumber="bugNumber" />
     </div>
 </template>
@@ -31,7 +31,7 @@ export default {
         }
     },
     methods: {
-        poof: function() {
+        poofAll: function() {
             let formData = new FormData();
             formData.append('active', true);
 

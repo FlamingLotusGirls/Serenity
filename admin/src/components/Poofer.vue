@@ -5,13 +5,13 @@
 <script>
 import { runFireProgram } from '../requests';
 const DEFAULT_POOF_DURATION = 300;
-let activeClearingTimer = null;
 
 export default {
   props: ['pooferId', 'bugNumber'],
   data() {
     return {
-      active: false
+      active: false,
+      activeClearingTimer: null
     };
   },
   computed: {
@@ -38,13 +38,13 @@ export default {
           this.active = true;
 
           // if we do multiple poofs overlapping, need to make sure we don't end up with weird timer glitches
-          if (activeClearingTimer) {
-            clearTimeout(activeClearingTimer);
+          if (this.activeClearingTimer) {
+            clearTimeout(this.activeClearingTimer);
           }
 
-          activeClearingTimer = setTimeout(() => {
-            clearTimeout(activeClearingTimer);
-            activeClearingTimer = null;
+          this.activeClearingTimer = setTimeout(() => {
+            clearTimeout(this.activeClearingTimer);
+            this.activeClearingTimer = null;
 
             this.active = false;
           }, 300)
