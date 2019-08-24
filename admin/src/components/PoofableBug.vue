@@ -8,6 +8,7 @@
 
 <script>
 import Poofer from './Poofer.vue'
+import { runFireProgram } from '../requests';
 
 export default {
     props: ['bugName', 'bugNumber'],
@@ -31,8 +32,15 @@ export default {
     },
     methods: {
         poof: function() {
-            // TODO: add fetch() request to poof all poofers here
-            alert(`This doesn't work yet, but someday this will poof all poofers on ${this.bugName}`);
+            let formData = new FormData();
+            formData.append('active', true);
+
+            return runFireProgram(`__${this.bugNumber}_ALL`)
+                .then(() => {
+                    console.log(`Fired all poofers on ${this.bugName}`);
+                }, error => {
+                    alert(error);
+                });
         }
     }
 };

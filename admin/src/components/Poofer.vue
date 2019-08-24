@@ -17,7 +17,7 @@ export default {
 
       return runFireProgram(`__${this.bugNumber}_${this.pooferId}`)
         .then(() => {
-          alert(`Fired poofer ${this.bugNumber}_${this.pooferId}`);
+          console.log(`Fired poofer ${this.bugNumber}_${this.pooferId}`);
         }, error => {
           alert(error);
         });
