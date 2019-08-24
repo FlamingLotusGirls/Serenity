@@ -4,7 +4,6 @@
             <div class="jars-header row">
                 <div class="col-12 align-self-left">
                     <h2><img class="jars-icon" src="/images/firefly-jar.png"></img> Jars</h2>
-                    <a class="view-color-sources-link" href="#">view color palette sources</a>
                 </div>
             </div>
             <div class="jars-content row">
