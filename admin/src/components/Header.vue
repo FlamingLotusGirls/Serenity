@@ -1,6 +1,6 @@
 <template>
   <header>
-      <h2>Flaming Lotus Girls: Serenity</h2>
+      <h2><span class="flg-text">Flaming Lotus Girls: </span>Serenity</h2>
       <div class="tabs">
         <a href="#BigBugs" v-bind:class="{ selected: selectedTab === 'BigBugs' }">Big Bugs</a>
         |
@@ -20,6 +20,28 @@ export default {
 </script>
 
 <style>
+  @media (max-device-width: 1030px) {
+    header h2 .flg-text {
+      display: none;
+    }
+  }
+  @media (max-device-width: 640px) {
+    header h2 {
+      display: block;
+      text-align: center;
+      width: 100%;
+      margin-left: 0 !important;
+    }
+    header .tabs {
+      width: 100%;
+      display: block;
+      padding: 10px;
+      text-align: center;
+      margin: 0 auto;
+      font-size: 19px;
+    }
+  }
+
   header {
     background: #000;
     height: 40px;
