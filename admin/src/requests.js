@@ -250,13 +250,20 @@ const setJarLEDs = function(jarIndex, foregroundPatternName, backgroundPatternNa
         .then(res => {
             // handle non-success responses
             if (!res.ok) {
-                return reject(`Unable to save jar ${jarIndex} LED settings. Request failed with status ${res.status} ${res.statusText}`);
+                let errMessage = `Unable to save jar ${jarIndex} LED settings. Request failed with status ${res.status} ${res.statusText}`;
+                if (res.status === 409) {
+                    // special error message for fade conflicts
+                    errMessage = `You can't change the jar pattern while it's already fading. Try again in a few seconds.`;
+                }
+
+                return reject(errMessage);
             }
             return res;
         })
         .then(res => {
             return resolve();
         }, error => {
+            console.log('error: ', error);
             return reject(`Failed to save jar ${jarIndex} LED settings with error ${error}`);
         });
     });
