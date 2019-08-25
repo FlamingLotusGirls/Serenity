@@ -117,7 +117,7 @@ export default {
         margin: 10px;
     }
     .pattern-editing-section {
-        padding: 20px;
+        padding: 20px 40px;
     }
     .manage-sequences-section {
         margin-top: 24px;
