@@ -5,8 +5,9 @@
             <a href="#Admin/Fire" v-bind:class="{ selected: selectedAdminTab === 'Fire' }">Fire Admin</a>
             |
             <a href="#Admin/Sound" v-bind:class="{ selected: selectedAdminTab === 'Sound' }">Sound Admin</a>
-            |
+            <!-- |
             <a href="#Admin/Light" v-bind:class="{ selected: selectedAdminTab === 'Light' }">Light Admin</a>
+            -->
         </div>
     </div>
     <keep-alive>
