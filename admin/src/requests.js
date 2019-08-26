@@ -83,10 +83,12 @@ const createNewFirePattern = function(programName, poofDuration, patternsObject)
                 if (!isLit) return;
                 let pooferId = `${bugNamesToNumbersMap[bugName]}_${pooferNamesToNumbersMap[pooferName]}`;
 
+                // convert all times in ms to seconds
+                // since that's what the flame admin server likes
                 eventsArr.push({
                     ids: [pooferId],
-                    duration: poofDuration,
-                    startTime: index * poofDuration
+                    duration: poofDuration / 1000,
+                    startTime: (index * poofDuration) / 1000
                 });
             });
         });
