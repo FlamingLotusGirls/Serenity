@@ -173,7 +173,12 @@ const setFireflyLEDs = function(swarmNumber, sequence, colorObject) {
     let formData = new FormData();
     formData.append('swarm', swarmNumber);
     formData.append('sequence', sequence);
-    formData.append('color', `${colorObject.r / 255.0},${colorObject.g / 255.0},${colorObject.b / 255.0}`);
+
+    // need to round the colors to 3 decimal places or Carolyn gets mad at me (and the firefly LEDs don't set)
+    let red = (colorObject.r / 255.0).toFixed(3);
+    let green = (colorObject.g / 255.0).toFixed(3);
+    let blue = (colorObject.b / 255.0).toFixed(3);
+    formData.append('color', `${red},${green},${blue}`);
 
     return new Promise(function(resolve, reject) {
         return fetch(`${smallFireflyLEDControllerURL}/firefly_leds`, {
