@@ -56,11 +56,11 @@ const createNewFirePattern = function(programName, poofDuration, patternsObject)
     // so we need to convert our pattern format to its pattern format
     let eventsArr = [];
 
-    const bugNames = ['Metric', 'Brazen', 'John'];
+    const bugNames = ['Metric', 'John', 'Brazen'];
     const bugNamesToNumbersMap = {
         Metric: 1,
-        Brazen: 2,
-        John: 3 
+        John: 2,
+        Brazen: 3
     };
     const pooferNames = ['butt1', 'butt2', 'butt3', 'butt4', 'butt5', 'butt6', 'antenna1', 'antenna2'];
     const pooferNamesToNumbersMap = {

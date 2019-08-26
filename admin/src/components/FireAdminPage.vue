@@ -4,8 +4,8 @@
         <div class="sequence-builder-section row">
             <div class="col-2 bug-admin-tabs">
                 <button class="btn bug-admin-tab" v-bind:class="{ selected: selectedBug === 'Metric' }" v-on:click="selectBug('Metric')">metric</button>
-                <button class="btn bug-admin-tab" v-bind:class="{ selected: selectedBug === 'Brazen' }" v-on:click="selectBug('Brazen')">brazen</button>
                 <button class="btn bug-admin-tab" v-bind:class="{ selected: selectedBug === 'John' }" v-on:click="selectBug('John')">john</button>
+                <button class="btn bug-admin-tab" v-bind:class="{ selected: selectedBug === 'Brazen' }" v-on:click="selectBug('Brazen')">brazen</button>
             </div>
             <div class="col-10 pattern-editing-section">
                 <div class="speed-row row">
