@@ -179,6 +179,7 @@ static sa_soundplay_t *sa_soundplay_new( char *filename, char *dev, pa_volume_t 
 
     sa_soundplay_t *splay = malloc(sizeof(sa_soundplay_t));
     memset(splay, 0, sizeof(sa_soundplay_t) );  // typically don't do this, do every field, but doing it this time
+   	sa_soundplay_ref_incr( splay );
 
     SF_INFO sfinfo;
 
@@ -301,6 +302,9 @@ void sa_soundplay_play( sa_soundplay_t *splay)
 
     pa_cvolume cv;
 
+    // this reference will be freed by the stream's terminate notification
+    sa_soundplay_ref_incr( splay ); 
+
     pa_stream_set_state_callback(splay->stream, stream_state_callback, splay);
     pa_stream_set_write_callback(splay->stream, stream_write_callback, splay);
     pa_stream_connect_playback(splay->stream, splay->dev, NULL/*buffer_attr*/, 0/*flags*/,
@@ -323,29 +327,51 @@ void sa_soundplay_terminate( sa_soundplay_t *splay)
     }
     else
         if (splay->verbose) fprintf(stderr, "soundplay_terminate but no stream in progress");
-
-
 }
 
-//
-// THIS IS BROKEN because the terminate calls happen asynchronously, and they ( and lots of others )
-// use the splay. The right thing appears to be the TERMINATE call.
-// HOWEVER< in the heat of the moment, we will simply 
+// increments the value of the reference counter, and returns the value
+// why the plus one? because the value returned from the function is the _previous_
+// version
+int sa_soundplay_ref_incr( sa_soundplay_t *splay ) {
+	return ( atomic_fetch_add(&(splay->reference), 1) + 1 );
+}
+
+// why the minus one? because atomic fetch sub returns the value
+// the variable had _prevsiously_ 
+int sa_soundplay_ref_decr( sa_soundplay_t *splay ) {
+	return ( atomic_fetch_sub(&(splay->reference), 1) - 1 );
+}
+
+
+// This free function decrements the reference and frees only
+// if it is the last free.
 
 
 void sa_soundplay_free( sa_soundplay_t *splay )
 {
-    if (splay->stream) {
-        pa_stream_disconnect(splay->stream);
-        pa_stream_unref(splay->stream);
-    }
-    //if (splay->stream_name) pa_xfree(splay->stream_name);
-    if (splay->sndfile) { sf_close(splay->sndfile); splay->sndfile = 0; }
-    if (splay->dev) { free(splay->dev); splay->dev = 0; }
-    if (splay->filename) { free(splay->filename); splay->filename = 0; }
+	// decrement, and if I get the 0, free
+	int ref = sa_soundplay_ref_decr(splay);
+	if (ref == 0) {
 
-    // leaking here!
-    //free(splay);
+		//fprintf(stderr, "sa_soundplay: last free %p\n",splay);
+
+	    if (splay->stream) {
+	        pa_stream_disconnect(splay->stream);
+	        pa_stream_unref(splay->stream);
+	        splay->stream = 0;
+	    }
+	    //if (splay->stream_name) pa_xfree(splay->stream_name);
+	    if (splay->sndfile) { sf_close(splay->sndfile); splay->sndfile = 0; }
+	    if (splay->dev) { free(splay->dev); splay->dev = 0; }
+	    if (splay->filename) { free(splay->filename); splay->filename = 0; }
+
+	    // test code....
+	    //memset(splay, 0xff, sizeof(sa_soundplay_t));
+	    free(splay);
+	}
+	//else {
+	//	fprintf(stderr, "sa_soundplay: free without free, ref %d\n",ref);
+	//}
 }
 
 /*
@@ -434,6 +460,7 @@ bool sa_soundscape_filename_change(sa_soundscape_t *scape, char *filename, int v
     {
         if (scape->splays[i])
         {
+        	sa_soundplay_terminate(scape->splays[i]);
             sa_soundplay_free(scape->splays[i]);
             scape->splays[i] = 0;
         }

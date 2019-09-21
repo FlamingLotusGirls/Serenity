@@ -159,8 +159,13 @@ void stream_state_callback(pa_stream *s, void *userdata) {
     switch (pa_stream_get_state(s)) {
         case PA_STREAM_CREATING:
         	break;
+            
         case PA_STREAM_TERMINATED:
-        	if (splay->verbose) fprintf(stderr, "stream %s terminated\n",splay->stream_name);
+            // NOTE! THere is a refcount on splay held by the stream player, I believe
+            // this is the function that's called no matter what after you get a play
+
+        	if (splay->verbose) fprintf(stderr, "stream %s terminated\n",splay->stream_name);            
+            sa_soundplay_free(splay);
             break;
 
         case PA_STREAM_READY:

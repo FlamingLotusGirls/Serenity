@@ -28,6 +28,7 @@ SOFTWARE.
 
 // external library which understands different formats
 #include <sndfile.h>
+#include <stdatomic.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -44,7 +45,14 @@ SOFTWARE.
 
 typedef struct sa_soundplay {
 
-	pa_stream *stream; // gets reset to NULL when file is over
+	// this has to be a reference counted structure, because
+  // we're using it with the pulseaudio async interfaces, so we'll
+  // have a few different threads accessing. The use is thread-safe,
+  // but freeing it can be a little troublesome.
+  // This uses the "new" C11 atomic interfaces.
+  atomic_int   reference;
+
+  pa_stream *stream; // gets reset to NULL when file is over
   uint32_t stream_index; // this id is used to change volume with the sink set volume by id call
 	char *stream_name;
 
@@ -60,6 +68,7 @@ typedef struct sa_soundplay {
   pa_channel_map channel_map;
 
 	sf_count_t (*readf_function)(SNDFILE *_sndfile, void *ptr, sf_count_t frames);
+
 } sa_soundplay_t;
 
 
@@ -140,6 +149,8 @@ extern void quit(int ret);
 // These volumes are pulse volumes
 extern void sa_soundplay_start(sa_soundplay_t *);
 extern bool sa_soundplay_playing(sa_soundplay_t *);
+extern int sa_soundplay_ref_incr( sa_soundplay_t *splay );
+extern int sa_soundplay_ref_decr( sa_soundplay_t *splay );
 extern void sa_soundplay_free(sa_soundplay_t *);
 extern void sa_soundplay_volume_set(sa_soundplay_t *, pa_volume_t);
 
