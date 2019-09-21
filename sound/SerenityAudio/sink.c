@@ -52,7 +52,7 @@ SOFTWARE.
 
 
 // Local Debug
-static bool ldebug = true;
+static bool ldebug = false;
 
 static pthread_mutex_t sink_submit_lock = PTHREAD_MUTEX_INITIALIZER;
 

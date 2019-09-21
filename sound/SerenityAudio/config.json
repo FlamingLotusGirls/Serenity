@@ -5,6 +5,8 @@
     },
     "zone": "PergolaLeft",
     "soundDir": "/home/pi/Serenity/sound/flg_sound/",
+    "recentScapeFile": "/home/pi/Serenity/sound/SerenityAudio/recentScapeFile.json",
+    "recentSinksFile": "/home/pi/Serenity/sound/SerenityAudio/recentSinksFile.json",
     "adminConfig": "/home/pi/Serenity/sound/SoundAdmin/data/config.json",
     "adminUrl": "http://localhost:9000/audio/",
     "httpPort": 8000
