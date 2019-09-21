@@ -1,7 +1,7 @@
 {
 	"background": {
-		"name": "Ambient2",
-		"volume": 50
+		"name": "Ambient1",
+		"volume": 80
 	},
 	"effects": {
 		"crickets": {
@@ -14,6 +14,10 @@
 		},
 		"cicadas": {
 			"intensity": 0,
+			"volume": 0
+		},
+		"treeFrogs": {
+			"intensity": 1,
 			"volume": 0
 		},
 		"frogs": {

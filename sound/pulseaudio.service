@@ -1,0 +1,9 @@
+[Unit]
+Description=PulseAudio system server
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=pulseaudio --daemonize=no --system --realtime --disallow-exit --log-target=journal

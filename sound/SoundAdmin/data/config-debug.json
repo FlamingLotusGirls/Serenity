@@ -31,17 +31,20 @@
     "names": ["PergolaRight", "PergolaLeft", "Jars", "Depot"]
   },
  "backgrounds": {
-    "names": ["Ambient1", "Ambient2", "Ambient3"],
+    "names": ["Ambient1", "Ambient2", "Ambient3", "Ambient4", "AmbientSucks"],
     "Ambient1": {"file": "ambient_1.wav"},
     "Ambient2": {"file": "ambient_2.wav"},
-    "Ambient3": {"file": "ambient_3.wav"}
+    "Ambient3": {"file": "ambient_3.wav"},
+    "Ambient4": {"file": "ambient_4.wav"},
+    "AmbientSucks": {"file": "ambient_5.wav"}
   },
   "effects": {
-    "names": ["birds" , "cicadas" , "crickets" , "frogs" , "frogsAlt" ],
+    "names": ["birds" , "cicadas" , "crickets" , "treefrogs", "frogs" , "frogsAlt" ],
     "cicadas": { "file1": "cicadas_1.wav", "file2": "cicadas_2.wav", "file3": "cicadas_3.wav"},
     "crickets": { "file1": "crickets_1.wav", "file2": "crickets_2.wav", "file3": "crickets_3.wav"},
     "birds": { "file1": "birds_1.wav", "file2": "birds_2.wav", "file3": "birds_3.wav"},
     "frogs": { "file1": "frogs_1.wav", "file2": "frogs_2.wav", "file3": "frogs_3.wav"},
+    "treefrogs": { "file1": "eastern_treefrog_1.wav", "file2": "eastern_treefrog_2.wav", "file3": "eastern_treefrog_3.wav"},
     "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"}
   },
   "buttons": {

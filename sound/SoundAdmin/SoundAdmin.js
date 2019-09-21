@@ -206,11 +206,15 @@ g_sink = sink_init();
 
 // Get the list of all possible backgrounds
 app.get('/audio/backgrounds', (req, res) => {
+
+	console.log("got audio backgrounds");
+
 	res.json(config.backgrounds)
 })
 
 // the current playing
 app.get('/audio/background', (req,res) => {
+	console.log("got audio background");
 	res.json(g_scape.background);
 })
 
@@ -267,6 +271,9 @@ app.put('/audio/background', (req, res) => {
 
 // Returns the current list of sounscapes as an array
 app.get('/audio/soundscapes', (req, res) => {
+
+	console.log(" audio soundscape get ");
+
 	var files = fs.readdirSync(config.soundscapeDir);
 	// This isn't preciese because I only want the trailing .json
 	var ret = {}
@@ -277,6 +284,9 @@ app.get('/audio/soundscapes', (req, res) => {
 // create a new soundscale with id 'id' using the current senttings
 //if no object is passed in, or with the passed in object
 app.post('/audio/soundscapes/:id', (req, res) => {
+
+	console.log(" post soundscape id %s",id );
+
 	var id = req.params.id;
 	// if exists fail
 	var fn = config.soundscapeDir+id+'.json';
@@ -303,6 +313,9 @@ app.post('/audio/soundscapes/:id', (req, res) => {
 
 // Get any named one... and make it current or not?
 app.get('/audio/soundscapes/:id', (req, res) => {
+
+	console.log(" audio soundscapes get id %s",id);
+
     const fileName = config.soundscapeDir + req.params.id + '.json';
 
     return fs.readFile(fileName, function(err, data) {
@@ -322,6 +335,9 @@ app.get('/audio/soundscapes/:id', (req, res) => {
 
 // Delete the soundscape /audio/soundscapes/NAME
 app.delete('/audio/soundscapes/:id', (req, res) => {
+
+	console.log("audio soundscapes DELETE id %d",id);
+
 	var id = req.params.id;
 	if (id == 'default') {
 		res.status(400)
@@ -340,6 +356,7 @@ app.delete('/audio/soundscapes/:id', (req, res) => {
 
 // Returns the current sounscape as a JSON object
 app.get('/audio/soundscape', (req, res) => {
+	console.log(" audio soundscape get ");
 	// Maybe we want all the names in here. I don't think so though.
 	//var ret = Object.assign({},g_scape)
 	//ret.zones.names = config.zones.names
@@ -351,6 +368,9 @@ app.get('/audio/soundscape', (req, res) => {
 
 // Update the current soundscape
 app.put('/audio/soundscape', (req, res) => {
+
+	console.log(" audio soundscape put ");
+
 	if (req.body.background) {
 		if (!background_put(req.body.background, res))
 			return;
@@ -382,7 +402,8 @@ app.put('/audio/soundscape', (req, res) => {
 })
 
 app.get('/audio/effects', (req,res) => {
-	//console.log(" getting effects ");
+	console.log(" getting effects ");
+
 	var effects = {};
 	effects.names = config.effects.names;
 	for (const [key, value] of Object.entries(g_scape.effects)) {
@@ -393,6 +414,8 @@ app.get('/audio/effects', (req,res) => {
 })
 
 function effects_put(eff, res) {
+
+	console.log("effects puts");
 
 	// Validate input
 	for (const [key, value] of Object.entries(eff)) {
@@ -440,8 +463,8 @@ function effects_put(eff, res) {
 }
 
 app.put('/audio/effects', (req,res) => {
-	//console.log('got a PUT effects request');
-	//console.log(req.body);
+	console.log('got a PUT effects request');
+	console.log(req.body);
 
 	if (effects_put(req.body, res) == false)
 		return;
@@ -456,7 +479,8 @@ app.put('/audio/effects', (req,res) => {
 })
 
 app.get('/audio/zones', (req, res) => {
-	//console.log(' endpoint audio zones called ');
+	console.log(' endpoint audio zones called ');
+
 	var ret = {}
 	ret.names = config.zones.names;
 	for (const [key, value] of Object.entries(g_scape.zones)) {
@@ -469,6 +493,7 @@ app.get('/audio/zones', (req, res) => {
 })
 
 function zones_put(z, res) {
+	console.log("zones put");
 
 	// Validate input
 	for (const [key, value] of Object.entries(z)) {
@@ -501,12 +526,13 @@ function zones_put(z, res) {
 }
 
 app.get('/audio/master', (req,res) => {
+	console.log(" get master object");
 	res.send( g_scape.master )
 })
 
 app.put('/audio/master', (req, res) => {
-	//console.log(' setting the master object ')
-	//console.log(req.body)
+	console.log(' setting the master object ')
+	console.log(req.body)
 	var master = req.body
 
 	if ((master.volume > 100) || (master.volume < 0)) {
@@ -527,6 +553,7 @@ app.put('/audio/master', (req, res) => {
 // set zones only through the put scape stuff
 
 app.get('/audio/sinks', (req, res) => {
+	console.log(" audio sinks GET ");
 	var ret = {}
 	ret.names = config.sinks.names;
 	for (const [key, value] of Object.entries(g_sink)) {
@@ -538,8 +565,8 @@ app.get('/audio/sinks', (req, res) => {
 })
 
 app.put('/audio/sinks', (req, res) => {
-	//console.log('got a PUT sinks request');
-	//console.log(req.body);
+	console.log('got a PUT sinks request');
+	console.log(req.body);
 
 	// Validate input
 	for (const [key, value] of Object.entries(req.body)) {
@@ -586,6 +613,9 @@ app.put('/audio/sinks', (req, res) => {
 //
 
 app.put('/audio/buttons/:bgroup/:button', (req, res) => {
+
+	console.log(" audio buttons put ");
+
 	var bgroup = req.params.bgroup;
 	var button = req.params.button;
 
