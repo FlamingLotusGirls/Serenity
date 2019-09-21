@@ -50,6 +50,10 @@ SOFTWARE.
 #include <locale.h>
 #include <stdbool.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 // Jannson for parsing Json
 #include <jansson.h>
 #include <curl/curl.h>
@@ -61,6 +65,8 @@ int g_verbose = 0;
 
 
 static char *g_sound_directory = NULL; // loaded from the config file
+static char *g_recent_scape_filename = NULL; // loaded from the config file
+static char *g_recent_sinks_filename = NULL; // loaded from the config file
 static char *g_admin_config_filename = NULL;
 char *g_zone = NULL;
 static char *g_config_filename = "config.json";
@@ -321,18 +327,25 @@ void sa_soundplay_terminate( sa_soundplay_t *splay)
 
 }
 
+//
+// THIS IS BROKEN because the terminate calls happen asynchronously, and they ( and lots of others )
+// use the splay. The right thing appears to be the TERMINATE call.
+// HOWEVER< in the heat of the moment, we will simply 
+
+
 void sa_soundplay_free( sa_soundplay_t *splay )
 {
     if (splay->stream) {
         pa_stream_disconnect(splay->stream);
         pa_stream_unref(splay->stream);
     }
-    if (splay->stream_name) pa_xfree(splay->stream_name);
-    if (splay->sndfile) sf_close(splay->sndfile);
-    if (splay->dev) free(splay->dev);
-    if (splay->filename) free(splay->filename);
+    //if (splay->stream_name) pa_xfree(splay->stream_name);
+    if (splay->sndfile) { sf_close(splay->sndfile); splay->sndfile = 0; }
+    if (splay->dev) { free(splay->dev); splay->dev = 0; }
+    if (splay->filename) { free(splay->filename); splay->filename = 0; }
 
-    free(splay);
+    // leaking here!
+    //free(splay);
 }
 
 /*
@@ -516,6 +529,9 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
         // next function ( next function a placeholder these days?)
         sa_sinks_populate(g_context, NULL);
 
+        if (g_verbose) fprintf(stderr, "first time started 22\n");
+
+
         // Kick off fetching the HTTP to load the initial JSON
         // Should have the initial JSON by this point, call the code to act on it
         if (g_scape_data) {
@@ -525,10 +541,13 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
             else {
                 fprintf(stderr, " initial scape processing failed\n");
             }
+            free(g_scape_data);
+            g_scape_data = NULL;
+            g_scape_data_len = 0;
         }
-        free(g_scape_data);
-        g_scape_data = NULL;
-        g_scape_data_len = 0;
+
+        if (g_verbose) fprintf(stderr, "first time started 33\n");
+
 
         if (g_sink_data) {
             if ( sa_sink_process(g_sink_data)) {
@@ -537,10 +556,13 @@ sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *u
             else {
                 fprintf(stderr, " initial sink processing failed\n");
             }
+            free(g_sink_data);
+            g_sink_data = NULL;
+            g_sink_data_len = 0;
         }
-        free(g_sink_data);
-        g_sink_data = NULL;
-        g_sink_data_len = 0;
+
+        if (g_verbose) fprintf(stderr, "first time started 44\n");
+
 
         g_started = true;
         goto NEXT;
@@ -708,7 +730,7 @@ bool sa_sinks_volume_set( const char *name, int volume )
         }
     }
 
-    //fprintf(stderr, "sink volume set: name %s not found\n",name);
+    fprintf(stderr, "sink volume set: name %s not found\n",name);
     return(false);
 }
 
@@ -736,12 +758,34 @@ static bool config_load(const char *filename)
     json_auto_t *js_sdir = json_object_get(js_root, "soundDir");
     if (!js_sdir)
     {
-        fprintf(stderr, "dirctory not found in config file, fail");
+        fprintf(stderr, "directory not found in config file, fail");
         goto quit;
     }
     else
     {
         g_sound_directory = strdup( json_string_value(js_sdir) );
+    }
+
+    json_auto_t *js_rscapefile = json_object_get(js_root, "recentScapeFile");
+    if (!js_rscapefile)
+    {
+        fprintf(stderr, "recent scape file not found in config file, fail");
+        goto quit;
+    }
+    else
+    {
+        g_recent_scape_filename = strdup( json_string_value(js_rscapefile) );
+    }
+
+    json_auto_t *js_rsinksfile = json_object_get(js_root, "recentSinksFile");
+    if (!js_rsinksfile)
+    {
+        fprintf(stderr, "recent sink file not found in config file, fail");
+        goto quit;
+    }
+    else
+    {
+        g_recent_sinks_filename = strdup( json_string_value(js_rsinksfile) );
     }
 
     json_auto_t *js_zone = json_object_get(js_root, "zone");
@@ -834,6 +878,39 @@ enum
     ARG_STREAM_NAME,
     ARG_CHANNELMAP
 };
+
+static bool read_file_in_memory(const char *fn, char **buf, size_t *len) {
+    int fd = -1;
+    fd = open( g_recent_scape_filename, O_RDONLY );
+    if (fd < 0) {
+        fprintf(stderr, "could not read old scape file either, waiting for sure\n");
+        return(false);
+    } else {
+        char *read_buf = malloc(1000);
+        size_t read_alloc_sz = 1000;
+        size_t read_offset = 0;
+        while(true) {
+            ssize_t read_sz;
+            read_sz = read(fd, read_buf + read_offset, read_alloc_sz - read_offset);
+            if (read_sz == 0) break;
+            read_offset += read_sz;
+            if (read_offset == read_alloc_sz) {
+                read_buf = realloc(read_buf, read_alloc_sz + 1000);
+                read_alloc_sz += 1000;
+            }
+        };
+        close(fd);
+        // null term
+        if (read_alloc_sz == read_offset) {
+            read_buf = realloc(read_buf, read_alloc_sz+1);
+            read_alloc_sz += 1;
+        }
+        read_buf[read_offset] = 0;
+        *buf = read_buf;
+        *len = read_offset;
+    }
+    return true;
+}
 
 int main(int argc, char *argv[])
 {
@@ -936,20 +1013,35 @@ int main(int argc, char *argv[])
     strcat(req_url, "soundscape");
     fprintf(stderr, "pulling scapes from url: %s\n", req_url);
     if (sa_http_request(req_url, &g_scape_data, &g_scape_data_len) == false) {
-        fprintf(stderr, "could not fetch initial scapes, will wait for push\n");
+        fprintf(stderr, "could not fetch initial scapes, trying file \n");
+        g_scape_data = 0;
+        g_scape_data_len = 0;
     }
     else {
         fprintf(stderr, "initial fetch of scapes succeeded\n");
+    }
+
+    // if you couldn't get it from HTTP, then you should get it from the file
+    if ( ! g_scape_data) {
+        if (false == read_file_in_memory(g_recent_scape_filename, &g_scape_data, &g_scape_data_len)) {
+            fprintf(stderr, "also could not read default scape file, wait for push\n");
+        }
     }
 
     strcpy(req_url, g_admin_url);
     strcat(req_url, "sinks");
     fprintf(stderr, "pulling sinks from url: %s\n", req_url);
     if (sa_http_request(req_url, &g_sink_data, &g_sink_data_len) == false) {
-        fprintf(stderr, "could not fetch initial sinks, will wait for push\n");
+        fprintf(stderr, "could not fetch initial sinks, trying file\n");
     }
     else {
         fprintf(stderr, "initial fetch of sinks succeeded\n");
+    }
+
+    if ( ! g_sink_data) {
+        if (false == read_file_in_memory(g_recent_scape_filename, &g_sink_data, &g_sink_data_len)) {
+            fprintf(stderr, "also could not read default sink file, wait for push\n");
+        }
     }
 
     /* Set up a new main loop */

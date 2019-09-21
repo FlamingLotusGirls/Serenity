@@ -58,7 +58,7 @@ struct connection_info {
   char *data;
 };
 
-static bool ldebug = true;
+static bool ldebug = false;
 
 // I will usually get posts less than 1k
 #define POST_BUFFER_SIZE (1024 * 2)
@@ -151,7 +151,7 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
   }
 
   // past here, got all the data we are expecting, handle it
-  if (ldebug) fprintf(stderr, "http request handler called url %s method %s\n",url,method);
+  if (ldebug) fprintf(stderr, "http request complete: url %s method %s\n",url,method);
 
   int ret = 0;
   bool parsed = false;
@@ -187,6 +187,9 @@ int httpd_request_handler (void *cls, struct MHD_Connection *connection,
 
     parsed = sa_sink_submit(ci->data);
   }
+  else {
+    fprintf(stderr, " received URL that I did not expect %s\n",url);
+  }
 
   // send the response off to be parsed by the audio system.
 
@@ -208,6 +211,8 @@ request_completed (void *cls, struct MHD_Connection *connection,
                    void **con_cls, enum MHD_RequestTerminationCode toe)
 {
   struct connection_info *ci = *con_cls;
+
+  if (ldebug) fprintf(stderr, "request_completed: \n");
 
   if (NULL == ci) return;
 

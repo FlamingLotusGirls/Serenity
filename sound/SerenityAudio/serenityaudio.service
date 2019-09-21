@@ -1,13 +1,16 @@
 [Unit]
 Description=Flaming Lotus Girls 2019 Serenity SoundScape Server
+Requires=pulseaudio.service
+After=pulseaudio.service
+
 
 [Service]
 Type=simple
 User=flaming
-WorkingDirectory=/home/flaming/Serenity/sound/SerenityAudio
-ExecStart=/home/flaming/Serenity/sound/SerenityAudio/saplay
+WorkingDirectory=/home/pi/Serenity/sound/SerenityAudio
+ExecStart=/home/pi/Serenity/sound/SerenityAudio/saplay
 Restart=always
-RestartSec=2
+RestartSec=12
 
 [Install]
 WantedBy=multi-user.target

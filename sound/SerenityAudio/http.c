@@ -55,7 +55,7 @@ typedef struct write_data_s {
 static size_t curlWriteFunction(void *ptr, size_t size/*always==1*/,
                                 size_t nmemb, void* userdata)
 {
-    fprintf(stderr,"curl write function: ptr %p size %zu nmemb %zu userdata %p\n",ptr,size,nmemb,userdata);
+    // fprintf(stderr,"curl write function: ptr %p size %zu nmemb %zu userdata %p\n",ptr,size,nmemb,userdata);
 
     size_t realSize = size * nmemb; // kinda sumb because size is always 1 but api is api
     write_data_t *buf = (write_data_t *)userdata;
@@ -63,7 +63,7 @@ static size_t curlWriteFunction(void *ptr, size_t size/*always==1*/,
     if(nmemb==0) return 0;
 
     if (buf->alloc_sz < (buf->len + realSize + 1) ) {
-      fprintf(stderr, "reallloc in curl function\n");
+      //fprintf(stderr, "reallloc in curl function\n");
       buf->alloc_sz = buf->len + realSize + 1;
       buf->buf = realloc(buf->buf, buf->alloc_sz);
     }
@@ -71,14 +71,14 @@ static size_t curlWriteFunction(void *ptr, size_t size/*always==1*/,
     buf->len += realSize;
     buf->buf[buf->len] = 0;
 
-    fprintf(stderr," leaving curl write function\n");
+    //fprintf(stderr," leaving curl write function\n");
 
     return realSize;
 }
 
 bool sa_http_request(const char *url, char **result, size_t *result_len) {
 
-  fprintf(stderr,"starting HTTP request %s\n",url);
+  // fprintf(stderr,"starting HTTP request %s\n",url);
 
   CURL *curl = 0;
   CURLcode res;
@@ -89,7 +89,7 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   if (!curl) {
     fprintf(stderr, " could not init curl ");
   }
-  fprintf(stderr," curl object is: %p\n",curl);
+  // fprintf(stderr," curl object is: %p\n",curl);
 
   // start with a reasonable buffer. Seems like these usually fit in 1k.
   write_data.buf = malloc(1000);
@@ -114,9 +114,7 @@ bool sa_http_request(const char *url, char **result, size_t *result_len) {
   write_data.len = 0;
 
   /* Perform the request, res will get the return code */ 
-  fprintf(stderr, "about to curl easy perform %s\n",url);
   res = curl_easy_perform(curl);
-  fprintf(stderr, "got curl result\n");
 
   /* Check for errors */ 
   if(res != CURLE_OK) {
