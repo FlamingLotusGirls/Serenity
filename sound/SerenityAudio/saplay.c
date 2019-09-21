@@ -353,7 +353,7 @@ void sa_soundplay_free( sa_soundplay_t *splay )
 	int ref = sa_soundplay_ref_decr(splay);
 	if (ref == 0) {
 
-		//fprintf(stderr, "sa_soundplay: last free %p\n",splay);
+		//fprintf(stderr, "sa_soundplay: last free %p streamname %s\n",splay,splay->stream_name);
 
 	    if (splay->stream) {
 	        pa_stream_disconnect(splay->stream);
@@ -366,12 +366,12 @@ void sa_soundplay_free( sa_soundplay_t *splay )
 	    if (splay->filename) { free(splay->filename); splay->filename = 0; }
 
 	    // test code....
-	    //memset(splay, 0xff, sizeof(sa_soundplay_t));
+	    memset(splay, 0xff, sizeof(sa_soundplay_t));
 	    free(splay);
 	}
-	//else {
-	//	fprintf(stderr, "sa_soundplay: free without free, ref %d\n",ref);
-	//}
+//	else {
+//		fprintf(stderr, "sa_soundplay: free without free, stream %s, ref %d\n",splay->stream_name,ref);
+//	}
 }
 
 /*
@@ -493,8 +493,8 @@ void sa_soundscape_volume_change(sa_soundscape_t *scape, int  volume)
 
 void sa_soundscape_timer(sa_soundscape_t *scape)
 {
-
-    if (g_verbose) fprintf(stderr, "soundscape timer: scape %p n_splays %d\n", scape, scape->n_splays);
+	// too verbose
+    //if (g_verbose) fprintf(stderr, "soundscape timer: scape %p n_splays %d\n", scape, scape->n_splays);
 
     if (false == sa_soundscape_playing(scape)) {
         sa_soundscape_play(scape);
@@ -517,6 +517,7 @@ void sa_soundscape_free( sa_soundscape_t *scape)
     {
         if (scape->splays[i])
         {
+        	sa_soundplay_terminate(scape->splays[i]);
             sa_soundplay_free(scape->splays[i]);
         }
     }
@@ -544,7 +545,8 @@ static int g_volume_next;
 static void
 sa_timer(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *userdata)
 {
-    if (g_verbose) fprintf(stderr, "time event called: sec %d usec %d\n", tv->tv_sec, tv->tv_usec);
+	// too verbose for most things
+    // if (g_verbose) fprintf(stderr, "time event called: sec %d usec %d\n", tv->tv_sec, tv->tv_usec);
 
     // FIRST TIME AFTER CONTEXT IS CONNECTED
     if ( (g_started == false) && (g_context_connected == true))

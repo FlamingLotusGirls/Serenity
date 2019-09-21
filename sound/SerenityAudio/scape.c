@@ -146,7 +146,9 @@ void sa_scape_free(void)
 
     for (int i = 0; i < g_scape.n_effects; i++)
     {
-        if (g_scape.effects[i].splay) sa_soundscape_free(g_scape.effects[i].splay);
+        if (g_scape.effects[i].splay) {
+            sa_soundscape_free(g_scape.effects[i].splay);
+        }
     }
 
 }
@@ -305,7 +307,7 @@ bool sa_scape_process(const char *scape_str)
                         // new intensity of 0 means kill it
                         if (intensity == 0)
                         {
-                            if (ldebug) fprintf(stderr, "scape: effect kill %s splay %p\n",key,e->splay);
+                            if (ldebug) fprintf(stderr, "scape: intensity 0 effect kill %s splay %p\n",key,e->splay);
                             sa_soundscape_free(e->splay);
                             e->splay = NULL;
                         }
