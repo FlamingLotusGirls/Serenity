@@ -36,4 +36,29 @@ Type 'make' to get the executable.
 
 Put the serenityaudio.service file in /etc/systemd/system
 sudo systemctl enable serenityaudio
+
+# testing
+
+Since the program has a rest interface, the easiest way to create tests
+is to have CURL bang against the port. The port by default is 8000.
+You will see a test directory, and that has a few .sh which form some nice tests.
+
+Feel free to add to those.
+
+# startup
+
+It's really nice to have the system come up with a nice sound by default, even if
+it can't find its master server. The sytem has a 'recentScapes' json file which
+is the initial JSON file. This file will be overwritten each time it receives a new
+value, which isn't great because it might have a terrible value... a better system might
+be to always startup with 'nice', and not overwrite that file, but you also 
+are happy to have a system where a given pi can restart and get back to it's old place.
+
+feel free to change the behavior!
+
+# where are my sounds?
+
+Go up a directory to the readme there, you'll see a link to a google driver folder
+hiwhc has gets a zip file with the sounds we created. Pull that down an uncompress
+it in the parent directory.
  
