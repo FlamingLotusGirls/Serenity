@@ -61,4 +61,31 @@ feel free to change the behavior!
 Go up a directory to the readme there, you'll see a link to a google driver folder
 hiwhc has gets a zip file with the sounds we created. Pull that down an uncompress
 it in the parent directory.
- 
+
+# debugging
+
+You'll see two things about debugging. There is a verbose flag, which allows turning
+on a lot of things, then poor man's unit debuggers because there's a variable called
+'ldebug' ( localdebug ) in some files which will allow you to turn to true, recompile,
+and see other things.
+
+Remember that when you're running as a service, it's pretty easy to just journalctl -f -u servicename , which gives you a "follow" of the log.
+
+# pulseaudio
+
+Two comments. First, the pulseaudio people suggested that I try 'gstreamer' next time I try
+a project like this. Gstreamer is a little higher level, so doesn't require things
+like the reference counted system. OTOH, I don't really see how you do the level of 
+volume control this code gets out of pulseaudio.
+
+There is a secret regarding how to create a pulseaudio and serenityaudio which can both
+be run as a service. There's a magic parameter to the pulseaudio module which disables
+security checkes. This is explained in the readme in the above directory, which has
+the service, and also describes the one parameter you have to add to the pulseaudio
+configuration file.
+
+# todo
+
+The "master volume" didn't get working, and neither, really, is the zone volume
+working. The right thing is to multiply those three things gether and divide.
+Which means tracking the master and the zone values, which just doesn't have a data structure. Sorry about that. 
