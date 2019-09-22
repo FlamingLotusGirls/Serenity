@@ -1,0 +1,45 @@
+{
+	"background": {
+		"name": "Ambient1",
+		"volume": 7
+	},
+	"effects": {
+		"crickets": {
+			"intensity": 2,
+			"volume": 15
+		},
+		"birds": {
+			"intensity": 2,
+			"volume": 20
+		},
+		"cicadas": {
+			"intensity": 0,
+			"volume": 0
+		},
+		"frogs": {
+			"intensity": 0,
+			"volume": 0
+		},
+		"frogsAlt": {
+			"intensity": 1,
+			"volume": 20
+		}
+	},
+	"zones": {
+		"PergolaLeft": {
+			"volume": 40
+		},
+		"PergolaRight": {
+			"volume": 40
+		},
+		"Jars": {
+			"volume": 30
+		},
+		"Depot": {
+			"volume": 40
+		}
+	},
+	"master": {
+		"volume": 50
+	}
+}
