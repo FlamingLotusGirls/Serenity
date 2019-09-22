@@ -7,8 +7,8 @@ After=pulseaudio.service
 [Service]
 Type=simple
 User=flaming
-WorkingDirectory=/home/pi/Serenity/sound/SerenityAudio
-ExecStart=/home/pi/Serenity/sound/SerenityAudio/saplay
+WorkingDirectory=/home/flaming/sound/SerenityAudio
+ExecStart=/home/flaming/sound/SerenityAudio/saplay
 Restart=always
 RestartSec=12
 
