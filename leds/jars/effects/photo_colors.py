@@ -11,17 +11,10 @@ class PhotoColorsLayer(EffectLayer):
         #images = glob.glob("images/*.png")
         #self.image = random.choice(images)
         self.image = image_path
-        self.file = None
         print(f"image file is {self.image}")
-        #self.file = open(self.image, 'rb')
-        self.lastFrame = None
-        self.pixelIter = self._pixelIter()
-    
-    def load_image(self):
-        if self.file is not None:
-            self.file.close()
-        self.file = open(self.image, "rb")
+        self.file = open(self.image, 'rb')
         reader = png.Reader(self.file)
+        self.lastFrame = None
         photo = reader.read()
         print(self.image)
         print(f"width {photo[0]}")
@@ -32,24 +25,20 @@ class PhotoColorsLayer(EffectLayer):
         self.photoSize = photo[0] * photo[1]
         self.rows = photo[2]
         self.offset = 0
-        self.photo = photo
-        
-        
+        self.pixelIter = self._pixelIter(photo)
+
     def get_photo(self):
         return self.image
 
-    def _pixelIter(self):
+    def _pixelIter(self, photo):
         """
         Infinitely iterate over pixels in the image.
         """
         while True:
-            self.load_image()
-            idx = 0
             # Generate a new row iterator
-            rowIter = self.photo[2]  # photo[2] is list of rows
+            rowIter = photo[2]  # photo[2] is list of rows
             for row in rowIter:
                 width = len(row)
-                idx += 1
                 i = 0
                 try:
                     while i < width:

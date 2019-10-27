@@ -14,8 +14,7 @@ import queue
 import sys
 from threading import Thread
 
-#DEFAULT_PHOTO = "fire_image.png"
-DEFAULT_PHOTO = "solid_blue_small copy.png"
+DEFAULT_PHOTO = "fire_image.png"
 
 class JarLedDriver():
     ''' Manage LEDs patterns running on the jar.'''
@@ -47,7 +46,7 @@ class JarLedDriver():
             model,
             self.cmd_queue,
             self.resp_queue,
-            (DEFAULT_PHOTO, 'fireflies', 1.0),
+            (DEFAULT_PHOTO, 'colorcycle', 1.0),
             masterParams,
         )
         controller.start() 

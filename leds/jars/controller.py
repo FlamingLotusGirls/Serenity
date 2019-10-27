@@ -263,15 +263,12 @@ class AnimationController(object):
     def drawingLoop(self):
         """Render frames forever or until keyboard interrupt"""
         try:
-            loop_count = 0
             while self.running:
                 # check for commands
                 self.process_commands()
                 self.drawFrame()
-                loop_count += 1  
-            print(f"NOT RUNNING ANYMORE")
-        except Exception as e:
-            traceback.print_exc()
+        except KeyboardInterrupt:
+            pass
         
         
 class FastOPC(object):

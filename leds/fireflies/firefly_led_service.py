@@ -5,7 +5,7 @@ from flask import Response
 from flask import abort
 from flask import send_file
 from flask import make_response
-import netifaces as ni
+#import netifaces as ni
 import json
 import io
 import logging
@@ -298,16 +298,17 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)-15s %(levelname)s %(module)s %(lineno)d: %(message)s', level=logging.DEBUG)
 
     controller = FireflyLedController()
-    interfaces = ni.interfaces()
-    for interface in interfaces:
-        addr = ni.ifaddresses(interface)
-        if ni.AF_INET in addr:
-            local_addr = addr[ni.AF_INET][0]['addr']
-            if local_addr.startswith("127"):
-                continue
-            print(f"Local address is {addr[ni.AF_INET][0]['addr']}")
-            controller.set_service_addr(addr[ni.AF_INET][0]['addr'], PORT) 
-            break
+    #interfaces = ni.interfaces()
+    #for interface in interfaces:
+    #    addr = ni.ifaddresses(interface)
+    #    if ni.AF_INET in addr:
+    #        local_addr = addr[ni.AF_INET][0]['addr']
+    #        if local_addr.startswith("127"):
+    #            continue
+    #        print(f"Local address is {addr[ni.AF_INET][0]['addr']}")
+    #        controller.set_service_addr(addr[ni.AF_INET][0]['addr'], PORT) 
+    #        break
+    controller.set_service_addr("192.168.1.10", PORT)
     pm = PatternManager()
     flaskThread = Thread(target=serve_forever, args=[PORT])
     flaskThread.start()
