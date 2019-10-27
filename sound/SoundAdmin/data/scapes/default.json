@@ -27,7 +27,11 @@
 		"frogsAlt": {
 			"intensity": 0,
 			"volume": 0
-		}
+		},
+        "treeFrogs": {
+            "intensity": 0,
+            "volume": 0
+        }
 	},
 	"zones": {
 		"PergolaLeft": {

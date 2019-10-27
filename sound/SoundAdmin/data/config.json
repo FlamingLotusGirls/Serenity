@@ -39,13 +39,13 @@
     "AmbientSucks": {"file": "ambient_5.wav"}
   },
   "effects": {
-    "names": ["birds" , "cicadas" , "crickets" , "treefrogs", "frogs" , "frogsAlt" ],
+    "names": ["birds" , "cicadas" , "crickets" , "frogs" , "frogsAlt", "treeFrogs" ],
     "cicadas": { "file1": "cicadas_1.wav", "file2": "cicadas_2.wav", "file3": "cicadas_3.wav"},
     "crickets": { "file1": "crickets_1.wav", "file2": "crickets_2.wav", "file3": "crickets_3.wav"},
     "birds": { "file1": "birds_1.wav", "file2": "birds_2.wav", "file3": "birds_3.wav"},
     "frogs": { "file1": "frogs_1.wav", "file2": "frogs_2.wav", "file3": "frogs_3.wav"},
-    "treefrogs": { "file1": "eastern_treefrog_1.wav", "file2": "eastern_treefrog_2.wav", "file3": "eastern_treefrog_3.wav"},
-    "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"}
+    "frogsAlt": { "file1": "frogs_1_alt.wav", "file2": "frogs_2_alt.wav", "file3": "frogs_3_alt.wav"},
+    "treeFrogs": { "file1": "treefrogs_1.wav", "file2": "treefrogs_2.wav", "file3": "treefrogs_3.wav"}
   },
   "buttons": {
     "0": { "effect": "cicadas", "volume": 75 },

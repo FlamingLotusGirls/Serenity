@@ -104,7 +104,7 @@ def flame_patterns():
             return CORSResponse("Success", 200)
 
 
-@app.route("/flame/patterns/<patternName>", methods=['GET', 'POST', 'DELETE'])
+@app.route("/flame/patterns/<patternName>", methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def flame_pattern(patternName):
     ''' POST /flame/patterns/<patternName> active=[true|false] enabled=[true|false] pattern=[pattern]
           active - Start an individual pattern (or stop it if it is currently running).
@@ -114,6 +114,10 @@ def flame_pattern(patternName):
     includesPattern = "pattern" in request.values
     includesEnabled = "enabled" in request.values
     includesActive  = "active"  in request.values
+
+    if request.method == 'OPTIONS':
+        print("OPTIONS request")
+        return CORSResponse("Yes of course", 200)
 
     if request.method == 'POST':
         # pattern create - pattern data included, but pattern name not in system

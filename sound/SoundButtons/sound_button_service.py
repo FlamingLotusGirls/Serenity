@@ -2,7 +2,7 @@ from gpiozero import Button
 import requests
 
 from time import sleep
-SOUND_SERVER = "localhost:9000"
+SOUND_SERVER = "192.168.1.10:9000"
 
 buttons = [
     {'id':7, 'group': 1, 'function': 1, 'button': Button("BOARD33", bounce_time=0.2)},
